@@ -7,166 +7,33 @@
     </div>
     <gis-viewer
       ref="gisViewer"
-      platform="arcgis3d"
+      platform="arcgis2d"
       :map-config="mapConfig"
       @map-loaded="mapLoaded"
       @marker-click="showGisDeviceInfo"
-      @marker-over="moveGisDeviceInfo"
     />
   </div>
 </template>
 <script lang="ts">
-import {Vue, Component, Prop} from 'vue-property-decorator';
+import {Vue, Component} from 'vue-property-decorator';
 import axios from 'axios';
 @Component
 export default class PluginTest extends Vue {
   private mapConfig = {
-    arcgis_api: 'http://localhost:8090/arcgis_js_api/library/4.14',
-    //arcgis_api:
-    //  'https://webapi.amap.com/maps?v=1.4.15&key=29dd04daa39aa33a7e2cdffa37ebec4d',
-    //arcgis_api: 'http://128.64.130.247:8219/baidumap/jsapi/api.js',
-    //arcgis_api: "http://128.64.151.245:8019/baidumap/jsapi/api.js",
-    //arcgis_api: "http://localhost:8090/baidu/BDAPI.js",
+    arcgis_api: 'http://192.168.0.204:18001/web-gis/scripts/arcgis_js_api/library/4.15',
     theme: 'light', //dark,vec
     baseLayers: [
       {
+        url:"http://192.168.0.204:6080/arcgis/rest/services/WuLuMuQi/wlmq_base_publishBlue/MapServer",
         type: 'tiled',
-        url:
-          'https://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',
-        visible: true
+        visible: true,
       }
     ],
-    operationallayers: [
-      {
-        label: '地铁',
-        url:
-          'http://172.30.30.1:6080/arcgis/rest/services/ShangHaiHarbour/ShangHai_transportation/MapServer',
-        type: 'dynamic',
-        visible: false
-      },
-      {
-        label: '发布段',
-        url:
-          'http://172.30.30.1:6080/arcgis/rest/services/ShangHaiHarbour/shanghai_xzqh_simple/MapServer/0',
-        type: 'feature',
-        visible: false,
-        outFields: ['*'],
-        renderer: {
-          type: 'unique-value',
-          field: 'Name',
-          defaultSymbol: {
-            type: 'simple-fill',
-            style: 'solid',
-            color: [255, 0, 0, 0.5],
-            outline: {
-              type: 'simple-line',
-              style: 'solid',
-              color: [110, 110, 110, 255],
-              width: 2
-            }
-          },
-          uniqueValueInfos: [
-            {
-              value: '闵行区',
-              symbol: {
-                type: 'simple-fill',
-                style: 'solid',
-                color: [0, 255, 51, 0.3],
-                outline: {
-                  type: 'simple-line',
-                  style: 'solid',
-                  color: [110, 110, 110, 0.5],
-                  width: 2
-                }
-              }
-            },
-            {
-              value: '普陀区',
-              symbol: {
-                type: 'simple-fill',
-                style: 'solid',
-                color: [34, 255, 122, 0.6],
-                outline: {
-                  type: 'simple-line',
-                  style: 'solid',
-                  color: [110, 110, 110, 255],
-                  width: 2
-                }
-              }
-            },
-            {
-              value: '奉贤区',
-              symbol: {
-                type: 'simple-fill',
-                style: 'solid',
-                color: [0, 0, 68, 0.4],
-                outline: {
-                  type: 'simple-line',
-                  style: 'solid',
-                  color: [110, 110, 110, 255],
-                  width: 2
-                }
-              }
-            }
-          ]
-        },
-        labelingInfo: [
-          {
-            labelExpressionInfo: {expression: '$feature.Name'},
-            useCodedValues: true,
-            labelPlacement: 'always-horizontal',
-            symbol: {
-              type: 'text',
-              rightToLeft: false,
-              color: [0, 0, 0, 255],
-              verticalAlignment: 'baseline',
-              horizontalAlignment: 'left',
-              font: {
-                size: 10,
-                weight: 'bold'
-              }
-            }
-          }
-        ]
-      },
-      {
-        label: '匝道灯',
-        url:
-          'http://172.30.30.1:6080/arcgis/rest/services/ShangHaiHarbour/KuaiSuLu_device/MapServer/0',
-        type: 'feature',
-        visible: false,
-        refreshInterval: 0.5,
-        outFields: ['*'],
-        maxScale: 98001,
-        renderer: {
-          type: 'simple',
-          symbol: {
-            type: 'picture-marker',
-            url: 'assets/image/Anchor.png',
-            width: 18,
-            height: 24,
-            yoffset: 12
-          }
-        }
-      }
-    ],
-    gisServer: 'http://128.64.151.245:8019',
+    gisServer: 'http://192.168.0.204:6080',
     options: {
       //for arcgis-2d
-      center: [121.441, 31.159],
-      zoom: 13
-      //viewMode: '3D'
-      //mapStyle: 'amap://styles/darkblue' //设置地图的显示样式
-      //for arcgis-3d
-      // camera: {
-      //   heading: 0,
-      //   tilt: 9.15,
-      //   position: {
-      //     x: 105.508849,
-      //     y: 22.581284,
-      //     z: 7000000
-      //   }
-      // }
+      center: [87.597, 43.824],
+      zoom: 6,
     },
     bookmarks: [
       {
@@ -187,11 +54,6 @@ export default class PluginTest extends Vue {
     console.log('Map Loaded.');
     let map = this.$refs.gisViewer as any;
 
-    (this.$refs.gisViewer as any).showDistrictMask({
-      name: '徐汇区',
-      showMask: true
-    });
-    map.showStreet();
     // map.showJurisdiction();
     /* (this.$refs.gisViewer as any).addOverlays({
       type: "police",
@@ -345,7 +207,7 @@ export default class PluginTest extends Vue {
         type: 'point-2d',
         // primitive: "square",
         url: 'assets/image/Anchor.png',
-        size: [50, 50],
+        size: [50, 100],
         anchor: 'center'
         // color: "red",
         // outline: {
@@ -400,18 +262,12 @@ export default class PluginTest extends Vue {
     //map.addOverlaysCluster(res.data);
     //  console.log(res.data);
     //});
-    //map.hideLayer({label: '匝道灯'});
-    map.findFeature({
-      layerName: 'police',
-      level: 16,
-      ids: ['test003'],
-      centerResult: true
-    });
-    // map.hideLayer({type: 'traffic'});
-    // map.showRoad({ids: [1]});
-    // map.showDistrictMask({
-    //   name: '徐汇区',
-    //   showMask: true
+    map.showJurisdiction();
+    // map.findFeature({
+    //   layerName: 'police',
+    //   level: 18,
+    //   ids: ['test001'],
+    //   centerResult: true
     // });
   }
   private async btn_test2() {
@@ -435,6 +291,7 @@ export default class PluginTest extends Vue {
         field: 'totalSpace',
         radius: '20',
         colors: [
+          'rgb(25, 154, 114)',
           'rgb(61, 192, 67)',
           'rgb(206, 199, 25)',
           'rgb(225, 145, 27)',
@@ -442,7 +299,7 @@ export default class PluginTest extends Vue {
         ],
         maxValue: 1000,
         minValue: 1,
-        zoom: 13,
+        zoom: 17,
         renderer: {
           type: 'simple',
           symbol: {
@@ -456,83 +313,69 @@ export default class PluginTest extends Vue {
       }
     };
     map.addHeatMap(json);
-    // map.addOverlays({
-    //   type: 'police',
-    //   defaultSymbol: {
-    //     //symbol for 2d
-    //     type: 'point-2d',
-    //     // primitive: "square",
-    //     url: 'assets/image/Anchor.png',
-    //     width: 80,
-    //     height: 90
-    //     // color: "red",
-    //     // outline: {
-    //     //   color: "white",
-    //     //   size: 4
-    //     // },
-    //     // anchor: "top"
+    map.addOverlays({
+      type: 'police',
+      defaultSymbol: {
+        //symbol for 2d
+        type: 'point-2d',
+        // primitive: "square",
+        url: 'assets/image/Anchor.png',
+        width: 80,
+        height: 90
+        // color: "red",
+        // outline: {
+        //   color: "white",
+        //   size: 4
+        // },
+        // anchor: "top"
 
-    //     //symbol for 3d
-    //     //type: "point-3d",
-    //     //primitive: "cube",
-    //     //color: "red",
-    //     //size: 20000,
-    //     //anchor: "bottom",
-    //   },
-    //   defaultZooms: [10, 20],
-    //   overlays: [
-    //     {
-    //       id: 'test001',
-    //       geometry: {x: 121.418924, y: 31.157101},
-    //       fields: {name: '测试2', featureid: '0002'}
-    //     },
-    //     {
-    //       id: 'test002',
-    //       geometry: {x: 121.318924, y: 31.157101},
-    //       fields: {name: '测试3', featureid: '0003'}
-    //     },
-    //     {
-    //       id: 'test003',
-    //       geometry: {x: 121.418924, y: 31.257101},
-    //       fields: {name: '测试4', featureid: '0001'}
-    //     }
-    //   ],
-    //   showPopup: true,
-    //   autoPopup: false,
-    //   defaultInfoTemplate: {
-    //     title: '1212',
-    //     content: '<div>name:{name}<br/><button>{name}</button></div>'
-    //   },
-    //   defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
+        //symbol for 3d
+        //type: "point-3d",
+        //primitive: "cube",
+        //color: "red",
+        //size: 20000,
+        //anchor: "bottom",
+      },
+      defaultZooms: [10, 20],
+      overlays: [
+        {
+          id: 'test001',
+          geometry: {x: 121.418924, y: 31.157101},
+          fields: {name: '测试2', featureid: '0002'}
+        },
+        {
+          id: 'test002',
+          geometry: {x: 121.318924, y: 31.157101},
+          fields: {name: '测试3', featureid: '0003'}
+        },
+        {
+          id: 'test003',
+          geometry: {x: 121.418924, y: 31.257101},
+          fields: {name: '测试4', featureid: '0001'}
+        }
+      ],
+      showPopup: true,
+      autoPopup: false,
+      defaultInfoTemplate: {
+        title: '1212',
+        content: '<div>name:{name}<br/><button>{name}</button></div>'
+      },
+      defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
+    });
+    (this.$refs.gisViewer as any).hideLayer({type: 'traffic'});
+    // (this.$refs.gisViewer as any).showDistrictMask({
+    //   name: '徐汇区',
+    //   showMask: true
     // });
-    // (this.$refs.gisViewer as any).hideLayer({type: 'traffic'});
-    // // (this.$refs.gisViewer as any).showDistrictMask({
-    // //   name: '徐汇区',
-    // //   showMask: true
-    // // });
-    // (this.$refs.gisViewer as any).locateStreet({id: '10003'});
   }
   private btn_test3() {
-    //(this.$refs.gisViewer as any).locateStreet({id: '10013'});
-    // (this.$refs.gisViewer as any).showLayer({type: 'traffic'});
-    // (this.$refs.gisViewer as any).findLayerFeature({
-    //   layerName: '地铁',
-    //   level: 16,
-    //   ids: ['12'],
-    //   centerResult: true
-    // });
-    //(this.$refs.gisViewer as any).hideLayer({label: '匝道灯'});
-    (this.$refs.gisViewer as any).deleteHeatMap();
-    //(this.$refs.gisViewer as any).deleteOverlaysCluster({types: ['sxj1']});
+    //(this.$refs.gisViewer as any).deleteHeatMap();
+    (this.$refs.gisViewer as any).deleteOverlaysCluster({types: ['sxj1']});
     //(this.$refs.gisViewer as any).deleteAllOverlays();
     //(this.$refs.gisViewer as any).deleteOverlays({ids: ['test001']});
     //(this.$refs.gisViewer as any).hideLayer({ type: "traffic" });
-    //(this.$refs.gisViewer as any).setMapCenter({x: 121.12, y: 31.23});
-    // (this.$refs.gisViewer as any).setMapCenterAndLevel({
-    //   x: 121.12,
-    //   y: 31.23,
-    //   level: 15
-    // });
+    //(this.$refs.gisViewer as any).setMapCenter({x:121.12,y:31.23});
+    //(this.$refs.gisViewer as any).setMapCenterAndLevel({x:121.12,y:31.23,level:15});
     //(this.$refs.gisViewer as any).hideJurisdiction();
     //(this.$refs.gisViewer as any).hideDistrictMask();
     // (this.$refs.gisViewer as any).addOverlays({
@@ -643,9 +486,6 @@ export default class PluginTest extends Vue {
     // });
   }
   private showGisDeviceInfo(type: string, id: string, detail: any) {
-    console.log(type, id, detail);
-  }
-  private moveGisDeviceInfo(type: string, id: string, detail: any) {
     console.log(type, id, detail);
   }
 }
