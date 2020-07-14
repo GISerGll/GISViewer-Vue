@@ -3,13 +3,10 @@ import {
   IPointSymbol,
   IResult,
   IOverlayDelete,
-  IFindParameter,
-  IPolylineSymbol,
-  IPolygonSymbol
+  IFindParameter, IPolylineSymbol, IPolygonSymbol
 } from '@/types/map';
 import {loadModules} from 'esri-loader';
-import ToolTip from './ToolTip';
-import HighFeauture from './Render/HighFeauture3D';
+import ToolTip from './ToolTip2D';
 import HighFeauture2D from './Render/HighFeauture2D';
 
 export class OverlayArcgis2D {
@@ -18,7 +15,7 @@ export class OverlayArcgis2D {
   private overlayLayer!: __esri.GraphicsLayer;
   private view!: __esri.MapView;
 
-  private primitive2D = [
+  private static primitive2D = [
     'circle',
     'cross',
     'diamond',
@@ -48,7 +45,20 @@ export class OverlayArcgis2D {
     this.view.map.add(this.overlayLayer);
   }
 
-  private makeSymbol(symbol: IPointSymbol | undefined): Object | undefined {
+  private static makeSymbol(symbol: any): Object | undefined {
+    if(!symbol) return undefined;
+    if(symbol.type.toLowerCase() === "point-2d"){
+      return this.makeMarkerSymbol(symbol);
+    }else if(symbol.type.toLowerCase() === "line-2d"){
+      return this.makePolylineSymbol(symbol);
+    }else if(symbol.type.toLowerCase() === "polygon-2d"){
+      return this.makePolygonSymbol(symbol);
+    }else {
+      return undefined;
+    }
+  }
+
+  private static makeMarkerSymbol(symbol: IPointSymbol | undefined): Object | undefined{
     if (!symbol || symbol.type.toLowerCase() !== 'point-2d') return undefined;
     let result;
 
@@ -74,15 +84,40 @@ export class OverlayArcgis2D {
       result = {
         type: 'picture-marker',
         url: symbol.url,
-        width: symbol.size instanceof Array ? symbol.size[0] : null,
-        height: symbol.size instanceof Array ? symbol.size[1] : null,
+        width: symbol.size instanceof Array && symbol.size[0] ? symbol.size[0] : 12,
+        height: symbol.size instanceof Array && symbol.size[0] ? symbol.size[1] : 12,
         xoffset: symbol.xoffset ? symbol.xoffset : null,
         yoffset: symbol.yoffset ? symbol.yoffset : null,
         angle: symbol.rotation ? symbol.rotation : null
       };
     }
 
+    console.log("markerSymbol:",result);
     return result;
+  }
+  private static makePolylineSymbol(symbol: IPolylineSymbol | undefined): Object | undefined{
+    if (!symbol || symbol.type.toLowerCase() !== 'line-2d') return undefined;
+
+    let result = {
+      type: "simple-line", //line-2d/line-3d
+      color: symbol.color? symbol.color: "black",
+      // opacity: symbol.opacity,
+      width: symbol.width ? symbol.width : 0.75,
+      style: symbol.style ? symbol.style : "solid",
+      cap : symbol.lineCap ? symbol.lineCap : "round",
+      join : symbol.lineJoin ? symbol.lineJoin : "round",
+    }
+
+    return result;
+  }
+  private static makePolygonSymbol(symbol: IPolygonSymbol | undefined): Object | undefined{
+    if (!symbol || symbol.type.toLowerCase() !== 'polygon-2d') return undefined;
+    return {
+      type: "simple-fill",
+      outline: symbol.outline,
+      color: symbol.color,
+      opacity: symbol.opacity,
+    }
   }
   /**根据graphic的属性生成弹出框*/
   private getInfoWindowContent(graphic: any): any {
@@ -148,7 +183,6 @@ export class OverlayArcgis2D {
     }
     return tipContent;
   }
-
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     if (!this.overlayLayer) {
       await this.createOverlayLayer();
@@ -160,7 +194,7 @@ export class OverlayArcgis2D {
       'esri/PopupTemplate'
     ]);
 
-    const defaultSymbol = this.makeSymbol(params.defaultSymbol);
+    const defaultSymbol = OverlayArcgis2D.makeSymbol(params.defaultSymbol);
     const showPopup = params.showPopup;
     const defaultInfoTemplate = params.defaultInfoTemplate;
     const autoPopup = params.autoPopup;
@@ -169,7 +203,7 @@ export class OverlayArcgis2D {
     let addCount = 0;
     for (let i = 0; i < params.overlays.length; i++) {
       const overlay = params.overlays[i];
-      const overlaySymbol = this.makeSymbol(overlay.symbol);
+      const overlaySymbol = OverlayArcgis2D.makeSymbol(overlay.symbol);
       //TODO: 加入更详细的参数是否合法判断
       if (!defaultSymbol && !overlaySymbol) {
         continue;
@@ -212,6 +246,7 @@ export class OverlayArcgis2D {
         }
       }
 
+      console.log("graphic:",graphic);
       this.overlayLayer.add(graphic);
       addCount++;
     }
@@ -261,25 +296,17 @@ export class OverlayArcgis2D {
     };
   }
   public async findFeature(params: IFindParameter): Promise<IResult> {
-    if (!this.overlayLayer) {
-      return {
-        status: 0,
-        message: 'ok'
-      };
-    }
     let type = params.layerName;
     let ids = params.ids || [];
     let level = params.level || this.view.zoom;
     let overlays = this.overlayLayer.graphics;
     let centerResult = params.centerResult !== false;
-    overlays.forEach((overlay: any) => {
-      if (type == overlay.type && ids.indexOf(overlay.id) >= 0) {
-        if (centerResult) {
-          this.view.goTo({target: overlay.geometry, zoom: level});
-        }
-        this.startJumpPoint([overlay]);
-      }
-    });
+
+    //根据网上资料,forEach内函数无法采用异步，除非重写原型。
+    for(let overlay of overlays.items){
+      await this.goToView(overlay,type,ids,centerResult,level);
+    }
+
     return {
       status: 0,
       message: 'ok'
@@ -287,6 +314,57 @@ export class OverlayArcgis2D {
   }
   private async startJumpPoint(graphics: any[]) {
     let high = HighFeauture2D.getInstance(this.view);
-    high.startup(graphics);
+    await high.startup(graphics);
+  }
+  private async goToView(overlay: any,type: any,ids:any[],centerResult:boolean,level:number){
+    if (type == overlay.type && ids.indexOf(overlay.id) >= 0) {
+      if (centerResult) {
+        var opts = {
+          duration: 5000  // Duration of animation will be 5 seconds
+        };
+        await this.view.goTo({target: overlay, zoom: level},opts).then(
+            async (msg)=> {
+              console.log(msg);
+              await this.startJumpPoint([overlay])
+            }).catch((err)=>{
+          console.log(err);
+        });
+      }
+      else{
+        await this.startJumpPoint([overlay]);
+      }
+    }
+  }
+  public async showToolTip(content: string) {
+    const view = this.view;
+    const moveLayer = this.overlayLayer;
+    let parent = this;
+    let tip!: any;
+    view.on('click', async (event) =>{
+      const response = await view.hitTest(event);
+        if (response.results.length > 0) {
+          response.results.forEach((result) => {
+            if (result.graphic.layer === moveLayer) {
+              if (tip) {
+                tip.remove();
+                tip = null;
+              }
+              tip = new ToolTip(
+                  view,
+                  {
+                    title: '',
+                    content: parent.getToolTipContent(result.graphic, content)
+                  },
+                  result.graphic
+              );
+            }
+          });
+        } else {
+          if (tip) {
+            tip.remove();
+            tip = null;
+          }
+        }
+    });
   }
 }

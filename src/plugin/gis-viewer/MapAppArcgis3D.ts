@@ -233,5 +233,6 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async hideRoad() {}
   public async showStreet() {}
   public async hideStreet() {}
+  public async showToolTip() {}
   public async locateStreet(param: IStreetParameter) {}
 }

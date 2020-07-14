@@ -174,6 +174,10 @@ export default class MapAppArcGIS2D {
     const find = FindFeature.getInstance(this.view);
     return await find.findLayerFeature(params);
   }
+  public async showToolTip(params: string){
+    const tooltip = OverlayArcgis2D.getInstance(this.view);
+    await tooltip.showToolTip(params);
+  }
   public async showLayer(params: ILayerConfig) {
     console.log(params);
     this.view.map.allLayers.forEach((baselayer: ILayerConfig) => {
@@ -199,7 +203,7 @@ export default class MapAppArcGIS2D {
     let y = params.y;
 
     if (!isNaN(x) && !isNaN(y)) {
-      this.view.goTo({
+      await this.view.goTo({
         center: [x, y]
       });
     }
@@ -210,7 +214,7 @@ export default class MapAppArcGIS2D {
     let level: number = params.level || this.view.zoom;
 
     if (!isNaN(x) && !isNaN(y) && !isNaN(level) && level >= 0) {
-      this.view.goTo({
+      await this.view.goTo({
         zoom: level,
         center: [x, y]
       });

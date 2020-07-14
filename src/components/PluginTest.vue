@@ -1,9 +1,22 @@
 <template>
   <div id="gisDiv">
     <div id="test">
-      <button @click="btn_test1">test1</button>
-      <button @click="btn_test2">test2</button>
-      <button @click="btn_test3">test3</button>
+<!--      <button @click="btn_loadMap">加载地图</button>-->
+      <button @click="btn_setMapCenter">居中</button>
+      <button @click="btn_setMapCenterAndLevel">放大居中</button>
+        <button @click="btn_findFeature">定位居中</button><br>
+      <button @click="btn_addOverlays_pt">添加点</button>
+      <button @click="btn_addOverlays_line">添加线</button>
+      <button @click="btn_addOverlays_polygon">添加面</button>
+      <button @click="btn_deleteOverlays">删除</button><br>
+      <button @click="btn_drawPoints">撒点</button>
+      <button @click="btn_drawLines">画线</button>
+      <button @click="btn_drawPolygons">画多边形</button>
+      <button @click="btn_drawCircles">画圆</button>
+      <button @click="btn_drawRects">画矩形</button>
+<!--      <button @click="btn_">删除</button><br>-->
+<!--      <button @click="btn_addHeatMap">添加热力图</button>-->
+<!--      <button @click="btn_deleteHeatMap">删除热力图</button>-->
     </div>
     <gis-viewer
       ref="gisViewer"
@@ -20,20 +33,20 @@ import axios from 'axios';
 @Component
 export default class PluginTest extends Vue {
   private mapConfig = {
-    arcgis_api: 'http://192.168.0.204:18001/web-gis/scripts/arcgis_js_api/library/4.15',
+    arcgis_api: 'http://128.64.151.217:8000/web-gis/scripts/arcgis_js_api/library/4.15',
     theme: 'light', //dark,vec
     baseLayers: [
       {
-        url:"http://192.168.0.204:6080/arcgis/rest/services/WuLuMuQi/wlmq_base_publishBlue/MapServer",
+        url:"http://map.geoq.cn/arcgis/rest/services/ChinaOnlineCommunity/MapServer",
         type: 'tiled',
         visible: true,
       }
     ],
-    gisServer: 'http://192.168.0.204:6080',
+    gisServer: 'http://128.64.151.245:6080',
     options: {
       //for arcgis-2d
       center: [87.597, 43.824],
-      zoom: 6,
+      zoom: 15,
     },
     bookmarks: [
       {
@@ -50,19 +63,42 @@ export default class PluginTest extends Vue {
       }
     ]
   };
-  private async mapLoaded() {
-    console.log('Map Loaded.');
-    let map = this.$refs.gisViewer as any;
 
-    // map.showJurisdiction();
-    /* (this.$refs.gisViewer as any).addOverlays({
-      type: "police",
+  private btn_setMapCenter(){
+    let map = this.$refs.gisViewer as any;
+    map.setMapCenter({
+      x:87.597,
+      y:43.824
+    })
+  }
+  private btn_setMapCenterAndLevel() {
+    let map = this.$refs.gisViewer as any;
+      map.setMapCenterAndLevel({
+          x:87.597,
+          y:43.824,
+          level:7
+      })
+  }
+  private async btn_findFeature(){
+      let map = this.$refs.gisViewer as any;
+      map.findFeature({
+          layerName:"police",
+          level:18,
+          ids:["test001","test002"],
+          centerResult:true
+      })
+  }
+  private async btn_addOverlays_pt() {
+      let map = this.$refs.gisViewer as any;
+      const img = await this.loadImageAsync("assets/image/Anchor.png");
+      await map.addOverlays({
+      type: 'police',
       defaultSymbol: {
         //symbol for 2d
-        // type: "point-2d",
+        type: 'point-2d',
         // primitive: "square",
-        // url: "assets/image/Anchor.png",
-        // size: 20,
+        url: 'assets/image/Anchor.png',
+        size: img? [img.width,img.height] : [12,12],
         // color: "red",
         // outline: {
         //   color: "white",
@@ -71,135 +107,167 @@ export default class PluginTest extends Vue {
         // anchor: "top"
 
         //symbol for 3d
-        type: "point-3d",
-        primitive: "cube",
-        color: "red",
-        size: 20000,
-        anchor: "bottom"
+        //type: "point-3d",
+        //primitive: "cube",
+        //color: "red",
+        //size: 20000,
+        //anchor: "bottom",
       },
-      overlays: [{ id: "test001", geometry: { x: 121.418924, y: 31.157101 } }]
-    }); */
-    // map.addOverlays({
-    //   type: "jingqing",
-    //   defaultSymbol: {
-    //     type: "point",
-    //     url: "assets/image/Anchor.png",
-    //     width: 50,
-    //     height: 30,
-    //   },
-    //   overlays: [
-    //     {
-    //       id: "310113610000",
-    //       geometry: { x: 121.3943501, y: 31.39351155 },
-    //       fields: {
-    //         jqId: "202004171434362492126666",
-    //         jqTime: "2020-05-11 16:03:54",
-    //         informerPhone: "15776038940",
-    //         informer: null,
-    //         jqType: "2101",
-    //         jqSubType: null,
-    //         carType: "CAR_TYPE_08",
-    //         jqAddress: "（报班长）宝山 宝祁路788号门口",
-    //         jqDescription:
-    //           "土方车单车事故（拉断光纤线），人无事，不影响交通，周围没有用电影响，请民警到场处理。",
-    //         longitude: null,
-    //         latitude: null,
-    //         roadId: "40149",
-    //         crossId: null,
-    //         roadName: "未知",
-    //         crossName: "未知",
-    //         duplicate: "0",
-    //         invalid: "0",
-    //         handleDeptId: "310113610000",
-    //         handlePoliceId: "046230",
-    //         handlePoliceName: "汪冰清",
-    //         handleTime: 1587105378000,
-    //         feedback: "1",
-    //         createUser: null,
-    //         createTime: 1587105353000,
-    //         updateUser: null,
-    //         updateTime: 1587106265000,
-    //         jqNo: "202004171434362492126666",
-    //         jqTypeDesc: "事故类",
-    //         jqLevel: "02",
-    //         jqLevelDesc: "三级",
-    //         jqSubTypeDesc: null,
-    //         carTypeDesc: "其他",
-    //         deptId: "310113610000",
-    //         deptName: "祁连派出所",
-    //         areaId: "310113610000",
-    //         areaName: "祁连派出所",
-    //         handleDescription: "民警已到现场，遇到报警人，系单车事故，当场处理",
-    //         jqStatus: "已反馈",
-    //         jqStatusDesc: null,
-    //         handleDeptName: "祁连派出所",
-    //         pdId: "21001",
-    //         jqSubTypeEntity: null,
-    //         carTypeEntity: null,
-    //         jqTypeEntity: null,
-    //       },
-    //     },
-    //     {
-    //       id: "310113750000",
-    //       geometry: { x: 121.459135, y: 31.396139 },
-    //       fields: {
-    //         jqId: "202004171213229932213053",
-    //         jqTime: "2020-05-11 16:03:54",
-    //         informerPhone: "13817782369",
-    //         informer: "陈宁宁",
-    //         jqType: "2101",
-    //         jqSubType: null,
-    //         carType: "CAR_TYPE_02",
-    //         jqAddress: "（报班长）宝山  铁山路（宝杨路—友谊路）  桥下",
-    //         jqDescription:
-    //           "路人：一人疑似骑自行车摔倒在地上，请民警到场处理。(已通知120到场，如不需要救护车，请民警电告120或110)",
-    //         longitude: 121.459135,
-    //         latitude: 31.396139,
-    //         roadId: "80108",
-    //         crossId: null,
-    //         roadName: "铁山路",
-    //         crossName: "铁山路/铁通路路口",
-    //         duplicate: "0",
-    //         invalid: "0",
-    //         handleDeptId: "310113750000",
-    //         handlePoliceId: "045644",
-    //         handlePoliceName: "许郁",
-    //         handleTime: 1587097003000,
-    //         feedback: "1",
-    //         createUser: null,
-    //         createTime: 1587096974000,
-    //         updateUser: null,
-    //         updateTime: 1587097904000,
-    //         jqNo: "202004171213229932213053",
-    //         jqTypeDesc: "事故类",
-    //         jqLevel: "02",
-    //         jqLevelDesc: "三级",
-    //         jqSubTypeDesc: null,
-    //         carTypeDesc: "机动车与非机动车",
-    //         deptId: "310113750000",
-    //         deptName: "宝杨派出所",
-    //         areaId: "310113750000",
-    //         areaName: "宝杨派出所",
-    //         handleDescription:
-    //           "经了解，夫妻双方结伴骑自行车外出。一方下坡时操作不慎摔倒。人无大碍，未受伤 不需要民警处理。",
-    //         jqStatus: "已反馈",
-    //         jqStatusDesc: null,
-    //         handleDeptName: "宝杨派出所",
-    //         pdId: "21003",
-    //         jqSubTypeEntity: null,
-    //         carTypeEntity: null,
-    //         jqTypeEntity: null,
-    //       },
-    //     },
-    //   ],
-    //   showPopup: true,
-    //   autoPopup: false,
-    //   defaultInfoTemplate: {
-    //     title: "警情信息",
-    //     content:
-    //       '<div class="jq_table">\n    <div class="jq-msg">\n        <div>警情描述:</div>\n        <div>{jqDescription}</div>\n    </div>\n    <div class="jq-msg">\n        <div>警情类型:</div>\n        <div>{jqTypeDesc}</div>\n    </div>\n    <div class="jq-msg">\n        <div>警情地址:</div>\n        <div>{jqAddress}</div>\n    </div>\n    <div class="jq-msg">\n        <div>发生时间:</div>\n        <div>{jqTime}</div>\n    </div>\n    <div class="jq-msg">\n        <div>报警人:</div>\n        <div>{informer}</div>\n    </div>\n    <div class="jq-msg">\n        <div>联系方式:</div>\n        <div>{informerPhone}</div>\n    </div>\n    <div class="jq-msg">\n        <div>处置描述:</div>\n        <div>{handleDescription}</div>\n    </div>\n    <div class="jq-msg">\n        <div>警情状态:</div>\n        <div>{jqStatus}</div>\n    </div>\n</div>',
-    //   },
-    // });
+      overlays: [
+        {
+          id: 'test001',
+          geometry: {x: 87.597, y: 43.814},
+          fields: {name: '测试2', featureid: '0002'}
+        },
+        {
+          id: 'test002',
+          geometry: {x: 87.587, y: 43.814},
+          fields: {name: '测试3', featureid: '0003'}
+        },
+        {
+          id: 'test003',
+          geometry: {x: 87.577, y: 43.814},
+          fields: {name: '测试4', featureid: '0001'}
+        }
+      ],
+      showPopup: true,
+      autoPopup: false,
+      defaultInfoTemplate: {
+        title: '1212',
+        content: '<div>name:{name}<br/><button>{name}</button></div>'
+      },
+      defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
+    });
+  }
+  private async btn_addOverlays_line() {
+
+      let path1 = [  // first path
+          [87.597,43.817],
+          [87.597,43.824],
+          [87.597,43.834]
+      ];
+
+      let path2 = [
+          [87.577,43.817],
+          [87.577,43.824],
+          [87.577,43.834]];
+      let map = this.$refs.gisViewer as any;
+      await map.addOverlays({
+          type: 'simpleLine',
+          defaultSymbol: {
+              //symbol for 2d
+              type: 'line-2d',
+              // primitive: "square",
+              color:[255,0,0,0.5],
+              width:2
+              // width: 10
+          },
+          overlays: [
+              {
+                  id: 'testPath001',
+                  geometry: {paths:path1},
+                  fields: {name: '测试1', featureid: '0002'}
+              },
+              {
+                  id: 'testPath002',
+                  geometry: {paths:path2},
+                  fields: {name: '测试2', featureid: '0002'}
+              }
+          ],
+          showPopup: true,
+          autoPopup: false,
+          defaultInfoTemplate: {
+              title: '1212',
+              content: '<div>name:{name}<br/><button>{name}</button></div>'
+          },
+          defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
+      })
+
+  }
+  private async btn_addOverlays_polygon(){
+      let rings1 = [[
+          [87.597,43.824],
+          [87.617,43.824],
+          [87.617,43.814],
+          [87.597,43.814]]];
+      let rings2 = [[[87.716, 43.842],[87.716, 43.839],[87.715, 43.836],[87.714, 43.833],[87.713, 43.830],[87.711, 43.827],[87.708, 43.824],
+          [87.705, 43.822],[87.702, 43.819],[87.699, 43.817],[87.695, 43.816],[87.691, 43.814],[87.687, 43.813],[87.683, 43.812],
+          [87.678, 43.812],[87.674, 43.812],[87.670, 43.812],[87.665, 43.812],[87.661, 43.813],[87.657, 43.814],[87.653, 43.816],
+          [87.649, 43.817],[87.646, 43.819],[87.643, 43.822],[87.640, 43.824],[87.638, 43.827],[87.636, 43.830],[87.634, 43.833],
+          [87.633, 43.836],[87.632, 43.839],[87.632, 43.842],[87.632, 43.845],[87.633, 43.848],[87.634, 43.851],[87.636, 43.854],
+          [87.638, 43.857],[87.640, 43.860],[87.643, 43.862],[87.646, 43.865],[87.649, 43.867],[87.653, 43.868],[87.657, 43.870],
+          [87.661, 43.871],[87.665, 43.872],[87.670, 43.872],[87.674, 43.872],[87.678, 43.872],[87.683, 43.872],[87.687, 43.871],
+          [87.691, 43.870],[87.695, 43.868],[87.699, 43.867],[87.702, 43.865],[87.705, 43.862],[87.708, 43.860],[87.711, 43.857],
+          [87.713, 43.854],[87.714, 43.851],[87.715, 43.848],[87.716, 43.845],[87.716, 43.842]]]
+      let map = this.$refs.gisViewer as any;
+
+      await map.addOverlays({
+          type: 'simplePolygon',
+          defaultSymbol: {
+              type: 'polygon-2d',
+              color:[255,0,0,0.5],
+          },
+          overlays: [
+              {
+                  id: 'testPplygon001',
+                  geometry: {rings:rings1},
+                  fields: {name: '测试1', featureid: '0001'}
+              },
+              {
+                  id: 'testPolygon002',
+                  geometry: {rings:rings2},
+                  fields: {name: '测试2', featureid: '0002'}
+              }
+          ],
+          showPopup: true,
+          autoPopup: false,
+          defaultInfoTemplate: {
+              title: '1212',
+              content: '<div>name:{name}<br/><button>{name}</button></div>'
+          },
+          defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
+      })
+  }
+  private async btn_deleteOverlays(){
+      let map = this.$refs.gisViewer as any;
+      await map.deleteOverlays({
+          types:["police"],
+          ids:["test001"]
+      })
+  }
+  private async btn_drawPoints(){
+
+  }
+  private async btn_drawLines(){
+
+  }
+  private async btn_drawPolygons(){
+
+  }
+  private async btn_drawCircles(){
+
+  }
+  private async btn_drawRects(){
+
+  }
+  private async loadImageAsync(url:string) {
+        return new Promise(function(resolve, reject) {
+            const image = new Image();
+
+            image.onload = function() {
+                resolve(image);
+            };
+
+            image.onerror = function() {
+                reject(new Error('Could not load image at ' + url));
+            };
+
+            image.src = url;
+        });
+    }
+  private async mapLoaded() {
+    console.log('Map Loaded.');
+    let map = this.$refs.gisViewer as any;
     const result = await map.addOverlays({
       type: 'police',
       defaultSymbol: {
@@ -207,7 +275,7 @@ export default class PluginTest extends Vue {
         type: 'point-2d',
         // primitive: "square",
         url: 'assets/image/Anchor.png',
-        size: [50, 100],
+        size: [25, 25],
         anchor: 'center'
         // color: "red",
         // outline: {
@@ -226,21 +294,21 @@ export default class PluginTest extends Vue {
       overlays: [
         {
           id: 'test001',
-          geometry: {x: 121.418924, y: 31.157101},
+          geometry: {x: 87.597, y: 43.824},
           fields: {name: '测试2', featureid: '0002'}
         },
         {
           id: 'test002',
-          geometry: {x: 121.318924, y: 31.157101},
+          geometry: {x: 87.587, y: 43.824},
           fields: {name: '测试3', featureid: '0003'}
         },
         {
           id: 'test003',
-          geometry: {x: 121.418924, y: 31.257101},
+          geometry: {x: 87.577, y: 43.824},
           fields: {name: '测试4', featureid: '0001'}
         }
       ],
-      showPopup: true,
+      showPopup: false,
       autoPopup: false,
       defaultInfoTemplate: {
         title: '1212',
@@ -248,242 +316,35 @@ export default class PluginTest extends Vue {
       },
       defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
     });
-  }
-  private btn_test1() {
-    let map = this.$refs.gisViewer as any;
-    // axios.get('config/point1.json').then((res: any) => {
-    //   map.addOverlaysCluster(res.data);
-    // });
-    // axios.get("config/point2.json").then((res: any) => {
-    //   map.addOverlaysCluster(res.data);
-    // });
 
-    //axios.get("config/Jurisdiction/bsga_v2.geo.json").then((res: any) => {
-    //map.addOverlaysCluster(res.data);
-    //  console.log(res.data);
-    //});
-    map.showJurisdiction();
-    // map.findFeature({
-    //   layerName: 'police',
-    //   level: 18,
-    //   ids: ['test001'],
-    //   centerResult: true
-    // });
-  }
-  private async btn_test2() {
-    let map = this.$refs.gisViewer as any;
-    var points = [];
-    var x = 121.43;
-    var y = 31.15;
-    for (var i = 0; i < 200; i++) {
-      var x1 = x + (Math.random() * 2 - 1) / 5;
-      var y1 = y + (Math.random() * 2 - 1) / 5;
-      var value = Math.floor(1000 * Math.random() + 1);
-      var a = i % 2 == 0 ? '1' : '0';
-      points.push({
-        geometry: {x: x1, y: y1},
-        fields: {desc: '上海体育馆停车场', totalSpace: value, type: a}
-      });
-    }
-    var json = {
-      points: points,
-      options: {
-        field: 'totalSpace',
-        radius: '20',
-        colors: [
-          'rgb(25, 154, 114)',
-          'rgb(61, 192, 67)',
-          'rgb(206, 199, 25)',
-          'rgb(225, 145, 27)',
-          'rgb(246, 64, 64)'
-        ],
-        maxValue: 1000,
-        minValue: 1,
-        zoom: 17,
-        renderer: {
-          type: 'simple',
-          symbol: {
-            type: 'esriPMS',
-            url: 'assets/image/Anchor.png',
-            width: 64,
-            height: 66,
-            yoffset: 16
-          }
-        }
-      }
-    };
-    map.addHeatMap(json);
-    map.addOverlays({
-      type: 'police',
-      defaultSymbol: {
-        //symbol for 2d
-        type: 'point-2d',
-        // primitive: "square",
-        url: 'assets/image/Anchor.png',
-        width: 80,
-        height: 90
-        // color: "red",
-        // outline: {
-        //   color: "white",
-        //   size: 4
-        // },
-        // anchor: "top"
-
-        //symbol for 3d
-        //type: "point-3d",
-        //primitive: "cube",
-        //color: "red",
-        //size: 20000,
-        //anchor: "bottom",
-      },
-      defaultZooms: [10, 20],
-      overlays: [
-        {
-          id: 'test001',
-          geometry: {x: 121.418924, y: 31.157101},
-          fields: {name: '测试2', featureid: '0002'}
-        },
-        {
-          id: 'test002',
-          geometry: {x: 121.318924, y: 31.157101},
-          fields: {name: '测试3', featureid: '0003'}
-        },
-        {
-          id: 'test003',
-          geometry: {x: 121.418924, y: 31.257101},
-          fields: {name: '测试4', featureid: '0001'}
-        }
-      ],
-      showPopup: true,
-      autoPopup: false,
-      defaultInfoTemplate: {
-        title: '1212',
-        content: '<div>name:{name}<br/><button>{name}</button></div>'
-      },
-      defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
-    });
-    (this.$refs.gisViewer as any).hideLayer({type: 'traffic'});
-    // (this.$refs.gisViewer as any).showDistrictMask({
-    //   name: '徐汇区',
-    //   showMask: true
-    // });
-  }
-  private btn_test3() {
-    //(this.$refs.gisViewer as any).deleteHeatMap();
-    (this.$refs.gisViewer as any).deleteOverlaysCluster({types: ['sxj1']});
-    //(this.$refs.gisViewer as any).deleteAllOverlays();
-    //(this.$refs.gisViewer as any).deleteOverlays({ids: ['test001']});
-    //(this.$refs.gisViewer as any).hideLayer({ type: "traffic" });
-    //(this.$refs.gisViewer as any).setMapCenter({x:121.12,y:31.23});
-    //(this.$refs.gisViewer as any).setMapCenterAndLevel({x:121.12,y:31.23,level:15});
-    //(this.$refs.gisViewer as any).hideJurisdiction();
-    //(this.$refs.gisViewer as any).hideDistrictMask();
-    // (this.$refs.gisViewer as any).addOverlays({
-    //   type: 'police',
-    //   defaultSymbol: {
-    //     url: 'assets/images/a.png',
-    //     size: [32, 41],
-    //     type: 'point'
-    //   },
-    //   overlays: [
-    //     {
-    //       id: 'test001',
-    //       geometry: {
-    //         x: 121.418924,
-    //         y: 31.157101
-    //       },
-    //       fields: {
-    //         name: '测试2',
-    //         featureid: '0002'
-    //       }
-    //     },
-    //     {
-    //       id: 'abc',
-    //       geometry: {
-    //         path: [
-    //           [121.31, 31.01],
-    //           [121.2, 31.22],
-    //           [121.1, 31.33],
-    //           [121.45, 30.89]
-    //         ]
-    //       },
-    //       fields: {
-    //         name: '测试2',
-    //         featureid: '0002'
-    //       },
-    //       symbol: {
-    //         color: 'red'
-    //       }
-    //     },
-    //     {
-    //       id: 'abc22',
-    //       geometry: {
-    //         ring: [
-    //           [121.31, 31.01],
-    //           [121.2, 31.22],
-    //           [121.1, 31.33],
-    //           [121.45, 30.89]
-    //         ]
-    //       },
-    //       fields: {
-    //         name: '测试2',
-    //         featureid: '0002'
-    //       },
-    //       symbol: {
-    //         color: 'red'
-    //       }
-    //     },
-    //     {
-    //       id: 'abc112',
-    //       geometry: {
-    //         center: [121.36, 31.45],
-    //         radius: 10000
-    //       },
-    //       fields: {
-    //         name: '测试3',
-    //         featureid: '00044'
-    //       },
-    //       symbol: {
-    //         color: 'red',
-    //         outline: {color: 'blue', width: 8}
-    //       }
-    //     },
-    //     {
-    //       id: 'test002',
-    //       geometry: {
-    //         x: 121.318924,
-    //         y: 31.157101
-    //       },
-    //       fields: {
-    //         name: '测试3',
-    //         featureid: '0003'
-    //       }
-    //     },
-    //     {
-    //       id: 'test003',
-    //       geometry: {
-    //         x: 121.418924,
-    //         y: 31.257101
-    //       },
-    //       fields: {
-    //         name: '测试4',
-    //         featureid: '0001'
-    //       }
-    //     }
-    //   ],
-    //   showPopup: true,
-    //   autoPopup: false,
-    //   defaultInfoTemplate: {
-    //     title: '1212',
-    //     content: 'name:{name}<br/><button>{name}</button>'
-    //   },
-    //   showToolTip: true,
-    //   toolTipOption: {
-    //     content: '{featureid}',
-    //     xoffset: 0,
-    //     yoffset: -6
-    //   }
-    // });
+    let html='<div class="lightingTreePop">\n' +
+        '        <p class="title">路灯信息</p>\n' +
+        '        <p class="fa fa-close"></p>\n' +
+        '        <ul class="main">\n' +
+        '            <li>\n' +
+        '                <p>路灯标号</p>\n' +
+        '                <div>成都雄飞中心</div>\n' +
+        '            </li>\n' +
+        '            <li>\n' +
+        '                <p>路灯名称</p>\n' +
+        '                <div>成都雄飞中心</div>\n' +
+        '            </li>\n' +
+        '            <li>\n' +
+        '                <p>路灯状态</p>\n' +
+        '                <div> <span class="green">在线</span></div>\n' +
+        '            </li>\n' +
+        '            <li>\n' +
+        '                <p>开灯状态</p>\n' +
+        '                <!-- fa-toggle-off -->\n' +
+        '                <div> <span class="fa fa-toggle-on"></span> </div>\n' +
+        '            </li>\n' +
+        '            <li>\n' +
+        '                <p>路灯状态</p>\n' +
+        '                <div>成都雄飞中心成都雄飞中心成都雄飞中心成都雄飞中心成都雄飞中心成都雄飞中心成都雄飞中心成都雄飞中心成都雄飞中心</div>\n' +
+        '            </li>\n' +
+        '        </ul>\n' +
+        '    </div>'
+    map.showToolTip(html);
   }
   private showGisDeviceInfo(type: string, id: string, detail: any) {
     console.log(type, id, detail);
@@ -500,7 +361,26 @@ export default class PluginTest extends Vue {
 }
 #test {
   position: absolute;
-  z-index: 99;
-  display: block;
+  right: 20px;
+  top: 100px;
+  width: 400px;
+  height: 300px;
+  z-index: 100;
+  background: #ffffff;
+  color: #777777;
+  padding: 5px;
+  border: 2px solid #666666;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.fa-close{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    color: #7d98bf;
 }
 </style>

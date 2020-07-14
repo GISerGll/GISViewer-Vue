@@ -218,4 +218,6 @@ export default class MapAppGaode implements IMapContainer {
     const jurisdiction = JurisdictionPoliceGD.getInstance(this.view);
     await jurisdiction.locateStreet(param);
   }
+
+  public async showToolTip(){}
 }

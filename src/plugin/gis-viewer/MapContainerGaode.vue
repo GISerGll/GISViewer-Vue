@@ -120,6 +120,8 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public locateStreet(param: IStreetParameter) {
     this.mapApp.locateStreet(param);
   }
+
+  public showToolTip(){}
 }
 </script>
 

@@ -96,6 +96,7 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public hideRoad() {}
   public showStreet() {}
   public hideStreet() {}
+  public showToolTip(){}
   public locateStreet(param: IStreetParameter) {}
 }
 </script>

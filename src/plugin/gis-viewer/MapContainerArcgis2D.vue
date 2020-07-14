@@ -86,6 +86,9 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public findLayerFeature(params: IFindParameter) {
     this.mapApp.findLayerFeature(params);
   }
+  public showToolTip(params: string){
+    this.mapApp.showToolTip(params);
+  }
   public showRoad() {}
   public hideRoad() {}
   public showStreet() {}

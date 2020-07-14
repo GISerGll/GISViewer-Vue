@@ -1,7 +1,5 @@
 import MapToolTip from "./MapToolTip.vue";
-import { Vue, Component, Emit, Prop } from "vue-property-decorator";
-import { loadModules } from "esri-loader";
-import { Geometry } from "esri/geometry";
+import { Vue } from "vue-property-decorator";
 
 export default class ToolTip {
   public id: string = "tooltip1";

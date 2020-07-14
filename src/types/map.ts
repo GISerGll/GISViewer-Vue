@@ -73,6 +73,7 @@ export interface IPolylineSymbol {
 export interface IPolygonSymbol {
   type: string;
   outline: IPolylineSymbol;
+  // style: "backward-diagonal" | "cross" | "diagonal-cross" | "forward-diagonal"
   color?: string;
   opacity?: number;
   zIndex?: number;
@@ -134,6 +135,7 @@ export interface IOverlayClusterParameter {
 
 export interface IMapContainer {
   addOverlays: (param: IOverlayParameter) => Promise<IResult>;
+  showToolTip: (param:string) => void;
   addHeatMap: (param: IHeatParameter) => void;
   addOverlaysCluster: (param: IOverlayClusterParameter) => void;
   deleteOverlays: (param: IOverlayDelete) => void;
