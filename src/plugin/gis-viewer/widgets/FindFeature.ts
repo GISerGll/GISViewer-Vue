@@ -6,7 +6,7 @@ import {
   IFindParameter
 } from '@/types/map';
 import {loadModules} from 'esri-loader';
-import HighFeauture3D from './Render/HighFeauture3D';
+import HighFeauture2D from './Render/HighFeauture2D';
 
 export class FindFeature {
   private static findFeature: FindFeature;
@@ -110,5 +110,7 @@ export class FindFeature {
       });
     });
   }
-  private async startJumpPoint(graphics: any[]) {}
+  private async startJumpPoint(graphics: any[]) {
+
+  }
 }

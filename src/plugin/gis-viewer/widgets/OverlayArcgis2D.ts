@@ -303,10 +303,12 @@ export class OverlayArcgis2D {
     let centerResult = params.centerResult !== false;
 
     //根据网上资料,forEach内函数无法采用异步，除非重写原型。
-    for(let overlay of overlays.items){
+    //此处graphics能访问的属性只有length，访问其items属性会提示错误
+    let lengthOfOverlays = overlays.length;
+    for(let i=0;i<lengthOfOverlays;i++){
+      let overlay = overlays.getItemAt(i);
       await this.goToView(overlay,type,ids,centerResult,level);
     }
-
     return {
       status: 0,
       message: 'ok'
@@ -323,8 +325,7 @@ export class OverlayArcgis2D {
           duration: 5000  // Duration of animation will be 5 seconds
         };
         await this.view.goTo({target: overlay, zoom: level},opts).then(
-            async (msg)=> {
-              console.log(msg);
+            async ()=> {
               await this.startJumpPoint([overlay])
             }).catch((err)=>{
           console.log(err);
