@@ -30,6 +30,7 @@
 <script lang="ts">
 import {Vue, Component} from 'vue-property-decorator';
 import axios from 'axios';
+import {IResult} from "@/types/map";
 @Component
 export default class PluginTest extends Vue {
   private mapConfig = {
@@ -90,15 +91,15 @@ export default class PluginTest extends Vue {
   }
   private async btn_addOverlays_pt() {
       let map = this.$refs.gisViewer as any;
-      const img = await this.loadImageAsync("assets/image/Anchor.png");
-      await map.addOverlays({
+      const img= await this.loadImageAsync("assets/image/Anchor.png");
+      const obj =  await map.addOverlays({
       type: 'police',
       defaultSymbol: {
         //symbol for 2d
         type: 'point-2d',
         // primitive: "square",
         url: 'assets/image/Anchor.png',
-        size: img? [img.width,img.height] : [12,12],
+        size:  (img as Object)? [(img as any).width,(img as any).height] : [12,12],
         // color: "red",
         // outline: {
         //   color: "white",
@@ -130,7 +131,7 @@ export default class PluginTest extends Vue {
           fields: {name: '测试4', featureid: '0001'}
         }
       ],
-      showPopup: true,
+      showPopup: false,
       autoPopup: false,
       defaultInfoTemplate: {
         title: '1212',
@@ -138,6 +139,7 @@ export default class PluginTest extends Vue {
       },
       defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
     });
+      console.log(obj)
   }
   private async btn_addOverlays_line() {
 
@@ -230,10 +232,11 @@ export default class PluginTest extends Vue {
   }
   private async btn_deleteOverlays(){
       let map = this.$refs.gisViewer as any;
-      await map.deleteOverlays({
+      const obj = await map.deleteOverlays({
           types:["police"],
           ids:["test001"]
       })
+      console.log(obj);
   }
   private async btn_drawPoints(){
 

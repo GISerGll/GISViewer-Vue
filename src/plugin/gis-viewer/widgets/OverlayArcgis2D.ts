@@ -92,9 +92,9 @@ export class OverlayArcgis2D {
       };
     }
 
-    console.log("markerSymbol:",result);
     return result;
   }
+
   private static makePolylineSymbol(symbol: IPolylineSymbol | undefined): Object | undefined{
     if (!symbol || symbol.type.toLowerCase() !== 'line-2d') return undefined;
 
@@ -110,6 +110,7 @@ export class OverlayArcgis2D {
 
     return result;
   }
+
   private static makePolygonSymbol(symbol: IPolygonSymbol | undefined): Object | undefined{
     if (!symbol || symbol.type.toLowerCase() !== 'polygon-2d') return undefined;
     return {
@@ -183,6 +184,7 @@ export class OverlayArcgis2D {
     }
     return tipContent;
   }
+
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     if (!this.overlayLayer) {
       await this.createOverlayLayer();
@@ -246,7 +248,6 @@ export class OverlayArcgis2D {
         }
       }
 
-      console.log("graphic:",graphic);
       this.overlayLayer.add(graphic);
       addCount++;
     }
@@ -256,6 +257,7 @@ export class OverlayArcgis2D {
       result: `成功添加${params.overlays.length}中的${addCount}个覆盖物`
     };
   }
+
   public async deleteOverlays(params: IOverlayDelete): Promise<IResult> {
     let types = params.types || [];
     let ids = params.ids || [];
@@ -282,12 +284,33 @@ export class OverlayArcgis2D {
         i--;
       }
     }
+    // this.overlayLayer.graphics.forEach((overlay)=>{
+    //     if (
+    //       //只判断type
+    //       (types.length > 0 &&
+    //         ids.length === 0 &&
+    //         types.indexOf((overlay as any).type) >= 0) ||
+    //       //只判断id
+    //       (types.length === 0 &&
+    //         ids.length > 0 &&
+    //         ids.indexOf((overlay as any).id) >= 0) ||
+    //       //type和id都要判断
+    //       (types.length > 0 &&
+    //         ids.length > 0 &&
+    //         types.indexOf((overlay as any).type) >= 0 &&
+    //         ids.indexOf((overlay as any).id) >= 0)
+    //     ) {
+    //       this.overlayLayer.remove(overlay);
+    //       delcount++;
+    //     }
+    // })
     return {
       status: 0,
       message: 'ok',
       result: `成功删除${delcount}个覆盖物`
     };
   }
+
   public async deleteAllOverlays(): Promise<IResult> {
     this.overlayLayer.removeAll();
     return {
@@ -295,6 +318,7 @@ export class OverlayArcgis2D {
       message: 'ok'
     };
   }
+
   public async findFeature(params: IFindParameter): Promise<IResult> {
     let type = params.layerName;
     let ids = params.ids || [];
@@ -314,10 +338,12 @@ export class OverlayArcgis2D {
       message: 'ok'
     };
   }
+
   private async startJumpPoint(graphics: any[]) {
     let high = HighFeauture2D.getInstance(this.view);
     await high.startup(graphics);
   }
+
   private async goToView(overlay: any,type: any,ids:any[],centerResult:boolean,level:number){
     if (type == overlay.type && ids.indexOf(overlay.id) >= 0) {
       if (centerResult) {
@@ -336,6 +362,7 @@ export class OverlayArcgis2D {
       }
     }
   }
+
   public async showToolTip(content: string) {
     const view = this.view;
     const moveLayer = this.overlayLayer;

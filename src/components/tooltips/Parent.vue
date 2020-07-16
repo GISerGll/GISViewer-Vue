@@ -14,7 +14,7 @@
         },
         data:function () {
             return{
-                value:0
+                value:1
             }
         }
     }
