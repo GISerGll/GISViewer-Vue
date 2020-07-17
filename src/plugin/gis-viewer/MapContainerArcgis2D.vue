@@ -17,7 +17,8 @@ import {
   IFindParameter,
   IResult,
   IDistrictParameter,
-  IStreetParameter
+  IStreetParameter,
+  IDrawOverlayParameter
 } from '@/types/map';
 
 @Component({
@@ -94,6 +95,9 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public showStreet() {}
   public hideStreet() {}
   public locateStreet(param: IStreetParameter) {}
+  public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
+    return await this.mapApp.startDrawOverlays(params);
+  }
 }
 </script>
 

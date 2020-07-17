@@ -51,7 +51,8 @@ import {
   IFindParameter,
   IResult,
   IDistrictParameter,
-  IStreetParameter
+  IStreetParameter,
+  IDrawOverlayParameter
 } from '@/types/map';
 
 @Component({
@@ -178,6 +179,10 @@ export default class MapContainer extends Vue implements IMapContainer {
 
   public showToolTip(param: string){
     this.mapContainer.showToolTip(param);
+  }
+
+  public async startDrawOverlays(param: IDrawOverlayParameter):Promise<IResult>{
+    return await this.mapContainer.startDrawOverlays(param);
   }
 }
 </script>

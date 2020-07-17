@@ -122,6 +122,7 @@ export interface IOverlayParameter {
   showToolTip?: boolean; //鼠标移到该点位是，是否显示悬浮窗
   toolTipContent?: string; //悬浮窗内容
 }
+
 export interface IOverlayClusterParameter {
   points: Array<IOverlay>;
   type?: string;
@@ -131,6 +132,16 @@ export interface IOverlayClusterParameter {
   clusterSymbol?: IPointSymbol;
   defaultVisible: boolean;
   defaultTooltip: string;
+}
+
+export interface IDrawOverlayParameter {
+  drawType?: string;
+  defaultSymbol?: IPointSymbol | IPolylineSymbol | IPolygonSymbol;
+  showPopup?: boolean;
+  showToolTip?: boolean;
+  type?: string;               //覆盖物类型, 用于按编号/类型删除
+  id?: boolean;                 //是否随机生成覆盖物编号, 用于按编号/类型删除
+  clearLastResults?: boolean;  //清除上一次绘画结果（调用一次方法只能存在一个graphic）
 }
 
 export interface IMapContainer {
@@ -158,6 +169,7 @@ export interface IMapContainer {
   hideStreet: () => void;
   locateStreet: (param: IStreetParameter) => void;
   findLayerFeature: (param: IFindParameter) => void;
+  startDrawOverlays: (param: IDrawOverlayParameter) => Promise<IResult>
 }
 export interface IPopUpTemplate {
   title?: string;

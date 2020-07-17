@@ -239,7 +239,14 @@ export default class PluginTest extends Vue {
       console.log(obj);
   }
   private async btn_drawPoints(){
-
+      let map = this.$refs.gisViewer as any;
+      const result = await map.startDrawOverlays({
+          drawType:"multipoint",
+          type:"points",
+          id:true,
+          showPopup:true
+      })
+      console.log(result);
   }
   private async btn_drawLines(){
 

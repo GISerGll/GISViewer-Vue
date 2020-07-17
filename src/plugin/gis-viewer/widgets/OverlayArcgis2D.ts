@@ -45,7 +45,7 @@ export class OverlayArcgis2D {
     this.view.map.add(this.overlayLayer);
   }
 
-  private static makeSymbol(symbol: any): Object | undefined {
+  public static makeSymbol(symbol: any): Object | undefined {
     if(!symbol) return undefined;
     if(symbol.type.toLowerCase() === "point-2d"){
       return this.makeMarkerSymbol(symbol);

@@ -8,11 +8,13 @@ import {
   IOverlayDelete,
   IFindParameter,
   IStreetParameter,
-  IHeatParameter
+  IHeatParameter,
+  IDrawOverlayParameter
 } from '@/types/map';
 import {OverlayArcgis2D} from '@/plugin/gis-viewer/widgets/OverlayArcgis2D';
 import {FindFeature} from './widgets/FindFeature';
 import {HeatMap} from './widgets/HeatMap';
+import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
@@ -232,5 +234,9 @@ export default class MapAppArcGIS2D {
   public async deleteHeatMap() {
     const heatmap = HeatMap.getInstance(this.view);
     return await heatmap.deleteHeatMap();
+  }
+  public async startDrawOverlays(params: IDrawOverlayParameter) {
+    const drawOverlay = Draw2D.getInstance(this.view);
+    return await drawOverlay.startDrawOverlays(params);
   }
 }
