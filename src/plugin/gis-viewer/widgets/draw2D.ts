@@ -134,6 +134,33 @@ export class Draw2D {
         return graphic;
     }
 
+    private async addPolylineGraphic(vertices:any):Promise<IResult>{
+        this.view.graphics.removeAll();
+        let polyline = {
+            type: "polyline", // autocasts as Polyline
+            paths: vertices,
+            spatialReference: this.view.spatialReference
+        };
+
+        const [Graphic] = await loadModules([
+            'esri/Graphic',
+        ]);
+
+        let graphic = new Graphic({
+            geometry: polyline,
+            symbol: {
+                type: "simple-line", // autocasts as SimpleLineSymbol
+                color: [4, 90, 141],
+                width: 3,
+                cap: "round",
+                join: "round"
+            }
+        });
+
+        this.view.graphics.add(graphic);
+        return graphic;
+    }
+
     private async drawPoints(drawProperties:IDrawOverlayParameter):Promise<IResult>{
         let drawCount = 0;
         let pts:any[] = [];
@@ -141,7 +168,7 @@ export class Draw2D {
         //用view.on实现调用一次方法添加多个点
         let promiseObj = new Promise(resolve => {
             this.drawHandler = this.view.on("click",  ()=>{
-                let drawAction = this.draw.create(drawProperties.drawType as any);
+                let drawAction = this.draw.create("point");
 
                 drawAction.on([
                     "draw-complete"
@@ -150,6 +177,7 @@ export class Draw2D {
                     let promiseGraphic = this.addPtsGraphics(evt.coordinates,drawProperties);
                     promiseGraphic.then((value => {
                         pts.push(value);
+                        drawCount++;
                     }))
                 });
             })
@@ -165,16 +193,41 @@ export class Draw2D {
         return {
             status:0,
             message:"ok",
-            result:promiseObj
+            result:`成功添加${drawCount}个覆盖物,详细信息:${promiseObj}`
         }
     }
 
     private async drawPolylines(drawProperties:IDrawOverlayParameter):Promise<IResult>{
+        let drawCount = 0;
+        let pts:any[] = [];
+
+        //用view.on实现调用一次方法添加多个点
+        let promiseObj = new Promise(resolve => {
+            let drawAction = this.draw.create("polyline");
+
+            drawAction.on([
+                "vertex-add",
+                "vertex-remove",
+                "cursor-update",
+            ], (evt) => {
+                this.addPolylineGraphic(evt.vertices);
+            });
+
+            drawAction.on([
+                "draw-complete"
+            ], (evt) => {
+                this.addPolylineGraphic(evt.vertices).then(value => {
+                    pts.push(value);
+                })
+                // pts.push(this.addPolylineGraphic(evt.vertices));
+                resolve(pts);
+            });
+        })
 
         return {
             status:0,
             message:"ok",
-            result:"polylines"
+            result:promiseObj
         }
     }
 

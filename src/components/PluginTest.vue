@@ -259,7 +259,18 @@ export default class PluginTest extends Vue {
       })
   }
   private async btn_drawLines(){
+      let map = this.$refs.gisViewer as any;
+      const result = await map.startDrawOverlays({
+          drawType:"polyline",
+          type:"lines",
+          id:true,
+          showPopup:true
+      })
 
+      var resultArray = result.result;
+      resultArray.then((value:any) =>{
+          console.log(value);
+      })
   }
   private async btn_drawPolygons(){
 

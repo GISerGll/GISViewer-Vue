@@ -341,7 +341,6 @@ export class OverlayArcgis2D {
       }
     })
 
-
     return {
       status: 0,
       message: 'ok',
