@@ -12,7 +12,8 @@ import {
   IFindParameter,
   IResult,
   IDistrictParameter,
-  IStreetParameter
+  IStreetParameter,
+    IDrawOverlayParameter
 } from '@/types/map';
 import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/OverlayArcgis3D';
 import {RasterStretchRenderer} from 'esri/rasterRenderers';
@@ -234,5 +235,11 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async showStreet() {}
   public async hideStreet() {}
   public async showToolTip() {}
+  public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
+    return {
+      status:1,
+      message:"Not implemented"
+    }
+  }
   public async locateStreet(param: IStreetParameter) {}
 }

@@ -235,7 +235,7 @@ export default class MapAppArcGIS2D {
     const heatmap = HeatMap.getInstance(this.view);
     return await heatmap.deleteHeatMap();
   }
-  public async startDrawOverlays(params: IDrawOverlayParameter) {
+  public async startDrawOverlays(params: IDrawOverlayParameter):Promise<IResult>{
     const drawOverlay = Draw2D.getInstance(this.view);
     return await drawOverlay.startDrawOverlays(params);
   }

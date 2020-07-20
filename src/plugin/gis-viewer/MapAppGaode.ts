@@ -11,7 +11,7 @@ import {
   IFindParameter,
   IResult,
   IDistrictParameter,
-  IStreetParameter
+  IStreetParameter, IDrawOverlayParameter
 } from '@/types/map';
 import {OverlayGaode} from '@/plugin/gis-viewer/widgets/OverlayGaode';
 import {JurisdictionPoliceGD} from './widgets/GD/JurisdictionPoliceGD';
@@ -217,6 +217,12 @@ export default class MapAppGaode implements IMapContainer {
   public async locateStreet(param: IStreetParameter) {
     const jurisdiction = JurisdictionPoliceGD.getInstance(this.view);
     await jurisdiction.locateStreet(param);
+  }
+  public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
+    return {
+      status:1,
+      message:"Not implemented"
+    }
   }
 
   public async showToolTip(){}

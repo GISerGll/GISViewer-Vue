@@ -11,7 +11,7 @@ import {
   IFindParameter,
   IResult,
   IDistrictParameter,
-  IStreetParameter
+  IStreetParameter, IDrawOverlayParameter
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/OverlayBaidu';
 import {HeatMapBD} from './widgets/BD/HeatMapBD';
@@ -214,4 +214,10 @@ export default class MapAppBaidu implements IMapContainer {
   public async hideStreet() {}
   public async showToolTip() {}
   public async locateStreet(param: IStreetParameter) {}
+  public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
+    return {
+      status:1,
+      message:"Not implemented"
+    }
+  }
 }

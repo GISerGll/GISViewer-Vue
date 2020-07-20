@@ -1,5 +1,5 @@
 import {
-    IDrawOverlayParameter,
+    IDrawOverlayParameter, IPointSymbol,
     IResult
 } from '@/types/map';
 import {loadModules} from 'esri-loader';
@@ -11,6 +11,7 @@ export class Draw2D {
     private overlayLayer!: __esri.GraphicsLayer;
     private view!: __esri.MapView;
     private draw!: __esri.Draw;
+    private drawHandler: any
 
     private constructor(view: __esri.MapView) {
         this.view = view;
@@ -33,7 +34,7 @@ export class Draw2D {
         this.view.map.add(this.overlayLayer);
     }
 
-    public async startDrawOverlays(params: IDrawOverlayParameter) {
+    public async startDrawOverlays(params: IDrawOverlayParameter){
         if (!this.overlayLayer) {
             await this.createOverlayLayer();
         }
@@ -46,50 +47,48 @@ export class Draw2D {
         });
 
         const defaultSymbol = OverlayArcgis2D.makeSymbol(params.defaultSymbol);
-        const showPopup = params.showPopup;
         const drawType = params.drawType;
-        const generateId = params.id;
-        const type = params.type;
-        const boolean = params.clearLastResults;
+        const drawPropObj = {
+            defaultSymbol:defaultSymbol,
+            showPopup:params.showPopup,
+            drawType:drawType,
+            generateId:params.id,
+            type:params.type,
+            boolean:params.clearLastResults
+        }
 
-        let drawCount = 0;
         if(!drawType){
             throw new Error("please input the drawType!")
         }
-
-        let drawAction = this.draw.create(drawType);
-
-        drawAction.on("cursor-update", (evt) => {
-            this.createGraphic(evt.vertices);
-        });
-        drawAction.on("draw-complete", (evt) => {
-            drawCount++;
-            this.createGraphic(evt.vertices);
-        });
-
-        drawAction.on("vertex-add", (evt)=>{
-            this.createGraphic(evt.vertices);
-        });
-
-        // Fires when the "Z" key is pressed to undo the last added point
-        drawAction.on("vertex-remove", (evt)=>{
-            this.createGraphic(evt.vertices);
-        });
+        switch (drawType) {
+            case "point":
+                return this.drawPoints(drawPropObj as any)
+            case "polyline":
+                return this.drawPolylines(drawPropObj as any)
+            case "polygon":
+                return this.drawPolygons(drawPropObj as any)
+            case "circle":
+                return this.drawCircles(drawPropObj as any)
+            default:
+                return this.drawPoints(drawPropObj as any)
+        }
     }
 
-    private async createGraphic(vertices: any):Promise<Graphic> {
+    private async showPtGraphic(coordinates: [number,number]) {
         this.view.graphics.removeAll();
-        const [Graphic,Multipoint] = await loadModules([
+        const [Graphic] = await loadModules([
             'esri/Graphic',
-            'esri/geometry/Multipoint'
         ]);
 
-        var multipoint = new Multipoint({
-            points: vertices,
+        var point = {
+            type: "point", // autocasts as /Point
+            x: coordinates[0],
+            y: coordinates[1],
             spatialReference: this.view.spatialReference
-        });
+        };
+
         var graphic = new Graphic({
-            geometry: multipoint,
+            geometry: point,
             symbol: {
                 type: "simple-marker", // autocasts as SimpleMarkerSymbol
                 style: "square",
@@ -103,9 +102,108 @@ export class Draw2D {
         });
 
         this.view.graphics.add(graphic);
+    }
+
+    private async addPtsGraphics(coordinates: [number,number],drawProperties:IDrawOverlayParameter){
+        const [Graphic] = await loadModules([
+            'esri/Graphic',
+        ]);
+
+        var point = {
+            type: "point", // autocasts as /Point
+            x: coordinates[0],
+            y: coordinates[1],
+            spatialReference: this.view.spatialReference
+        };
+
+        var graphic = new Graphic({
+            geometry: point,
+            symbol: {
+                type: "simple-marker", // autocasts as SimpleMarkerSymbol
+                style: "square",
+                color: "red",
+                size: "16px",
+                outline: { // autocasts as SimpleLineSymbol
+                    color: [255, 255, 0],
+                    width: 3
+                }
+            }
+        });
+
+        await this.overlayLayer.add(graphic);
         return graphic;
     }
 
+    private async drawPoints(drawProperties:IDrawOverlayParameter):Promise<IResult>{
+        console.log(drawProperties);
+        let drawCount = 0;
+        let pts:any = [];
 
 
+        //用view.on实现调用一次方法添加多个点
+        this.drawHandler = this.view.on("click", ()=>{
+            let drawAction = this.draw.create(drawProperties.drawType as any);
+
+            drawAction.on([
+                "draw-complete"
+            ], (evt) => {
+                drawCount++;
+                pts.push(this.addPtsGraphics(evt.coordinates,drawProperties));
+            });
+        })
+
+        let handler = await this.view.on("double-click", ()=>{
+            this.drawHandler.remove();
+            handler.remove();
+        })
+
+        console.log(pts);
+        return {
+            status:0,
+            message:"ok",
+            result:pts
+        }
+    }
+
+    private async drawPolylines(drawProperties:IDrawOverlayParameter):Promise<IResult>{
+
+        return {
+            status:0,
+            message:"ok",
+            result:"polylines"
+        }
+    }
+
+    private async drawPolygons(drawProperties:IDrawOverlayParameter):Promise<IResult>{
+
+        return {
+            status:0,
+            message:"ok",
+            result:"polygons"
+        }
+    }
+
+    private async drawRectangle(drawProperties:IDrawOverlayParameter):Promise<IResult>{
+        return {
+            status:0,
+            message:"ok",
+            result:"rectangles"
+        }
+    }
+
+    private async drawCircles(drawProperties:IDrawOverlayParameter):Promise<IResult>{
+        return {
+            status:0,
+            message:"ok",
+            result:"rectangles"
+        }
+    }
+
+    private async drawEllipses(drawProperties:IDrawOverlayParameter):Promise<IResult>{
+        return {
+            status:0,
+            message:"ok",
+            result:"ellipses"
+        }
+    }
 }

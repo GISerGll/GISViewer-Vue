@@ -65,7 +65,7 @@ import {
 })
 export default class MapContainer extends Vue implements IMapContainer {
   //平台类型 高德/百度/arcgis
-  @Prop({default: Platforms.ArcGIS3D, type: String})
+  @Prop({default: Platforms.ArcGIS2D, type: String})
   readonly platform!: string;
 
   //地图配置
@@ -88,7 +88,7 @@ export default class MapContainer extends Vue implements IMapContainer {
       case Platforms.AMap:
         return this.containerGaode;
       default:
-        return this.containerArcgis3D;
+        return this.containerArcgis2D;
     }
   }
 
@@ -108,7 +108,6 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     return await this.mapContainer.addOverlays(params);
   }
-
   public addOverlaysCluster(params: IOverlayClusterParameter) {
     this.mapContainer.addOverlaysCluster(params);
   }
@@ -121,7 +120,6 @@ export default class MapContainer extends Vue implements IMapContainer {
   public deleteOverlaysCluster(params: IOverlayDelete) {
     this.mapContainer.deleteOverlaysCluster(params);
   }
-
   public deleteAllOverlays() {
     this.mapContainer.deleteAllOverlays();
   }

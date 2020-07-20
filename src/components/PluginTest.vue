@@ -34,7 +34,8 @@ import {IResult} from "@/types/map";
 @Component
 export default class PluginTest extends Vue {
   private mapConfig = {
-    arcgis_api: 'http://128.64.151.217:8000/web-gis/scripts/arcgis_js_api/library/4.15',
+    arcgis_api: 'http://localhost:8080/arcgis_js_api/library/4.15',
+      // arcgis_api: 'https://js.arcgis.com/4.15',
     theme: 'light', //dark,vec
     baseLayers: [
       {
@@ -241,12 +242,14 @@ export default class PluginTest extends Vue {
   private async btn_drawPoints(){
       let map = this.$refs.gisViewer as any;
       const result = await map.startDrawOverlays({
-          drawType:"multipoint",
+          drawType:"point",
           type:"points",
           id:true,
           showPopup:true
       })
-      console.log(result);
+
+
+      console.log(result.result.length);
   }
   private async btn_drawLines(){
 
