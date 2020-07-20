@@ -81,8 +81,8 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public hideJurisdiction() {}
   public showDistrictMask(param: IDistrictParameter) {}
   public hideDistrictMask() {}
-  public findFeature(params: IFindParameter) {
-    this.mapApp.findFeature(params);
+  public async findFeature(params: IFindParameter):Promise<IResult>{
+    return await this.mapApp.findFeature(params);
   }
   public findLayerFeature(params: IFindParameter) {
     this.mapApp.findLayerFeature(params);

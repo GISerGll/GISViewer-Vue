@@ -83,11 +83,16 @@ export default class PluginTest extends Vue {
   }
   private async btn_findFeature(){
       let map = this.$refs.gisViewer as any;
-      map.findFeature({
+      const result = await map.findFeature({
           layerName:"police",
           level:18,
-          ids:["test001","test002"],
+          ids:["test001"],
           centerResult:true
+      })
+
+      let resultMsg = result.result;
+      resultMsg.then((msg:any) =>{
+          console.log(msg);
       })
   }
   private async btn_addOverlays_pt() {
@@ -248,8 +253,10 @@ export default class PluginTest extends Vue {
           showPopup:true
       })
 
-
-      console.log(result.result.length);
+      var resultArray = result.result;
+      resultArray.then((value:any) =>{
+          console.log(value);
+      })
   }
   private async btn_drawLines(){
 

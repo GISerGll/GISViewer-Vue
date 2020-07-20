@@ -329,13 +329,23 @@ export class OverlayArcgis2D {
     //根据网上资料,forEach内函数无法采用异步，除非重写原型。
     //此处graphics能访问的属性只有length，访问其items属性会提示错误
     let lengthOfOverlays = overlays.length;
-    for(let i=0;i<lengthOfOverlays;i++){
-      let overlay = overlays.getItemAt(i);
-      await this.goToView(overlay,type,ids,centerResult,level);
-    }
+
+    let processObj = new Promise(async resolve => {
+      let i = 0;
+      for(i;i<lengthOfOverlays;i++){
+        let overlay = overlays.getItemAt(i);
+        await this.goToView(overlay, type, ids, centerResult, level);
+        if(i == lengthOfOverlays - 1){
+          resolve("finish animating")
+        }
+      }
+    })
+
+
     return {
       status: 0,
-      message: 'ok'
+      message: 'ok',
+      result: processObj
     };
   }
 

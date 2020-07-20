@@ -168,7 +168,7 @@ export default class MapAppArcGIS2D {
     const overlay = OverlayArcgis2D.getInstance(this.view);
     return await overlay.deleteAllOverlays();
   }
-  public async findFeature(params: IFindParameter) {
+  public async findFeature(params: IFindParameter):Promise<IResult> {
     const overlay = OverlayArcgis2D.getInstance(this.view);
     return await overlay.findFeature(params);
   }

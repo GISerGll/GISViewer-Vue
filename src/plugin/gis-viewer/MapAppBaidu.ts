@@ -119,7 +119,7 @@ export default class MapAppBaidu implements IMapContainer {
     overlay.showGisDeviceInfo = this.showGisDeviceInfo;
     return await overlay.addOverlays(params);
   }
-  public async findFeature(params: IFindParameter) {
+  public async findFeature(params: IFindParameter):Promise<any>{
     const overlay = OverlayBaidu.getInstance(this.view);
     await overlay.findFeature(params);
   }

@@ -64,13 +64,13 @@ export class Draw2D {
             case "point":
                 return this.drawPoints(drawPropObj as any)
             case "polyline":
-                return this.drawPolylines(drawPropObj as any)
+                return await this.drawPolylines(drawPropObj as any)
             case "polygon":
-                return this.drawPolygons(drawPropObj as any)
+                return await this.drawPolygons(drawPropObj as any)
             case "circle":
-                return this.drawCircles(drawPropObj as any)
+                return await this.drawCircles(drawPropObj as any)
             default:
-                return this.drawPoints(drawPropObj as any)
+                return await this.drawPoints(drawPropObj as any)
         }
     }
 
@@ -104,7 +104,7 @@ export class Draw2D {
         this.view.graphics.add(graphic);
     }
 
-    private async addPtsGraphics(coordinates: [number,number],drawProperties:IDrawOverlayParameter){
+    private async addPtsGraphics(coordinates: [number,number],drawProperties:IDrawOverlayParameter):Promise<Graphic>{
         const [Graphic] = await loadModules([
             'esri/Graphic',
         ]);
@@ -135,33 +135,37 @@ export class Draw2D {
     }
 
     private async drawPoints(drawProperties:IDrawOverlayParameter):Promise<IResult>{
-        console.log(drawProperties);
         let drawCount = 0;
-        let pts:any = [];
-
+        let pts:any[] = [];
 
         //用view.on实现调用一次方法添加多个点
-        this.drawHandler = this.view.on("click", ()=>{
-            let drawAction = this.draw.create(drawProperties.drawType as any);
+        let promiseObj = new Promise(resolve => {
+            this.drawHandler = this.view.on("click",  ()=>{
+                let drawAction = this.draw.create(drawProperties.drawType as any);
 
-            drawAction.on([
-                "draw-complete"
-            ], (evt) => {
-                drawCount++;
-                pts.push(this.addPtsGraphics(evt.coordinates,drawProperties));
-            });
+                drawAction.on([
+                    "draw-complete"
+                ], (evt) => {
+                    drawCount++;
+                    let promiseGraphic = this.addPtsGraphics(evt.coordinates,drawProperties);
+                    promiseGraphic.then((value => {
+                        pts.push(value);
+                    }))
+                });
+            })
+
+            let handler = this.view.on("double-click",  ()=>{
+                this.drawHandler.remove();
+                handler.remove()
+
+                resolve(pts);
+            })
         })
 
-        let handler = await this.view.on("double-click", ()=>{
-            this.drawHandler.remove();
-            handler.remove();
-        })
-
-        console.log(pts);
         return {
             status:0,
             message:"ok",
-            result:pts
+            result:promiseObj
         }
     }
 
