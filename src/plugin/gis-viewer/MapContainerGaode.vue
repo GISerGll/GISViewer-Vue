@@ -17,7 +17,7 @@ import {
   IFindParameter,
   IResult,
   IDistrictParameter,
-  IStreetParameter
+  IStreetParameter, IDrawOverlayParameter
 } from '@/types/map';
 
 @Component({
@@ -101,8 +101,8 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public hideDistrictMask() {
     this.mapApp.hideDistrictMask();
   }
-  public findFeature(params: IFindParameter) {
-    this.mapApp.findFeature(params);
+  public findFeature(params: IFindParameter):Promise<any> {
+    return this.mapApp.findFeature(params);
   }
   public findLayerFeature(params: IFindParameter) {}
   public showRoad(params: {ids: string[]}) {
@@ -122,6 +122,10 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   }
 
   public showToolTip(){}
+
+  public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
+    return await this.mapApp.startDrawOverlays(params);
+  }
 }
 </script>
 

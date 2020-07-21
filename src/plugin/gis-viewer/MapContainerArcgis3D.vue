@@ -17,7 +17,7 @@ import {
   IFindParameter,
   IResult,
   IDistrictParameter,
-  IStreetParameter
+  IStreetParameter, IDrawOverlayParameter
 } from '@/types/map';
 
 @Component({
@@ -80,8 +80,8 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public hideJurisdiction() {}
   public showDistrictMask(param: IDistrictParameter) {}
   public hideDistrictMask() {}
-  public findFeature(params: IFindParameter) {
-    this.mapApp.findFeature(params);
+  public findFeature(params: IFindParameter):Promise<any>{
+    return this.mapApp.findFeature(params);
   }
   public findLayerFeature(params: IFindParameter) {
     this.mapApp.findLayerFeature(params);
@@ -92,6 +92,9 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public hideStreet() {}
   public locateStreet(param: IStreetParameter) {}
   public showToolTip(){}
+  public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
+    return await this.mapApp.startDrawOverlays(params);
+  }
 }
 </script>
 
