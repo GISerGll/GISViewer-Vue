@@ -143,18 +143,23 @@ export class Draw2D {
         }
         graphic.type = type;
 
+        const fields = {
+            id:graphic.id,
+            type:graphic.type
+        }
+        graphic.attributes = fields;
+
         if(clearLastResults){
             console.log(this.overlayLayer.graphics);
             const overlays2D = OverlayArcgis2D.getInstance(this.view);
             await overlays2D.deleteOverlays({
                 types:[type]
-            });
+            },this.overlayLayer);
         }
 
         await this.overlayLayer.add(graphic);
         // var geometry = graphic.geometry
         // WebMercatorUtils.webMercatorToGeographic(geometry);
-        console.log(graphic);
         return graphic;
     }
 

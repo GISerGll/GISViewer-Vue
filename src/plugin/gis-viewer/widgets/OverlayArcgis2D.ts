@@ -363,6 +363,7 @@ export class OverlayArcgis2D {
       const response = await view.hitTest(event);
         if (response.results.length > 0) {
           response.results.forEach((result) => {
+            if(result.graphic.geometry.type === "point"){
               if (tip) {
                 tip.remove();
                 tip = null;
@@ -375,6 +376,7 @@ export class OverlayArcgis2D {
                   },
                   result.graphic
               );
+            }
           });
         } else {
           if (tip) {
