@@ -52,10 +52,11 @@ export class Draw2D {
             defaultSymbol:defaultSymbol,
             showPopup:params.showPopup,
             drawType:drawType,
-            generateId:params.id,
+            generateId:params.generateId,
             type:params.type,
-            boolean:params.clearLastResults
+            clearLastResults:params.clearLastResults
         }
+        console.log(drawPropObj);
 
         if(!drawType){
             throw new Error("please input the drawType!")
@@ -109,32 +110,55 @@ export class Draw2D {
             'esri/Graphic',
         ]);
 
-        var point = {
+        let point = {
             type: "point", // autocasts as /Point
             x: coordinates[0],
             y: coordinates[1],
             spatialReference: this.view.spatialReference
         };
 
-        var graphic = new Graphic({
-            geometry: point,
-            symbol: {
-                type: "simple-marker", // autocasts as SimpleMarkerSymbol
-                style: "square",
-                color: "red",
-                size: "16px",
-                outline: { // autocasts as SimpleLineSymbol
-                    color: [255, 255, 0],
-                    width: 3
-                }
+        let defaultPtSymbol = {
+            type: "simple-marker", // autocasts as SimpleMarkerSymbol
+            style: "square",
+            color: "red",
+            size: "16px",
+            outline: { // autocasts as SimpleLineSymbol
+                color: [255, 255, 0],
+                width: 3
             }
+        }
+
+        const ptSymbol = drawProperties.defaultSymbol;
+        const isGenerateId = drawProperties.generateId;
+        const type = drawProperties.type || "points";
+        const clearLastResults = drawProperties.clearLastResults || false;
+
+        let graphic = new Graphic({
+            geometry: point,
+            symbol:ptSymbol || defaultPtSymbol
         });
 
+        if(isGenerateId){
+            graphic.id = Math.random();
+        }
+        graphic.type = type;
+
+        if(clearLastResults){
+            console.log(this.overlayLayer.graphics);
+            const overlays2D = OverlayArcgis2D.getInstance(this.view);
+            await overlays2D.deleteOverlays({
+                types:[type]
+            });
+        }
+
         await this.overlayLayer.add(graphic);
+        // var geometry = graphic.geometry
+        // WebMercatorUtils.webMercatorToGeographic(geometry);
+        console.log(graphic);
         return graphic;
     }
 
-    private async addPolylineGraphic(vertices:any):Promise<IResult>{
+    private async addPolylineGraphic(vertices:any,drawProperties:IDrawOverlayParameter):Promise<Graphic>{
         this.view.graphics.removeAll();
         let polyline = {
             type: "polyline", // autocasts as Polyline
@@ -161,6 +185,34 @@ export class Draw2D {
         return graphic;
     }
 
+    private async addPolygonGraphic(vertices:any,drawProperties:IDrawOverlayParameter):Promise<Graphic>{
+        this.view.graphics.removeAll();
+        var polygon = {
+            type: "polygon", // autocasts as Polygon
+            rings: vertices,
+            spatialReference: this.view.spatialReference
+        };
+
+        const [Graphic] = await loadModules([
+            'esri/Graphic',
+        ]);
+
+        var graphic = new Graphic({
+            geometry: polygon,
+            symbol: {
+                type: "simple-fill", // autocasts as SimpleFillSymbol
+                color: "purple",
+                style: "solid",
+                outline: {  // autocasts as SimpleLineSymbol
+                    color: "white",
+                    width: 1
+                }
+            }
+        });
+        this.view.graphics.add(graphic);
+        return graphic;
+    }
+
     private async drawPoints(drawProperties:IDrawOverlayParameter):Promise<IResult>{
         let drawCount = 0;
         let pts:any[] = [];
@@ -176,6 +228,7 @@ export class Draw2D {
                     drawCount++;
                     let promiseGraphic = this.addPtsGraphics(evt.coordinates,drawProperties);
                     promiseGraphic.then((value => {
+
                         pts.push(value);
                         drawCount++;
                     }))
@@ -193,34 +246,35 @@ export class Draw2D {
         return {
             status:0,
             message:"ok",
-            result:`成功添加${drawCount}个覆盖物,详细信息:${promiseObj}`
+            result:promiseObj
         }
     }
 
     private async drawPolylines(drawProperties:IDrawOverlayParameter):Promise<IResult>{
-        let drawCount = 0;
         let pts:any[] = [];
 
         //用view.on实现调用一次方法添加多个点
         let promiseObj = new Promise(resolve => {
             let drawAction = this.draw.create("polyline");
+            console.log(drawAction)
 
             drawAction.on([
                 "vertex-add",
                 "vertex-remove",
                 "cursor-update",
             ], (evt) => {
-                this.addPolylineGraphic(evt.vertices);
+                this.addPolylineGraphic(evt.vertices,drawProperties);
             });
 
             drawAction.on([
                 "draw-complete"
             ], (evt) => {
-                this.addPolylineGraphic(evt.vertices).then(value => {
+                console.log(drawAction);
+                this.addPolylineGraphic(evt.vertices,drawProperties).then((value:Graphic) => {
                     pts.push(value);
+                    resolve(pts);
                 })
                 // pts.push(this.addPolylineGraphic(evt.vertices));
-                resolve(pts);
             });
         })
 
@@ -232,11 +286,37 @@ export class Draw2D {
     }
 
     private async drawPolygons(drawProperties:IDrawOverlayParameter):Promise<IResult>{
+        let pts:any[] = [];
+
+        //用view.on实现调用一次方法添加多个点
+        let promiseObj = new Promise(resolve => {
+            let drawAction = this.draw.create("polyline");
+            console.log(drawAction)
+
+            drawAction.on([
+                "vertex-add",
+                "vertex-remove",
+                "cursor-update",
+            ], (evt) => {
+                this.addPolygonGraphic(evt.vertices,drawProperties);
+            });
+
+            drawAction.on([
+                "draw-complete"
+            ], (evt) => {
+                console.log(drawAction);
+                this.addPolygonGraphic(evt.vertices,drawProperties).then((value:Graphic) => {
+                    pts.push(value);
+                    resolve(pts);
+                })
+                // pts.push(this.addPolylineGraphic(evt.vertices));
+            });
+        })
 
         return {
             status:0,
             message:"ok",
-            result:"polygons"
+            result:promiseObj
         }
     }
 

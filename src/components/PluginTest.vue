@@ -25,6 +25,7 @@
       @map-loaded="mapLoaded"
       @marker-click="showGisDeviceInfo"
     />
+
   </div>
 </template>
 <script lang="ts">
@@ -246,14 +247,23 @@ export default class PluginTest extends Vue {
   }
   private async btn_drawPoints(){
       let map = this.$refs.gisViewer as any;
+      const img= await this.loadImageAsync("assets/image/Anchor.png");
       const result = await map.startDrawOverlays({
+          defaultSymbol: {
+              //symbol for 2d
+              type: 'point-2d',
+              // primitive: "square",
+              url: 'assets/image/Anchor.png',
+              size:  img ? [0.5*img.width,0.5*img.height] : [12,12],
+          },
           drawType:"point",
           type:"points",
-          id:true,
+          generateId:true,
+          clearLastResults:true,
           showPopup:true
       })
 
-      var resultArray = result.result;
+      let resultArray = result.result;
       resultArray.then((value:any) =>{
           console.log(value);
       })
@@ -273,7 +283,18 @@ export default class PluginTest extends Vue {
       })
   }
   private async btn_drawPolygons(){
+      let map = this.$refs.gisViewer as any;
+      const result = await map.startDrawOverlays({
+          drawType:"polygon",
+          type:"polygons",
+          id:true,
+          showPopup:true
+      })
 
+      var resultArray = result.result;
+      resultArray.then((value:any) =>{
+          console.log(value);
+      })
   }
   private async btn_drawCircles(){
 
@@ -348,34 +369,7 @@ export default class PluginTest extends Vue {
       defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
     });
 
-    let html='<div class="lightingTreePop">\n' +
-        '        <p class="title">路灯信息</p>\n' +
-        '        <p class="fa fa-close"></p>\n' +
-        '        <ul class="main">\n' +
-        '            <li>\n' +
-        '                <p>路灯标号</p>\n' +
-        '                <div>成都雄飞中心</div>\n' +
-        '            </li>\n' +
-        '            <li>\n' +
-        '                <p>路灯名称</p>\n' +
-        '                <div>成都雄飞中心</div>\n' +
-        '            </li>\n' +
-        '            <li>\n' +
-        '                <p>路灯状态</p>\n' +
-        '                <div> <span class="green">在线</span></div>\n' +
-        '            </li>\n' +
-        '            <li>\n' +
-        '                <p>开灯状态</p>\n' +
-        '                <!-- fa-toggle-off -->\n' +
-        '                <div> <span class="fa fa-toggle-on"></span> </div>\n' +
-        '            </li>\n' +
-        '            <li>\n' +
-        '                <p>路灯状态</p>\n' +
-        '                <div>成都雄飞中心成都雄飞中心成都雄飞中心成都雄飞中心成都雄飞中心成都雄飞中心成都雄飞中心成都雄飞中心成都雄飞中心</div>\n' +
-        '            </li>\n' +
-        '        </ul>\n' +
-        '    </div>'
-    map.showToolTip(html);
+    map.showToolTip();
   }
   private showGisDeviceInfo(type: string, id: string, detail: any) {
     console.log(type, id, detail);

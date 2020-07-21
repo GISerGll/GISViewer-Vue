@@ -140,7 +140,7 @@ export interface IDrawOverlayParameter {
   showPopup?: boolean;
   showToolTip?: boolean;
   type?: string;               //覆盖物类型, 用于按编号/类型删除
-  id?: boolean;                 //是否随机生成覆盖物编号, 用于按编号/类型删除
+  generateId?: boolean;                 //是否随机生成覆盖物编号, 用于按编号/类型删除
   clearLastResults?: boolean;  //清除上一次绘画结果（调用一次方法只能存在一个graphic）
 }
 
