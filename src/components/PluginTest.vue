@@ -4,7 +4,8 @@
 <!--      <button @click="btn_loadMap">加载地图</button>-->
       <button @click="btn_setMapCenter">居中</button>
       <button @click="btn_setMapCenterAndLevel">放大居中</button>
-        <button @click="btn_findFeature">定位居中</button><br>
+        <button @click="btn_findFeature">定位居中</button>
+        <button @click="btn_showLayer">切换图层</button><br>
       <button @click="btn_addOverlays_pt">添加点</button>
       <button @click="btn_addOverlays_line">添加线</button>
       <button @click="btn_addOverlays_polygon">添加面</button>
@@ -21,7 +22,7 @@
     <gis-viewer
       ref="gisViewer"
       platform="arcgis2d"
-      :map-config="mapConfig"
+      :map-config= mapConfig
       @map-loaded="mapLoaded"
       @marker-click="showGisDeviceInfo"
     />
@@ -30,42 +31,24 @@
 </template>
 <script lang="ts">
 import {Vue, Component} from 'vue-property-decorator';
+import WuLuMuQiConfig from '@/project/WuLuMuQi/mapConfig';
 import axios from 'axios';
 import {IResult} from "@/types/map";
 @Component
 export default class PluginTest extends Vue {
-  private mapConfig = {
-    arcgis_api: 'http://localhost:8080/arcgis_js_api/library/4.15',
-      // arcgis_api: 'https://js.arcgis.com/4.15',
-    theme: 'light', //dark,vec
-    baseLayers: [
-      {
-        url:"http://map.geoq.cn/arcgis/rest/services/ChinaOnlineCommunity/MapServer",
-        type: 'tiled',
-        visible: true,
-      }
-    ],
-    gisServer: 'http://128.64.151.245:6080',
-    options: {
-      //for arcgis-2d
-      center: [87.597, 43.824],
-      zoom: 15,
-    },
-    bookmarks: [
-      {
-        name: 'china',
-        camera: {
-          heading: 0,
-          tilt: 9.15,
-          position: {
-            x: 105.508849,
-            y: 22.581284,
-            z: 7000000
-          }
-        }
-      }
-    ]
-  };
+  private mapConfig = WuLuMuQiConfig.mapConfig;
+
+    private async btn_showLayer() {
+        let map = this.$refs.gisViewer as any;
+        await map.hideLayer({
+            label:"浅色底图"
+        })
+        await map.showLayer({
+            label:"深色底图"
+        })
+    }
+
+
 
   private btn_setMapCenter(){
     let map = this.$refs.gisViewer as any;
