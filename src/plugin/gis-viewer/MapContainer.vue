@@ -154,8 +154,7 @@ export default class MapContainer extends Vue implements IMapContainer {
     this.mapContainer.hideDistrictMask();
   }
   public findFeature(params: IFindParameter) :Promise<IResult>{
-    let result = this.mapContainer.findFeature(params)
-    return result;
+    return this.mapContainer.findFeature(params)
   }
   public findLayerFeature(params: IFindParameter) {
     this.mapContainer.findLayerFeature(params);
@@ -175,14 +174,11 @@ export default class MapContainer extends Vue implements IMapContainer {
   public locateStreet(param: IStreetParameter) {
     this.mapContainer.locateStreet(param);
   }
-
   public showToolTip(param: string){
     this.mapContainer.showToolTip(param);
   }
-
   public async startDrawOverlays(param: IDrawOverlayParameter):Promise<IResult>{
-    let result = this.mapContainer.startDrawOverlays(param)
-    return result;
+    return this.mapContainer.startDrawOverlays(param)
   }
 }
 </script>

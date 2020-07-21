@@ -258,12 +258,13 @@ export class OverlayArcgis2D {
     };
   }
 
-  public async deleteOverlays(params: IOverlayDelete): Promise<IResult> {
+  public async deleteOverlays(params: IOverlayDelete,overlayLayer?:__esri.GraphicsLayer): Promise<IResult> {
     let types = params.types || [];
     let ids = params.ids || [];
     let delcount = 0;
-    for (let i = 0; i < this.overlayLayer.graphics.length; i++) {
-      let graphic: any = this.overlayLayer.graphics.getItemAt(i);
+    const searchLayer = overlayLayer ? overlayLayer : this.overlayLayer;
+    for (let i = 0; i < searchLayer.graphics.length; i++) {
+      let graphic: any = searchLayer.graphics.getItemAt(i);
       if (
         //只判断type
         (types.length > 0 &&
@@ -279,31 +280,12 @@ export class OverlayArcgis2D {
           types.indexOf(graphic.type) >= 0 &&
           ids.indexOf(graphic.id) >= 0)
       ) {
-        this.overlayLayer.remove(graphic);
+        searchLayer.remove(graphic);
         delcount++;
         i--;
       }
     }
-    // this.overlayLayer.graphics.forEach((overlay)=>{
-    //     if (
-    //       //只判断type
-    //       (types.length > 0 &&
-    //         ids.length === 0 &&
-    //         types.indexOf((overlay as any).type) >= 0) ||
-    //       //只判断id
-    //       (types.length === 0 &&
-    //         ids.length > 0 &&
-    //         ids.indexOf((overlay as any).id) >= 0) ||
-    //       //type和id都要判断
-    //       (types.length > 0 &&
-    //         ids.length > 0 &&
-    //         types.indexOf((overlay as any).type) >= 0 &&
-    //         ids.indexOf((overlay as any).id) >= 0)
-    //     ) {
-    //       this.overlayLayer.remove(overlay);
-    //       delcount++;
-    //     }
-    // })
+
     return {
       status: 0,
       message: 'ok',
@@ -319,11 +301,11 @@ export class OverlayArcgis2D {
     };
   }
 
-  public async findFeature(params: IFindParameter): Promise<IResult> {
+  public async findFeature(params: IFindParameter,overlaysLayer?:__esri.GraphicsLayer): Promise<IResult> {
     let type = params.layerName;
     let ids = params.ids || [];
     let level = params.level || this.view.zoom;
-    let overlays = this.overlayLayer.graphics;
+    let overlays = overlaysLayer ? overlaysLayer.graphics : this.overlayLayer.graphics;
     let centerResult = params.centerResult !== false;
 
     //根据网上资料,forEach内函数无法采用异步，除非重写原型。
@@ -381,7 +363,6 @@ export class OverlayArcgis2D {
       const response = await view.hitTest(event);
         if (response.results.length > 0) {
           response.results.forEach((result) => {
-            if (result.graphic.layer === moveLayer) {
               if (tip) {
                 tip.remove();
                 tip = null;
@@ -389,12 +370,11 @@ export class OverlayArcgis2D {
               tip = new ToolTip(
                   view,
                   {
-                    title: '',
-                    content: parent.getToolTipContent(result.graphic, content)
+                    // title: '',
+                    // content: parent.getToolTipContent(result.graphic, content)
                   },
                   result.graphic
               );
-            }
           });
         } else {
           if (tip) {

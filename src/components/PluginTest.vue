@@ -247,14 +247,14 @@ export default class PluginTest extends Vue {
   }
   private async btn_drawPoints(){
       let map = this.$refs.gisViewer as any;
-      const img= await this.loadImageAsync("assets/image/Anchor.png");
+      const img:any = await this.loadImageAsync("assets/image/Anchor.png");
       const result = await map.startDrawOverlays({
           defaultSymbol: {
               //symbol for 2d
               type: 'point-2d',
               // primitive: "square",
               url: 'assets/image/Anchor.png',
-              size:  img ? [0.5*img.width,0.5*img.height] : [12,12],
+              size:  img ? [0.5 * img.width,0.5 * img.height] : [12,12],
           },
           drawType:"point",
           type:"points",
