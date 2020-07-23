@@ -30,7 +30,9 @@ export class Draw2D {
         const [GraphicsLayer] = await (loadModules([
             'esri/layers/GraphicsLayer'
         ]) as Promise<MapModules>);
-        this.overlayLayer = new GraphicsLayer();
+        this.overlayLayer = new GraphicsLayer({
+            id:"draw2D"
+        });
         this.view.map.add(this.overlayLayer);
     }
 
@@ -150,7 +152,6 @@ export class Draw2D {
         graphic.attributes = fields;
 
         if(clearLastResults){
-            console.log(this.overlayLayer.graphics);
             const overlays2D = OverlayArcgis2D.getInstance(this.view);
             await overlays2D.deleteOverlays({
                 types:[type]
@@ -158,13 +159,11 @@ export class Draw2D {
         }
 
         await this.overlayLayer.add(graphic);
-        // var geometry = graphic.geometry
-        // WebMercatorUtils.webMercatorToGeographic(geometry);
         return graphic;
     }
 
     private async addPolylineGraphic(vertices:any,drawProperties:IDrawOverlayParameter):Promise<Graphic>{
-        this.view.graphics.removeAll();
+        this.overlayLayer.graphics.removeAll();
         let polyline = {
             type: "polyline", // autocasts as Polyline
             paths: vertices,
@@ -186,7 +185,7 @@ export class Draw2D {
             }
         });
 
-        this.view.graphics.add(graphic);
+      await this.overlayLayer.add(graphic);
         return graphic;
     }
 
@@ -222,6 +221,9 @@ export class Draw2D {
         let drawCount = 0;
         let pts:any[] = [];
 
+        const [WebMercatorUtils] = await loadModules([
+        'esri/geometry/support/webMercatorUtils'
+      ]);
         //用view.on实现调用一次方法添加多个点
         let promiseObj = new Promise(resolve => {
             this.drawHandler = this.view.on("click",  ()=>{
@@ -233,7 +235,7 @@ export class Draw2D {
                     drawCount++;
                     let promiseGraphic = this.addPtsGraphics(evt.coordinates,drawProperties);
                     promiseGraphic.then((value => {
-
+                      value.geometry = WebMercatorUtils.webMercatorToGeographic(value.geometry);
                         pts.push(value);
                         drawCount++;
                     }))

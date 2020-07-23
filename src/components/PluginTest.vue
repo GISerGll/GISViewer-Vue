@@ -14,7 +14,9 @@
       <button @click="btn_drawLines">画线</button>
       <button @click="btn_drawPolygons">画多边形</button>
       <button @click="btn_drawCircles">画圆</button>
-      <button @click="btn_drawRects">画矩形</button>
+      <button @click="btn_drawRects">画矩形</button><br>
+      <button @click="btn_startTrackPlayback">轨迹回放</button>
+
 <!--      <button @click="btn_">删除</button><br>-->
 <!--      <button @click="btn_addHeatMap">添加热力图</button>-->
 <!--      <button @click="btn_deleteHeatMap">删除热力图</button>-->
@@ -284,6 +286,17 @@ export default class PluginTest extends Vue {
   }
   private async btn_drawRects(){
 
+  }
+  private async btn_startTrackPlayback(){
+    let map = this.$refs.gisViewer as any;
+    let trackPts = [
+        [87.597,43.824],
+      [87.617,43.824],
+      [87.617,43.814],
+      [87.597,43.814]]
+    map.startTrackPlayback({
+      trackPoints:trackPts
+    })
   }
   private async loadImageAsync(url:string) {
         return new Promise(function(resolve, reject) {

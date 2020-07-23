@@ -170,6 +170,7 @@ export interface IMapContainer {
   locateStreet: (param: IStreetParameter) => void;
   findLayerFeature: (param: IFindParameter) => void;
   startDrawOverlays: (param: IDrawOverlayParameter) => Promise<IResult>
+  startTrackPlayback: (param: ITrackPlayback) => Promise<IResult>
 }
 export interface IPopUpTemplate {
   title?: string;
@@ -211,4 +212,16 @@ export interface IStreetParameter {
   name: string;
   hideStreet: boolean; //是否隐藏其他街道
   reset: boolean; //重置,清除选择
+}
+export interface ITrackPlayback {
+    trackPoints:Array<Array<number>>
+    trackLineSymbol:IPolylineSymbol
+    autoStart?:Boolean
+    loop?:Boolean
+    repeatCount?:number
+    clearBefore?:Boolean
+    isCenter?:Boolean
+    isZoom?:Boolean
+    routeUrl?:string
+    canSuspend?:Boolean
 }

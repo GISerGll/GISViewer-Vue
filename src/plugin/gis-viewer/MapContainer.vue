@@ -14,21 +14,6 @@
       @map-loaded="mapLoaded"
       @marker-click="showGisDeviceInfo"
     />
-    <map-container-baidu
-      ref="containerBaidu"
-      v-if="this.platform === 'bd'"
-      :map-config="this.mapConfig"
-      @map-loaded="mapLoaded"
-      @marker-click="showGisDeviceInfo"
-    />
-    <map-container-gaode
-      ref="containerGaode"
-      v-if="this.platform === 'gd'"
-      :map-config="this.mapConfig"
-      @map-loaded="mapLoaded"
-      @marker-click="showGisDeviceInfo"
-      @marker-mouse="mouseGisDeviceInfo"
-    />
   </div>
 </template>
 
@@ -36,8 +21,6 @@
 import {Vue, Component, Prop, Ref, Emit} from 'vue-property-decorator';
 import MapContainerArcgisThreeD from '@/plugin/gis-viewer/MapContainerArcgis3D.vue';
 import MapContainerArcgisTwoD from '@/plugin/gis-viewer/MapContainerArcgis2D.vue';
-import MapContainerBaidu from '@/plugin/gis-viewer/MapContainerBaidu.vue';
-import MapContainerGaode from '@/plugin/gis-viewer/MapContainerGaode.vue';
 import {
   Platforms,
   IMapContainer,
@@ -52,15 +35,14 @@ import {
   IResult,
   IDistrictParameter,
   IStreetParameter,
-  IDrawOverlayParameter
+  IDrawOverlayParameter, ITrackPlayback
 } from '@/types/map';
+import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
 @Component({
   components: {
     MapContainerArcgisThreeD,
-    MapContainerArcgisTwoD,
-    MapContainerBaidu,
-    MapContainerGaode
+    MapContainerArcgisTwoD
   }
 })
 export default class MapContainer extends Vue implements IMapContainer {
@@ -73,8 +55,6 @@ export default class MapContainer extends Vue implements IMapContainer {
 
   @Ref() readonly containerArcgis3D!: MapContainerArcgisThreeD;
   @Ref() readonly containerArcgis2D!: MapContainerArcgisTwoD;
-  @Ref() readonly containerBaidu!: MapContainerBaidu;
-  @Ref() readonly containerGaode!: MapContainerGaode;
 
   //当前的地图容器
   get mapContainer(): IMapContainer {
@@ -83,10 +63,6 @@ export default class MapContainer extends Vue implements IMapContainer {
         return this.containerArcgis2D;
       case Platforms.ArcGIS3D:
         return this.containerArcgis3D;
-      case Platforms.BDMap:
-        return this.containerBaidu;
-      case Platforms.AMap:
-        return this.containerGaode;
       default:
         return this.containerArcgis2D;
     }
@@ -179,6 +155,10 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public async startDrawOverlays(param: IDrawOverlayParameter):Promise<IResult>{
     return this.mapContainer.startDrawOverlays(param)
+  }
+
+  public async startTrackPlayback(params: ITrackPlayback):Promise<IResult>{
+    return await this.mapContainer.startTrackPlayback(params);
   }
 }
 </script>

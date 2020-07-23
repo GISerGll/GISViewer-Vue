@@ -41,7 +41,9 @@ export class OverlayArcgis2D {
     const [GraphicsLayer] = await (loadModules([
       'esri/layers/GraphicsLayer'
     ]) as Promise<MapModules>);
-    this.overlayLayer = new GraphicsLayer();
+    this.overlayLayer = new GraphicsLayer({
+        id:"overlayArcgis2D"
+    });
     this.view.map.add(this.overlayLayer);
   }
 
@@ -221,6 +223,7 @@ export class OverlayArcgis2D {
         symbol: overlaySymbol || defaultSymbol,
         attributes: fields || {}
       });
+
       graphic.type = params.type;
       graphic.id = overlay.id;
       graphic.buttons = buttons || defaultButtons;
