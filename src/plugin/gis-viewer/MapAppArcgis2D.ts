@@ -1,20 +1,21 @@
 import {setDefaultOptions, loadCss, loadModules} from 'esri-loader';
 import {
-  ILayerConfig,
-  IOverlayParameter,
-  IResult,
-  IPointGeometry,
-  ICenterLevel,
-  IOverlayDelete,
-  IFindParameter,
-  IStreetParameter,
-  IHeatParameter,
-  IDrawOverlayParameter
+    ILayerConfig,
+    IOverlayParameter,
+    IResult,
+    IPointGeometry,
+    ICenterLevel,
+    IOverlayDelete,
+    IFindParameter,
+    IStreetParameter,
+    IHeatParameter,
+    IDrawOverlayParameter, ITrackPlayback
 } from '@/types/map';
 import {OverlayArcgis2D} from '@/plugin/gis-viewer/widgets/OverlayArcgis2D';
 import {FindFeature} from './widgets/FindFeature';
 import {HeatMap} from './widgets/HeatMap';
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
+import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback.ts";
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
@@ -83,7 +84,10 @@ export default class MapAppArcGIS2D {
         basemap
       }),
       container: mapContainer,
-      ...mapConfig.options
+      ...mapConfig.options,
+      constraints: {
+        rotationEnabled: false
+      }
     });
     view.ui.remove('attribution');
     if (mapConfig.operationallayers) {
@@ -238,5 +242,9 @@ export default class MapAppArcGIS2D {
   public async startDrawOverlays(params: IDrawOverlayParameter):Promise<IResult>{
     const drawOverlay = Draw2D.getInstance(this.view);
     return await drawOverlay.startDrawOverlays(params);
+  }
+  public async startTrackPlayback(params: ITrackPlayback):Promise<IResult>{
+      const trackPlayback = TrackPlayback.getInstance(this.view);
+      return await trackPlayback.startTrackPlayback(params);
   }
 }

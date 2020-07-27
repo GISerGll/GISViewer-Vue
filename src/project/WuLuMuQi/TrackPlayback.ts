@@ -9,11 +9,12 @@ import {
 import {loadModules} from "esri-loader";
 
 export default class TrackPlayback {
-    private static trackPlayback:TrackPlayback
-  private static stepLength: 0.01;
-
-    private overlayLayer!: __esri.GraphicsLayer
-    private view!: __esri.MapView
+  private static trackPlayback:TrackPlayback
+  private movingPtLayer!: __esri.GraphicsLayer
+  private trackLineLayer!: __esri.GraphicsLayer
+  private view!: __esri.MapView
+  //小车行进步长设定
+  private stepLength: number;
 
     private defaultLineSymbol = {
         type: "simple-line", //line-2d/line-3d
@@ -25,6 +26,7 @@ export default class TrackPlayback {
 
     constructor(view: __esri.MapView) {
         this.view = view
+      this.stepLength = 0.0005
     }
     public static getInstance(view: __esri.MapView){
         if (!TrackPlayback.trackPlayback) {
@@ -39,10 +41,13 @@ export default class TrackPlayback {
         const [GraphicsLayer] = await (loadModules([
             'esri/layers/GraphicsLayer'
         ]) as Promise<MapModules>);
-        this.overlayLayer = new GraphicsLayer({
-            id:"trackPlayback"
+        this.movingPtLayer = new GraphicsLayer({
+            id:"trackPlayback_movingPt"
         });
-        this.view.map.add(this.overlayLayer);
+      this.trackLineLayer = new GraphicsLayer({
+        id:"trackPlayback_trackLine"
+      });
+        this.view.map.addMany([this.movingPtLayer,this.trackLineLayer]);
     }
 
     public async startTrackPlayback(params:ITrackPlayback):Promise<IResult>{
@@ -54,15 +59,13 @@ export default class TrackPlayback {
       let lineSymbol = params.trackLineSymbol;
 
       //put the line on the screen
-      const [Graphic, geometryJsonUtils,Polyline] = await loadModules([
+      const [Graphic, Polyline] = await loadModules([
         'esri/Graphic',
-        'esri/geometry/support/jsonUtils',
         'esri/geometry/Polyline'
       ]);
 
-      let onePath = [trackPts];
       let lineGeometry = new Polyline({
-        paths: onePath,
+        paths: trackPts,
         spatialReference: { wkid:4326 }
       });
 
@@ -71,19 +74,20 @@ export default class TrackPlayback {
         symbol: lineSymbol || this.defaultLineSymbol,
       });
 
-      if (!this.overlayLayer) {
+      if (!this.movingPtLayer) {
         await this.createOverlayLayer();
       }
-      await this.overlayLayer.add(lineGraphic);
+      await this.trackLineLayer.add(lineGraphic);
 
         //start moving the vehicle
-      await TrackPlayback.movingPt(trackPts);
+      await this.movingPt(trackPts);
         return {
             status:0,
             message:"ok",
             result:"not implement"
         }
     }
+
     public async startRealTrackPlayback(params:ITrackPlayback):Promise<IResult>{
         return {
             status:0,
@@ -92,7 +96,7 @@ export default class TrackPlayback {
         }
     }
 
-    private static async movingPt(params:Array<Array<number>>):Promise<IResult>{
+    private async movingPt(params:Array<Array<number>>){
       let trackPoints = params;
       //轨迹上每条线段需要移动的次数
       let numOfSegmentPoints = null;
@@ -102,32 +106,72 @@ export default class TrackPlayback {
       let segmentDistance = null;
       //收集trackPoints在每条线段所需要移动的次数[2.3,3.4,...2.1];
       let lineDistance = 0;
-      //小车行进步长设定
-      let stepLength = 0.01
+      const [Graphic] = await loadModules([
+        'esri/Graphic'
+      ]);
 
       for(let i=0;i<trackPoints.length-1;i++){
         segmentDistance = Math.sqrt(Math.pow(trackPoints[i][0]-trackPoints[i+1][0],2)+Math.pow(trackPoints[i][1]-trackPoints[i+1][1],2));
         //线段长度小于步长，则此条线段只需要移动一次，即从上一个点直接移动到下一个点
-        if(segmentDistance <= stepLength){
+        if(segmentDistance <= this.stepLength){
           numOfSegmentPoints = 1;
           orderAndNum.push(1);
         }
         else{
-          numOfSegmentPoints = Math.ceil(segmentDistance/stepLength);
+          numOfSegmentPoints = Math.ceil(segmentDistance/this.stepLength);
           orderAndNum.push(numOfSegmentPoints);
         }
         lineDistance += segmentDistance;
       }
 
+      //计算得出每条线段中小车移动的准确坐标
+      await this.calculateMovingPoints(trackPoints,orderAndNum).then(async value => {
+        for(let i=0;i<value.length;i++){
+          let testArray = value[i];
+          for( let j=0;j<testArray.length;j++){
+            let symbol = {
+              type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
+              url:"assets/image/icon_car_blue.png",
+              width: "17px",
+              height: "23px",
+              angle:testArray[j].angle
+            };
+            let pictureGraphic = new Graphic({
+                  geometry:{
+                    type:"point",
+                    longitude:testArray[j].coordinate[0],
+                    latitude:testArray[j].coordinate[1]
+                  },
+                  symbol:symbol
+                },
+            );
+            //将所有小车隐藏
+            pictureGraphic.visible = false;
+            await this.movingPtLayer.add(pictureGraphic);
+          }
+        }
+      });
 
-      return {
-        status:0,
-        message:"ok",
-        result:"not implement"
-      }
+      console.log(this.movingPtLayer.graphics);
+      let numOfCars = this.movingPtLayer.graphics.length;
+      console.log(numOfCars);
+      let count = 0;
+
+      let interval = await setInterval(()=>{
+            //先隐藏前一个
+            if(count){
+              this.movingPtLayer.graphics.getItemAt(count-1).visible = false;
+            }
+
+            if(count === numOfCars){
+                count = 0;
+            }
+            this.movingPtLayer.graphics.getItemAt(count).visible = true;
+            count++;
+      },50)
     }
 
-    private static async caculateMovingPoints(trackPoints:Array<Array<number>>,orderAndNum:any):Promise<IResult>{
+    private async calculateMovingPoints(trackPoints:Array<Array<number>>,orderAndNum:any):Promise<any>{
       var movingPointsCoordinates = [];
       for(let j=0;j<orderAndNum.length;j++){
         let num = orderAndNum[j];
@@ -142,7 +186,7 @@ export default class TrackPlayback {
         let segmentPoints = [];
         let segmentStartPoint:any = {};
 
-        let angle = TrackPlayback.calculateAngle(x1,y1,x2,y2);
+        let angle = await TrackPlayback.calculateAngle(x1,y1,x2,y2).then(value => value);
 
         segmentStartPoint.coordinate = trackPoints[j];
         segmentStartPoint.angle = angle;
@@ -151,11 +195,16 @@ export default class TrackPlayback {
           console.log("jump!");
         }
         else{
-          var midx = segmentStartPoint.coordinate[0];
-          var midy = segmentStartPoint.coordinate[1];
-          for(var i=0;i<num-1;i++){
+          let midx = segmentStartPoint.coordinate[0];
+          let midy = segmentStartPoint.coordinate[1];
+          for(let i=0;i<num-1;i++){
             if (Math.abs(p) === Number.POSITIVE_INFINITY) {
-              midy += this.stepLength;
+              if(y2>y1){
+                midy += this.stepLength;
+              }
+              else {
+                midy -= this.stepLength;
+              }
             } else {
               if (x2 < x1) {
                 midx -= (1 / Math.sqrt(1 + p * p)) * this.stepLength;
@@ -170,7 +219,7 @@ export default class TrackPlayback {
                 midy += (Math.abs(p) / Math.sqrt(1 + p * p)) * this.stepLength;
               }
             }
-            var obj:any = {};
+            let obj:any = {};
             obj.coordinate = [midx,midy];
             obj.angle = angle;
             segmentPoints.push(obj);
@@ -179,11 +228,7 @@ export default class TrackPlayback {
         movingPointsCoordinates.push(segmentPoints);
       }
 
-      return {
-        status:0,
-        message:"ok",
-        result:movingPointsCoordinates
-      }
+      return movingPointsCoordinates;
     }
 
     private static async calculateAngle(x1:number,y1:number,x2:number,y2:number) {

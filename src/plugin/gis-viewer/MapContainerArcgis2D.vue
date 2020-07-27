@@ -6,20 +6,21 @@
 import {Vue, Component, Emit, Prop} from 'vue-property-decorator';
 import MapApp from '@/plugin/gis-viewer/MapAppArcgis2D';
 import {
-  IMapContainer,
-  IOverlayParameter,
-  IHeatParameter,
-  IOverlayClusterParameter,
-  IOverlayDelete,
-  ILayerConfig,
-  IPointGeometry,
-  ICenterLevel,
-  IFindParameter,
-  IResult,
-  IDistrictParameter,
-  IStreetParameter,
-  IDrawOverlayParameter
+    IMapContainer,
+    IOverlayParameter,
+    IHeatParameter,
+    IOverlayClusterParameter,
+    IOverlayDelete,
+    ILayerConfig,
+    IPointGeometry,
+    ICenterLevel,
+    IFindParameter,
+    IResult,
+    IDistrictParameter,
+    IStreetParameter,
+    IDrawOverlayParameter, ITrackPlayback
 } from '@/types/map';
+import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
 @Component({
   name: 'MapContainerArcgisTwoD'
@@ -97,6 +98,9 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public locateStreet(param: IStreetParameter) {}
   public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
     return await this.mapApp.startDrawOverlays(params);
+  }
+  public async startTrackPlayback(params: ITrackPlayback):Promise<IResult>{
+        return await this.mapApp.startTrackPlayback(params);
   }
 }
 </script>

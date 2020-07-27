@@ -294,7 +294,7 @@ export default class PluginTest extends Vue {
       [87.617,43.824],
       [87.617,43.814],
       [87.597,43.814]]
-    map.startTrackPlayback({
+    await map.startTrackPlayback({
       trackPoints:trackPts
     })
   }
