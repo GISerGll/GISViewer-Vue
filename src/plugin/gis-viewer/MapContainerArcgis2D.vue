@@ -102,6 +102,9 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async startTrackPlayback(params: ITrackPlayback):Promise<IResult>{
         return await this.mapApp.startTrackPlayback(params);
   }
+  public async startRealTrackPlayback(params: ITrackPlayback):Promise<IResult>{
+    return await this.mapApp.startRealTrackPlayback(params);
+  }
 }
 </script>
 

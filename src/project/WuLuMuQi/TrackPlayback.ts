@@ -7,6 +7,7 @@ import {
   IFindParameter, IPolylineSymbol, IPolygonSymbol, IPointGeometry
 } from '@/types/map';
 import {loadModules} from "esri-loader";
+import Geometry = __esri.geometry.Geometry;
 
 export default class TrackPlayback {
   private static trackPlayback:TrackPlayback
@@ -26,7 +27,7 @@ export default class TrackPlayback {
 
     constructor(view: __esri.MapView) {
         this.view = view
-      this.stepLength = 0.0005
+      this.stepLength = 0.0001
     }
     public static getInstance(view: __esri.MapView){
         if (!TrackPlayback.trackPlayback) {
@@ -41,6 +42,7 @@ export default class TrackPlayback {
         const [GraphicsLayer] = await (loadModules([
             'esri/layers/GraphicsLayer'
         ]) as Promise<MapModules>);
+
         this.movingPtLayer = new GraphicsLayer({
             id:"trackPlayback_movingPt"
         });
@@ -49,7 +51,7 @@ export default class TrackPlayback {
       });
         this.view.map.addMany([this.movingPtLayer,this.trackLineLayer]);
     }
-
+    //直线轨迹回放，根据一组点坐标直接连成直线回放
     public async startTrackPlayback(params:ITrackPlayback):Promise<IResult>{
       //solve the parameter
       let trackPts = params.trackPoints;
@@ -87,13 +89,69 @@ export default class TrackPlayback {
             result:"not implement"
         }
     }
-
+    //实际路径轨迹回放，根据一组点坐标通过NAServer服务分析路径得出路线回放
     public async startRealTrackPlayback(params:ITrackPlayback):Promise<IResult>{
-        return {
-            status:0,
-            message:"ok",
-            result:"not implement"
+      const [Graphic,RouteTask,RouteParameters,FeatureSet] = await loadModules([
+        'esri/Graphic',
+        "esri/tasks/RouteTask",
+        "esri/tasks/support/RouteParameters",
+        "esri/tasks/support/FeatureSet"
+      ]);
+
+      let routeTask = new RouteTask(params.routeUrl);
+      let featureSet = new FeatureSet();
+      let trackFeatures:any = [];
+      let trackPoints = params.trackPoints;
+      trackPoints.forEach((trackPoint)=>{
+        //点位生成覆盖物
+        let graphic = new Graphic({
+          geometry:{
+            type:"point",
+            longitude:trackPoint[0],
+            latitude:trackPoint[1]
+          },
+        });
+        //加载点位覆盖物
+        trackFeatures.push(graphic);
         }
+      );
+      featureSet.features = trackFeatures;
+      let routeParams = new RouteParameters({
+        stops: featureSet,
+        outSpatialReference: {
+          // autocasts as new SpatialReference()
+          wkid: 4326
+        },
+      });
+
+      let paths:Array<number> = [];
+      await routeTask.solve(routeParams).then(async (value:any)=>{
+        paths = value.routeResults[0].route.geometry.paths;
+        //结果为单路径处理
+        if(paths.length < 1){
+          let routePath:any = paths[0];
+          await this.startTrackPlayback({trackPoints:routePath})
+        }
+        //结果为多条路径处理
+        else {
+          let routePath:any = [];
+          await paths.forEach((pathArray:any)=>{
+            pathArray.forEach((coordinate:any)=>{
+              routePath.push(coordinate);
+            })
+          })
+
+          await this.startTrackPlayback({trackPoints:routePath})
+        }
+      }).catch((err:any)=>{
+        console.log(err);
+      })
+
+      return {
+        status:0,
+        message:"ok",
+        result:"not implement"
+      }
     }
 
     private async movingPt(params:Array<Array<number>>){
@@ -125,7 +183,7 @@ export default class TrackPlayback {
       }
 
       //计算得出每条线段中小车移动的准确坐标
-      await this.calculateMovingPoints(trackPoints,orderAndNum).then(async value => {
+      await this.calculateMovingPoints(trackPoints,orderAndNum).then(value => {
         for(let i=0;i<value.length;i++){
           let testArray = value[i];
           for( let j=0;j<testArray.length;j++){
@@ -147,14 +205,12 @@ export default class TrackPlayback {
             );
             //将所有小车隐藏
             pictureGraphic.visible = false;
-            await this.movingPtLayer.add(pictureGraphic);
+            this.movingPtLayer.add(pictureGraphic);
           }
         }
       });
 
-      console.log(this.movingPtLayer.graphics);
       let numOfCars = this.movingPtLayer.graphics.length;
-      console.log(numOfCars);
       let count = 0;
 
       let interval = await setInterval(()=>{
@@ -168,11 +224,11 @@ export default class TrackPlayback {
             }
             this.movingPtLayer.graphics.getItemAt(count).visible = true;
             count++;
-      },50)
+      },20)
     }
 
     private async calculateMovingPoints(trackPoints:Array<Array<number>>,orderAndNum:any):Promise<any>{
-      var movingPointsCoordinates = [];
+      let movingPointsCoordinates = [];
       for(let j=0;j<orderAndNum.length;j++){
         let num = orderAndNum[j];
 

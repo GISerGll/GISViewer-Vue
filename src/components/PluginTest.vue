@@ -16,6 +16,7 @@
       <button @click="btn_drawCircles">画圆</button>
       <button @click="btn_drawRects">画矩形</button><br>
       <button @click="btn_startTrackPlayback">轨迹回放</button>
+      <button @click="btn_startReallTrackPlayback">实际轨迹回放</button>
 
 <!--      <button @click="btn_">删除</button><br>-->
 <!--      <button @click="btn_addHeatMap">添加热力图</button>-->
@@ -290,12 +291,24 @@ export default class PluginTest extends Vue {
   private async btn_startTrackPlayback(){
     let map = this.$refs.gisViewer as any;
     let trackPts = [
-        [87.597,43.824],
-      [87.617,43.824],
-      [87.617,43.814],
-      [87.597,43.814]]
+      [87.633314	,	43.887925],
+      [87.633242	,	43.867131],
+      [87.60694	,	43.87012],
+      [87.602538	,	43.881778]]
     await map.startTrackPlayback({
       trackPoints:trackPts
+    })
+  }
+  private async btn_startReallTrackPlayback(){
+    let map = this.$refs.gisViewer as any;
+    let trackPts = [
+      [87.633314	,	43.887925],
+      [87.633242	,	43.867131],
+      [87.60694	,	43.87012],
+      [87.602538	,	43.881778]]
+    await map.startRealTrackPlayback({
+      trackPoints:trackPts,
+      routeUrl:"http://128.64.151.245:6080/arcgis/rest/services/WuLuMuQi/wlmq_road_analyst/NAServer/Route"
     })
   }
   private async loadImageAsync(url:string) {

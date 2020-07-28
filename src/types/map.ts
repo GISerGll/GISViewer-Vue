@@ -171,6 +171,7 @@ export interface IMapContainer {
   findLayerFeature: (param: IFindParameter) => void;
   startDrawOverlays: (param: IDrawOverlayParameter) => Promise<IResult>
   startTrackPlayback: (param: ITrackPlayback) => Promise<IResult>
+  startRealTrackPlayback: (param: ITrackPlayback) => Promise<IResult>
 }
 export interface IPopUpTemplate {
   title?: string;
@@ -215,7 +216,7 @@ export interface IStreetParameter {
 }
 export interface ITrackPlayback {
     trackPoints:Array<Array<number>>
-    trackLineSymbol:IPolylineSymbol
+    trackLineSymbol?:IPolylineSymbol
     autoStart?:Boolean
     loop?:Boolean
     repeatCount?:number

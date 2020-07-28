@@ -247,4 +247,8 @@ export default class MapAppArcGIS2D {
       const trackPlayback = TrackPlayback.getInstance(this.view);
       return await trackPlayback.startTrackPlayback(params);
   }
+  public async startRealTrackPlayback(params: ITrackPlayback):Promise<IResult>{
+    const trackPlayback = TrackPlayback.getInstance(this.view);
+    return await trackPlayback.startRealTrackPlayback(params);
+  }
 }
