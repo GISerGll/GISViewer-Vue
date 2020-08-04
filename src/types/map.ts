@@ -215,14 +215,27 @@ export interface IStreetParameter {
   reset: boolean; //重置,清除选择
 }
 export interface ITrackPlayback {
-    trackPoints:Array<Array<number>>
-    trackLineSymbol?:IPolylineSymbol
-    autoStart?:Boolean
-    loop?:Boolean
-    repeatCount?:number
-    clearBefore?:Boolean
-    isCenter?:Boolean
-    isZoom?:Boolean
-    routeUrl?:string
-    canSuspend?:Boolean
+  startId?:number,
+  endId?:number,
+  movingLength?:number,
+  time:number,
+  speed:number,
+  path:number[][]
+}
+export interface ITrackPlaybackParameter{
+  trackPoints:[{
+    id?:string
+    from:number[],
+    to:number[],
+    time?:number
+  }]
+  trackLineSymbol?:IPolylineSymbol
+  autoStart?:Boolean
+  loop?:Boolean
+  repeatCount?:number
+  clearBefore?:Boolean
+  isCenter?:Boolean
+  isZoom?:Boolean
+  routeUrl?:string
+  canSuspend?:Boolean
 }
