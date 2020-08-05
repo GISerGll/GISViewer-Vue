@@ -1,3 +1,4 @@
+
 export interface IResult {
   //本次接口调用状态，如果成功返回0，如果失败返回其他数字。
   status: number;
@@ -215,6 +216,7 @@ export interface IStreetParameter {
   reset: boolean; //重置,清除选择
 }
 export interface ITrackPlayback {
+  features?:__esri.Graphic[],
   startId?:number,
   endId?:number,
   movingLength?:number,

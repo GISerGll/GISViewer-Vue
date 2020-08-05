@@ -311,13 +311,23 @@ export default class PluginTest extends Vue {
       {
         from:[87.633314	,	43.887925],
         to:  [87.633242	,	43.867131],
-        time: 40
+        time: 400
       },
       {
         from:[87.633242	,	43.867131],
         to:  [87.60694	,	43.87012],
-        time: 10
+        time: 100
       },
+      {
+        from:[87.60694	,	43.87012],
+        to:  [87.602538	,	43.881778],
+        time: 100
+      },
+      {
+        from:[87.602538	,	43.881778],
+        to:  [87.632538	,	43.781778],
+        time: 800
+      }
     ]
     await map.startRealTrackPlayback({
       trackPoints:trackPts_,

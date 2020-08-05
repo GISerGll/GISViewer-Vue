@@ -5,6 +5,7 @@ import {
 } from '@/types/map';
 import {loadModules} from "esri-loader";
 import Geometry = __esri.geometry.Geometry;
+import Graphic = __esri.Graphic;
 
 export default class TrackPlayback {
   private static trackPlayback:TrackPlayback
@@ -52,38 +53,31 @@ export default class TrackPlayback {
   }
   //实际路径轨迹回放，根据一组点坐标通过NAServer服务分析路径得出路线回放
   public async startRealTrackPlayback(params:ITrackPlaybackParameter):Promise<IResult>{
-    const [Graphic,RouteTask,RouteParameters,FeatureSet,urlUtils] = await loadModules([
+    const [Graphic] = await loadModules([
       'esri/Graphic',
-      "esri/tasks/RouteTask",
-      "esri/tasks/support/RouteParameters",
-      "esri/tasks/support/FeatureSet",
-      "esri/core/urlUtils"
     ]);
 
-    // urlUtils.addProxyRule({
-    //   urlPrefix: "http://128.64.151.245:6080/arcgis/rest/services/",
-    //   proxyUrl: "http://localhost:8080/Java/proxy.jsp"
-    // });
-
-    let routeTask = new RouteTask(params.routeUrl);
-    let featureSet = new FeatureSet();
-    let routeParams = new RouteParameters({
-      stops: featureSet,
-      outSpatialReference: {
-        // autocasts as new SpatialReference()
-        wkid: 4326
-      },
-      returnRoutes:true,
-      returnStops:true
-    });
-
+    let url = params.routeUrl;
+    if(!url){
+      throw new Error("url address required!");
+    }
     let trackPoints = params.trackPoints;
-    let pathObjArray = [];
+    let pathObjArray:ITrackPlayback[] = [];
     //因为arcgis server版本或者网络数据集原因，目前返回的结果只能是单一路径，所以采用多次请求的方式
     //trackPoints => loop(require date from network => route result) =>
     // combined and return one
     for(let trackPoint of trackPoints){
-      let pathObj:{path:[],time:any} = {path:[],time:0};
+      let pathObj:{
+        time:number,
+        path:any,
+        speed:number,
+        features:any[],
+      } = {
+        time:0,
+        path:[],
+        speed:0,
+        features:[]
+      };
       if(Object.prototype.toString.call(trackPoint) === '[object Object]'){
         let fromPtGeometry = trackPoint.from;
         let toPtGeometry = trackPoint.to;
@@ -102,37 +96,45 @@ export default class TrackPlayback {
             latitude:toPtGeometry[1]
           }
         });
-        routeParams.stops.features = [fromGraphic,toGraphic]
-        let path = await this.solveRoute(routeTask,routeParams);
-        pathObj.path = path;
-        pathObj.time = trackPoint.time;
+        let features = [fromGraphic,toGraphic]
+        // let path = await this.solveRoute(routeTask,routeParams);
+        // pathObj.path = await this.solveRoute(url,features);
+        pathObj.features = features;
+        pathObj.time = trackPoint.time || 0;
         pathObjArray.push(pathObj);
       }
     }
-    //根据time分析得出每段行进速率
-    // input:[{path:[coordinate...],time:number}...]
-    // return:[{path:[coordinate...],time:number,speed:number}...]
-    pathObjArray = await this.calculateSpeed(pathObjArray);
 
-    //获取每段路径小车需要移动的次数 & 展示小车轨迹
-    //input:[{path:[coordinate...],time:number,speed:number}...]
-    //output:[{path:[coordinate...],time:number,speed:number,movingLength:number}...]
+    let promises = [];
     for(let pathObj of pathObjArray){
-      //展示小车移动轨迹
-      await this.showTrackLine(pathObj.path);
-      //获取每段路径小车需要移动的次数，为小车移动做准备
-      pathObj = await this.prepareForCarMove(pathObj);
+      promises.push(this.solveRoute(url,pathObj));
     }
 
-    //得出小车每段的起点id和终点id
-    //input:[{path:[coordinate...],time:number,speed:number,movingLength:number}...]
-    //output:[{path:[coordinate...],time:number,speed:number,startId:number,endId:number,movingLength:number}...]
-    pathObjArray = await this.calculateId(pathObjArray);
+    Promise.all(promises).then(async () => {
+      //根据time分析得出每段行进速率
+      // input:[{path:[coordinate...],time:number}...]
+      // return:[{path:[coordinate...],time:number,speed:number}...]
+      pathObjArray = await this.calculateSpeed(pathObjArray);
 
-    console.log(pathObjArray);
-    //分段展示小车移动
-    // await this.showMovingCar(pathObjArray[0])
-    await this.movingIteration(pathObjArray,5);
+      //获取每段路径小车需要移动的次数 & 展示小车轨迹
+      //input:[{path:[coordinate...],time:number,speed:number}...]
+      //output:[{path:[coordinate...],time:number,speed:number,movingLength:number}...]
+      for(let pathObj of pathObjArray){
+        //展示小车移动轨迹
+        await this.showTrackLine(pathObj.path);
+        //获取每段路径小车需要移动的次数，为小车移动做准备
+        pathObj = await this.prepareForCarMove(pathObj);
+      }
+
+      //得出小车每段的起点id和终点id
+      //input:[{path:[coordinate...],time:number,speed:number,movingLength:number}...]
+      //output:[{path:[coordinate...],time:number,speed:number,startId:number,endId:number,movingLength:number}...]
+      pathObjArray = await this.calculateId(pathObjArray);
+
+      //分段展示小车移动
+      // await this.showMovingCar(pathObjArray[0])
+      await this.movingIteration(pathObjArray,5);
+    });
 
     return {
       status:0,
@@ -255,10 +257,39 @@ export default class TrackPlayback {
       count++;
     },20)
   }
+  //向服务器发送
+  private async requireRoute(url:string,features:__esri.Graphic[]):Promise<__esri.RouteResult>{
+    const [RouteTask,RouteParameters,FeatureSet,urlUtils] = await loadModules([
+      "esri/tasks/RouteTask",
+      "esri/tasks/support/RouteParameters",
+      "esri/tasks/support/FeatureSet",
+      "esri/core/urlUtils"
+    ]);
 
-  private async solveRoute(routeTask:any,routeParams:any):Promise<any>{
+    let routeTask = new RouteTask(url);
+    let featureSet = new FeatureSet();
+    let routeParams = new RouteParameters({
+      stops: featureSet,
+      outSpatialReference: {
+        // autocasts as new SpatialReference()
+        wkid: 4326
+      },
+      returnRoutes:true,
+      returnStops:true
+    });
+
+    routeParams.stops.features = features;
+    return routeTask.solve(routeParams);
+    // await this.solveRoute(routeTask,routeParams);
+  }
+
+  private async solveRoute(url:string,params:ITrackPlayback):Promise<any>{
     let onePath:any = [];
-    await routeTask.solve(routeParams).then((value:any)=>{
+    let features = params.features;
+    if(!features){
+      throw new Error("error,missing features!");
+    }
+    await this.requireRoute(url,features).then((value:any)=>{
       let paths = value.routeResults[0].route.geometry.paths;
       //处理结果有两条路径情况（较少,通常paths.length = 1）
       if(paths.length == 1){
@@ -272,12 +303,11 @@ export default class TrackPlayback {
       }else {
         console.log("error in route value!");
       }
-      return onePath;
     }).catch((err:any)=>{
       console.log(err);
     })
 
-    return onePath;
+    params.path = onePath;
   }
 
   private async prepareForCarMove(params:ITrackPlayback):Promise<ITrackPlayback>{
@@ -349,7 +379,6 @@ export default class TrackPlayback {
       'esri/geometry/Polyline'
     ]);
 
-    console.log(paths);
     let lineGeometry = new Polyline({
       paths: paths,
       spatialReference: { wkid:4326 }
@@ -370,8 +399,8 @@ export default class TrackPlayback {
     let intervalTime = 100;
     let speed = params.speed;
 
-    let movingFunc = async (i:number) => {
-      await setTimeout(()=>{
+    let movingFunc = (i:number,timer:number) => {
+      setTimeout(()=>{
         this.movingPtLayer.graphics.getItemAt(i).visible = true;
         if(i){
           this.movingPtLayer.graphics.getItemAt(i-1).visible = false;
@@ -379,28 +408,31 @@ export default class TrackPlayback {
         if(i === numOfCars){
           console.log("该段轨迹回放结束！")
         }
-      },this.sumOfInterval)
+      },timer)
     }
 
-      for(let i=count;i<=numOfCars;i++){
-        await movingFunc(i);
-        this.sumOfInterval += intervalTime/speed;
-      }
+    for(let i=count;i<=numOfCars;i++){
+      this.sumOfInterval += intervalTime/speed;
+      movingFunc(i,this.sumOfInterval);
+    }
   }
   //小车移动迭代函数
   private async movingIteration(params:ITrackPlayback[],times?:Number){
+    if(this.sumOfInterval){
+      this.sumOfInterval = 0;
+    }
     for(let i=0;i<params.length;i++){
       await this.showMovingCar(params[i])
     }
   }
   //小车行进速度
-  private async calculateSpeed(params:Object[]):Promise<ITrackPlayback[]>{
+  private async calculateSpeed(params:ITrackPlayback[]):Promise<ITrackPlayback[]>{
     const [Polyline] = await loadModules([
       'esri/geometry/Polyline'
     ]);
 
     //accpet params[{path,time}],target return value[{path,time,speed}]
-    let pathObjArray = params as any;
+    let pathObjArray = params;
     //get every path average speed;
     for(let pathObj of pathObjArray){
       let path = pathObj.path;
@@ -524,7 +556,7 @@ export default class TrackPlayback {
     for(let pathObj of params){
       if(pathObj.movingLength){
         if(endId){
-          startId += (endId + 1);
+          startId = endId + 1;
         }
         else {
           startId += endId;
