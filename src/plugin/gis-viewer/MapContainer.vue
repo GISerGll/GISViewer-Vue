@@ -35,7 +35,8 @@ import {
   IResult,
   IDistrictParameter,
   IStreetParameter,
-  IDrawOverlayParameter, ITrackPlayback
+  IDrawOverlayParameter,
+  ITrackPlaybackParameter
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -157,11 +158,11 @@ export default class MapContainer extends Vue implements IMapContainer {
     return this.mapContainer.startDrawOverlays(param)
   }
 
-  public async startTrackPlayback(params: ITrackPlayback):Promise<IResult>{
+  public async startTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
     return await this.mapContainer.startTrackPlayback(params);
   }
 
-  public async startRealTrackPlayback(params: ITrackPlayback):Promise<IResult>{
+  public async startRealTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
     return await this.mapContainer.startRealTrackPlayback(params);
   }
 }

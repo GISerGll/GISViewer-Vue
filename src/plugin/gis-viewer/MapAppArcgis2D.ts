@@ -9,7 +9,7 @@ import {
     IFindParameter,
     IStreetParameter,
     IHeatParameter,
-    IDrawOverlayParameter, ITrackPlayback
+    IDrawOverlayParameter, ITrackPlaybackParameter
 } from '@/types/map';
 import {OverlayArcgis2D} from '@/plugin/gis-viewer/widgets/OverlayArcgis2D';
 import {FindFeature} from './widgets/FindFeature';
@@ -23,7 +23,7 @@ export default class MapAppArcGIS2D {
 
   public async initialize(mapConfig: any, mapContainer: string): Promise<void> {
     const apiUrl =
-      mapConfig.arcgis_api || mapConfig.apiUrl || 'https://js.arcgis.com/4.14/';
+      mapConfig.arcgis_api || mapConfig.apiUrl || 'https://js.arcgis.com/4.15/';
     setDefaultOptions({
       url: `${apiUrl}/init.js`
     });
@@ -243,11 +243,11 @@ export default class MapAppArcGIS2D {
     const drawOverlay = Draw2D.getInstance(this.view);
     return await drawOverlay.startDrawOverlays(params);
   }
-  public async startTrackPlayback(params: ITrackPlayback):Promise<IResult>{
+  public async startTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
       const trackPlayback = TrackPlayback.getInstance(this.view);
       return await trackPlayback.startTrackPlayback(params);
   }
-  public async startRealTrackPlayback(params: ITrackPlayback):Promise<IResult>{
+  public async startRealTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
     const trackPlayback = TrackPlayback.getInstance(this.view);
     return await trackPlayback.startRealTrackPlayback(params);
   }

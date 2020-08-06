@@ -18,7 +18,8 @@ import {
     IResult,
     IDistrictParameter,
     IStreetParameter,
-    IDrawOverlayParameter, ITrackPlayback
+    IDrawOverlayParameter,
+    ITrackPlaybackParameter
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -99,10 +100,10 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
     return await this.mapApp.startDrawOverlays(params);
   }
-  public async startTrackPlayback(params: ITrackPlayback):Promise<IResult>{
+  public async startTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
         return await this.mapApp.startTrackPlayback(params);
   }
-  public async startRealTrackPlayback(params: ITrackPlayback):Promise<IResult>{
+  public async startRealTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
     return await this.mapApp.startRealTrackPlayback(params);
   }
 }

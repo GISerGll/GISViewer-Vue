@@ -171,8 +171,8 @@ export interface IMapContainer {
   locateStreet: (param: IStreetParameter) => void;
   findLayerFeature: (param: IFindParameter) => void;
   startDrawOverlays: (param: IDrawOverlayParameter) => Promise<IResult>
-  startTrackPlayback: (param: ITrackPlayback) => Promise<IResult>
-  startRealTrackPlayback: (param: ITrackPlayback) => Promise<IResult>
+  startTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>
+  startRealTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>
 }
 export interface IPopUpTemplate {
   title?: string;
