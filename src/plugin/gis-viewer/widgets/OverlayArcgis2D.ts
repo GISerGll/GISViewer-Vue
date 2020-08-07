@@ -358,7 +358,7 @@ export class OverlayArcgis2D {
     }
   }
 
-  public async showToolTip(content: string) {
+  public async showToolTip() {
     const view = this.view;
     const moveLayer = this.overlayLayer;
     let parent = this;
@@ -368,16 +368,14 @@ export class OverlayArcgis2D {
         if (response.results.length > 0) {
           response.results.forEach((result) => {
             if(result.graphic.geometry.type === "point"){
+              let content = result.graphic.attributes.infoWindow;
               if (tip) {
                 tip.remove();
                 tip = null;
               }
               tip = new ToolTip(
                   view,
-                  {
-                    // title: '',
-                    // content: parent.getToolTipContent(result.graphic, content)
-                  },
+                  content,
                   result.graphic
               );
             }

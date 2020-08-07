@@ -1,21 +1,38 @@
 <template>
-        <test-child1 v-if="value"></test-child1>
-        <test-child2 v-else></test-child2>
+  <normal-tooltip v-if="type==='normal'" ref="normal" ></normal-tooltip>
+  <alarm-tooltip v-else-if="type==='alarm'" ref="alarm"></alarm-tooltip>
+  <SuspiciousTooltip v-else-if="type==='suspicious'" ref="suspicious"></SuspiciousTooltip>
+  <normal-tooltip v-else></normal-tooltip>
 </template>
 
 <script>
-    import TestChild1 from "@/components/tooltips/TestChild1";
-    import TestChild2 from "@/components/tooltips/TestChild2";
+    import NormalTooltip from "@/components/tooltips/NormalTooltip";
+    import AlarmTooltip from "@/components/tooltips/AlarmTooltip";
+    import SuspiciousTooltip from "@/components/tooltips/SuspiciousTooltip";
     export default {
         name: "Parent.vue",
         components:{
-            TestChild1,
-            TestChild2
+            NormalTooltip,
+            AlarmTooltip,
+            SuspiciousTooltip
         },
-        data:function () {
-            return{
-                value:1
+        props:{
+            type:{
+                type:String,
+                default:"no value"
+            },
+            value1:{
+                type:String,
+                default:"no value"
+            },
+            value2:{
+                type:String,
+                default:"no value"
             }
+        },
+        mounted() {
+            this.$refs.alarm.value = this.$props.value1;
+            console.log("parent",this.type)
         }
     }
 </script>

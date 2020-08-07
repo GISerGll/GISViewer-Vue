@@ -5,19 +5,19 @@ export default class WuLuMuQiConfig{
         // arcgis_api: 'https://js.arcgis.com/4.15',
         theme: 'light', //dark,vec
         baseLayers: [
-            // {
-            //     url:"http://map.geoq.cn/arcgis/rest/services/ChinaOnlineCommunity/MapServer",
-            //     type: 'tiled',
-            //     label: "浅色底图",
-            //     visible: true,
-            // },
+            {
+                url:"http://map.geoq.cn/arcgis/rest/services/ChinaOnlineCommunity/MapServer",
+                type: 'tiled',
+                label: "浅色底图",
+                visible: true,
+            },
             {
                 // url:"http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer",
                 url:"http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetWarm/MapServer",
                 // url:"http://128.64.151.245:6080/arcgis/rest/services/WuLuMuQi/wlmq_base_publishBlueNew/MapServer",
                 type: 'tiled',
                 label: "深色底图",
-                visible: true,
+                visible: false,
             }
         ],
         gisServer: 'http://128.64.151.245:6080',

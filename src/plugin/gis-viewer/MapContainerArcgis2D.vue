@@ -38,7 +38,6 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     await this.mapApp.initialize(this.mapConfig, 'divArcGISMap2D');
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
   }
-
   @Emit('marker-click')
   public showGisDeviceInfo(type: string, id: string, detail: any) {}
   @Emit('marker-mouse')
@@ -105,6 +104,9 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   }
   public async startRealTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
     return await this.mapApp.startRealTrackPlayback(params);
+  }
+  public async polylineRanging(params:any):Promise<number>{
+    return await this.mapApp.polylineRanging(params);
   }
 }
 </script>

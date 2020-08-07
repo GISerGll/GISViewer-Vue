@@ -115,7 +115,6 @@ export default class TrackPlayback {
       // input:[{path:[coordinate...],time:number}...]
       // return:[{path:[coordinate...],time:number,speed:number}...]
       pathObjArray = await this.calculateSpeed(pathObjArray);
-
       //获取每段路径小车需要移动的次数 & 展示小车轨迹
       //input:[{path:[coordinate...],time:number,speed:number}...]
       //output:[{path:[coordinate...],time:number,speed:number,movingLength:number}...]

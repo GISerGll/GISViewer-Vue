@@ -30,6 +30,7 @@
       @marker-click="showGisDeviceInfo"
     />
 
+
   </div>
 </template>
 <script lang="ts">
@@ -37,7 +38,12 @@ import {Vue, Component} from 'vue-property-decorator';
 import WuLuMuQiConfig from '@/project/WuLuMuQi/mapConfig';
 import axios from 'axios';
 import {IResult} from "@/types/map";
-@Component
+import Parent from "@/components/tooltips/Parent.vue";
+@Component({
+  components: {
+    Parent,
+  }
+})
 export default class PluginTest extends Vue {
   private mapConfig = WuLuMuQiConfig.mapConfig;
 
@@ -50,8 +56,6 @@ export default class PluginTest extends Vue {
             label:"深色底图"
         })
     }
-
-
 
   private btn_setMapCenter(){
     let map = this.$refs.gisViewer as any;
@@ -73,7 +77,7 @@ export default class PluginTest extends Vue {
       const result = await map.findFeature({
           layerName:"police",
           level:18,
-          ids:["test001"],
+          ids:["test001","test002"],
           centerResult:true
       })
 
@@ -311,17 +315,17 @@ export default class PluginTest extends Vue {
       {
         from:[87.633314	,	43.887925],
         to:  [87.633242	,	43.867131],
-        time: 400
+        time: 100
       },
       {
         from:[87.633242	,	43.867131],
         to:  [87.60694	,	43.87012],
-        time: 100
+        time: 200
       },
       {
         from:[87.60694	,	43.87012],
         to:  [87.602538	,	43.881778],
-        time: 100
+        time: 200
       },
       {
         from:[87.602538	,	43.881778],
@@ -379,17 +383,26 @@ export default class PluginTest extends Vue {
         {
           id: 'test001',
           geometry: {x: 87.597, y: 43.824},
-          fields: {name: '测试2', featureid: '0002'}
+          fields: {
+            name: '测试2',
+            featureid: '0002',
+            infoWindow: { type:"normal" ,value1:"这是一个信息弹窗",value2:"随意测试一下"}}
         },
         {
           id: 'test002',
           geometry: {x: 87.587, y: 43.824},
-          fields: {name: '测试3', featureid: '0003'}
+          fields: {
+            name: '测试3',
+            featureid: '0003',
+            infoWindow: { type:"alarm" ,value1:"这是一个警告弹窗",value2:"随意测试一下"}}
         },
         {
           id: 'test003',
           geometry: {x: 87.577, y: 43.824},
-          fields: {name: '测试4', featureid: '0001'}
+          fields: {
+            name: '测试4',
+            featureid: '0001',
+            infoWindow: { type:"suspicious",value1:"这是一个正常弹窗",value2:"这是一个正常弹窗"}}
         }
       ],
       showPopup: false,

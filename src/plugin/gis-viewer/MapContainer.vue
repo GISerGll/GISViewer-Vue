@@ -165,6 +165,10 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async startRealTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
     return await this.mapContainer.startRealTrackPlayback(params);
   }
+
+  public async polylineRanging(params:any):Promise<number>{
+    return await this.mapContainer.polylineRanging(params);
+  }
 }
 </script>
 
