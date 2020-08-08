@@ -97,6 +97,9 @@ export default class MapAppArcGIS2D {
       const response = await view.hitTest(event);
       response.results.forEach((result) => {
         const graphic = result.graphic;
+        if(!graphic.attributes){
+          return;
+        }
         let {type, id} = graphic.attributes;
         if (graphic.layer.declaredClass.indexOf('FeatureLayer') > -1) {
           id =
@@ -180,9 +183,9 @@ export default class MapAppArcGIS2D {
     const find = FindFeature.getInstance(this.view);
     return await find.findLayerFeature(params);
   }
-  public async showToolTip(params: string){
+  public async showToolTip(){
     const tooltip = OverlayArcgis2D.getInstance(this.view);
-    await tooltip.showToolTip(params);
+    await tooltip.showToolTip();
   }
   public async showLayer(params: ILayerConfig) {
     console.log(params);

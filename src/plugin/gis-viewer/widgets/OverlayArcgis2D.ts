@@ -368,16 +368,18 @@ export class OverlayArcgis2D {
         if (response.results.length > 0) {
           response.results.forEach((result) => {
             if(result.graphic.geometry.type === "point"){
-              let content = result.graphic.attributes.infoWindow;
-              if (tip) {
-                tip.remove();
-                tip = null;
-              }
-              tip = new ToolTip(
+              if(result.graphic.attributes && result.graphic.attributes.hasOwnProperty("infoWindow")){
+                let content = result.graphic.attributes.infoWindow;
+                if (tip) {
+                  tip.remove();
+                  tip = null;
+                }
+                tip = new ToolTip(
                   view,
                   content,
                   result.graphic
-              );
+                );
+              }
             }
           });
         } else {
