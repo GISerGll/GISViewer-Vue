@@ -242,4 +242,16 @@ export default class MapAppArcGIS3D implements IMapContainer {
     }
   }
   public async locateStreet(param: IStreetParameter) {}
+  public async startTrackPlayback():Promise<IResult>{
+    return {
+      status:1,
+      message:"Not implemented"
+    }
+  }
+  public async startRealTrackPlayback():Promise<IResult>{
+    return {
+      status:1,
+      message:"Not implemented"
+    }
+  }
 }

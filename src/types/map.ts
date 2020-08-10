@@ -222,14 +222,17 @@ export interface ITrackPlayback {
   movingLength?:number,
   time:number,
   speed:number,
-  path:number[][]
+  speedToString?:string,
+  path:number[][],
+  stage?:string
 }
 export interface ITrackPlaybackParameter{
   trackPoints:[{
     id?:string
     from:number[],
     to:number[],
-    time?:number
+    time?:number,
+    stage?:string
   }]
   trackLineSymbol?:IPolylineSymbol
   autoStart?:Boolean

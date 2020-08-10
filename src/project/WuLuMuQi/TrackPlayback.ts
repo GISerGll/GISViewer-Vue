@@ -6,6 +6,7 @@ import {
 import {loadModules} from "esri-loader";
 import Geometry = __esri.geometry.Geometry;
 import Graphic = __esri.Graphic;
+import {OverlayArcgis2D} from "@/plugin/gis-viewer/widgets/OverlayArcgis2D"
 
 export default class TrackPlayback {
   private static trackPlayback:TrackPlayback
@@ -18,9 +19,18 @@ export default class TrackPlayback {
   private sumOfInterval: number
   private defaultLineSymbol = {
     type: "simple-line", //line-2d/line-3d
-    color: [70, 235, 255],
+    style:"solid",
+    color: [8, 146, 251],
     // opacity: symbol.opacity,
-    width: 4
+    width: 8
+  }
+
+  private alarmLineSymbol = {
+    type: "simple-line", //line-2d/line-3d
+    style:"solid",
+    color: [244, 26, 26],
+    // opacity: symbol.opacity,
+    width: 8
   }
 
   constructor(view: __esri.MapView) {
@@ -49,7 +59,7 @@ export default class TrackPlayback {
     this.trackLineLayer = new GraphicsLayer({
       id:"trackPlayback_trackLine"
     });
-    this.view.map.addMany([this.movingPtLayer,this.trackLineLayer]);
+    this.view.map.addMany([this.trackLineLayer,this.movingPtLayer]);
   }
   //实际路径轨迹回放，根据一组点坐标通过NAServer服务分析路径得出路线回放
   public async startRealTrackPlayback(params:ITrackPlaybackParameter):Promise<IResult>{
@@ -67,12 +77,7 @@ export default class TrackPlayback {
     //trackPoints => loop(require date from network => route result) =>
     // combined and return one
     for(let trackPoint of trackPoints){
-      let pathObj:{
-        time:number,
-        path:any,
-        speed:number,
-        features:any[],
-      } = {
+      let pathObj:any= {
         time:0,
         path:[],
         speed:0,
@@ -101,6 +106,9 @@ export default class TrackPlayback {
         // pathObj.path = await this.solveRoute(url,features);
         pathObj.features = features;
         pathObj.time = trackPoint.time || 0;
+        if(trackPoint.stage){
+          pathObj.stage = trackPoint.stage;
+        }
         pathObjArray.push(pathObj);
       }
     }
@@ -129,7 +137,6 @@ export default class TrackPlayback {
       //input:[{path:[coordinate...],time:number,speed:number,movingLength:number}...]
       //output:[{path:[coordinate...],time:number,speed:number,startId:number,endId:number,movingLength:number}...]
       pathObjArray = await this.calculateId(pathObjArray);
-
       //分段展示小车移动
       // await this.showMovingCar(pathObjArray[0])
       await this.movingIteration(pathObjArray,5);
@@ -372,7 +379,7 @@ export default class TrackPlayback {
     return trackPlaybackObj;
   }
   //展示轨迹
-  private async showTrackLine(paths:Array<Array<number>>,symbol?:__esri.symbolsSimpleLineSymbol){
+  private async showTrackLine(paths:number[][],symbolType?:string){
     const [Graphic, Polyline] = await loadModules([
       'esri/Graphic',
       'esri/geometry/Polyline'
@@ -382,17 +389,35 @@ export default class TrackPlayback {
       paths: paths,
       spatialReference: { wkid:4326 }
     });
+
+    let symbol:any;
+    switch (symbolType) {
+      case "normal":
+        symbol = this.defaultLineSymbol;
+        break;
+      case "alarm":
+        symbol = this.alarmLineSymbol;
+        break;
+      default:
+        symbol = this.defaultLineSymbol;
+    }
     let lineGraphic = new Graphic({
       geometry:lineGeometry,
       symbol: symbol || this.defaultLineSymbol,
     });
+
+    if(symbol === this.alarmLineSymbol){
+      lineGraphic.type = "alarm";
+    }else if(symbol === this.defaultLineSymbol){
+      lineGraphic.type = "normal";
+    }
     if (!this.trackLineLayer) {
       await this.createOverlayLayer();
     }
     await this.trackLineLayer.add(lineGraphic);
   }
   //展示移动小车
-  private async showMovingCar(params:ITrackPlayback):Promise<any>{
+  private showMovingCar(params:ITrackPlayback) {
     let count = params.startId || 0;
     let numOfCars = params.endId || this.movingPtLayer.graphics.length;
     let intervalTime = 100;
@@ -415,13 +440,61 @@ export default class TrackPlayback {
       movingFunc(i,this.sumOfInterval);
     }
   }
+  //展示一段路
+  private async showAPartRoad(params:ITrackPlayback) {
+    let count = params.startId || 0;
+    let numOfCars = params.endId || this.movingPtLayer.graphics.length;
+    let stage = params.stage || "normal";
+    let intervalTime = 100;
+    let speed = params.speed;
+    let path = params.path;
+
+    for(let i=count;i<=numOfCars;i++){
+      this.sumOfInterval += intervalTime/speed;
+      await this.showOneMovingCar(i,intervalTime/speed,stage)
+    }
+  }
+  //展示一段路中的某一点
+  private async showOneMovingCar(startId:number,sleepTime?:number,stage?:string) {
+    let intervalTime = sleepTime || 100;
+    let path;
+    if(startId){
+      let graphic1:any = this.movingPtLayer.graphics.getItemAt(startId-1);
+      let graphic2:any = this.movingPtLayer.graphics.getItemAt(startId);
+
+      path = [[graphic1.geometry.x, graphic1.geometry.y],[graphic2.geometry.x, graphic2.geometry.y]]
+      if(stage === "alarm"){
+        await this.showTrackLine(path,stage);
+      }
+
+      await this.sleep(intervalTime);
+      this.movingPtLayer.graphics.getItemAt(startId-1).visible = false;
+    }
+    this.movingPtLayer.graphics.getItemAt(startId).visible = true;
+  }
+  //promise+setTimeout =>sleep
+  private sleep(ms:number):Promise<any>{
+    return new Promise((resolve)=>setTimeout(resolve,ms));
+  }
   //小车移动迭代函数
   private async movingIteration(params:ITrackPlayback[],times?:Number){
     if(this.sumOfInterval){
       this.sumOfInterval = 0;
     }
+
+    let length = this.movingPtLayer.graphics.length;
     for(let i=0;i<params.length;i++){
-      await this.showMovingCar(params[i])
+      // this.showMovingCar(params[i])
+      await this.showAPartRoad(params[i]).then(()=>{
+        if(i == params.length - 1){
+          i=-1;
+          this.sumOfInterval = 0;
+          this.movingPtLayer.graphics.getItemAt(length-1).visible = false;
+
+          const overlay = OverlayArcgis2D.getInstance(this.view);
+          overlay.deleteOverlays({types:["alarm"]},this.trackLineLayer);
+        }
+      });
     }
   }
   //小车行进速度
@@ -443,6 +516,7 @@ export default class TrackPlayback {
       let pathTime = pathObj.time;
       let tempSpeed = pathLength/pathTime;
       pathObj.speed = tempSpeed;
+      pathObj.speedToString = ((pathObj.speed).toFixed(3)).toString();
     }
     let pathMinSpeed:number = pathObjArray[0].speed;
     //get the min speed
@@ -464,7 +538,7 @@ export default class TrackPlayback {
       'esri/geometry/geometryEngine'
     ]);
 
-    return geometryEngine.geodesicLength(params);
+    return geometryEngine.geodesicLength(params,"miles");
   }
 
   private async calculateMovingPoints(trackPoints:Array<Array<number>>,orderAndNum:any):Promise<any>{
@@ -568,6 +642,10 @@ export default class TrackPlayback {
     }
 
     return params;
+  }
+
+  private adjustPlaybackSpeed(speed:number,rate:number){
+    return speed*rate;
   }
 
 }

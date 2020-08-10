@@ -320,7 +320,8 @@ export default class PluginTest extends Vue {
       {
         from:[87.633242	,	43.867131],
         to:  [87.60694	,	43.87012],
-        time: 200
+        time: 200,
+        stage: "alarm"
       },
       {
         from:[87.60694	,	43.87012],
