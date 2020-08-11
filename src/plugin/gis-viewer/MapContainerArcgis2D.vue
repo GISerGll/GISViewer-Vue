@@ -105,8 +105,8 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async startRealTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
     return await this.mapApp.startRealTrackPlayback(params);
   }
-  public async polylineRanging(params:any):Promise<number>{
-    return await this.mapApp.polylineRanging(params);
+  public pausePlayback(){
+    this.mapApp.pausePlayback();
   }
 }
 </script>

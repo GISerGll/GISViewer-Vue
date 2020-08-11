@@ -16,9 +16,17 @@ export default class TrackPlayback {
   private interval!: any
   //小车行进步长设定
   private stepLength: number
-  private sumOfInterval: number
+  private movingMsgObj: {
+    sumOfRoads:number,
+    sumOfIds:number,
+    currentId:number,
+    currentRoad:number,
+    currentStatus:string,
+    tempCache:any
+  }
   private intervalTime: number
   private canGo: Boolean
+
   private defaultDotSymbol = {
     type: "simple-line", //line-2d/line-3d
     style:"short-dot",
@@ -27,7 +35,6 @@ export default class TrackPlayback {
     width: 2,
     cap:"square"
   }
-
   private defaultLineSymbol = {
     type: "simple-line", //line-2d/line-3d
     style:"solid",
@@ -35,7 +42,6 @@ export default class TrackPlayback {
     // opacity: symbol.opacity,
     width: 4
   }
-
   private alarmDotSymbol = {
     type: "simple-line", //line-2d/line-3d
     style:"short-dot",
@@ -44,7 +50,6 @@ export default class TrackPlayback {
     width: 2,
     cap:"square"
   }
-
   private alarmLineSymbol = {
     type: "simple-line", //line-2d/line-3d
     style:"solid",
@@ -56,7 +61,14 @@ export default class TrackPlayback {
   constructor(view: __esri.MapView) {
     this.view = view
     this.stepLength = 0.0005
-    this.sumOfInterval = 0;
+    this.movingMsgObj = {
+      sumOfRoads:0,
+      sumOfIds:0,
+      currentId:0,
+      currentRoad:0,
+      currentStatus:"normal",
+      tempCache:{}
+    }
     this.intervalTime = 100;
     this.canGo = true;
   }
@@ -161,7 +173,7 @@ export default class TrackPlayback {
       pathObjArray = await this.calculateId(pathObjArray);
       //分段展示小车移动
       // await this.showMovingCar(pathObjArray[0])
-      await this.movingIteration(pathObjArray,5);
+      await this.movingIteration(pathObjArray);
     });
 
     return {
@@ -472,18 +484,19 @@ export default class TrackPlayback {
     }
     await this.trackLineLayer.add(lineGraphic);
   }
-  //展示一段路
-  private async showAPartRoad(params:ITrackPlayback) {
-    let count = params.startId || 0;
-    let numOfCars = params.endId || this.movingPtLayer.graphics.length;
-    let stage = params.stage || "normal";
-    // let intervalTime = 100;
-    let speed = params.speed;
+  //展示从当前id到终点的一段路
+  private async showAPartRoad() {
+    let count = this.movingMsgObj.currentId;
+    let numOfCars = this.movingMsgObj.sumOfIds;
+    let stage = this.movingMsgObj.currentStatus;
 
     for(let i=count;i<=numOfCars;i++){
       if(this.canGo){
-        this.sumOfInterval += this.intervalTime/speed;
+        this.movingMsgObj.currentId = i;
         await this.showOneMovingCar(i,stage)
+      }
+      else {
+        return "pause"
       }
     }
   }
@@ -508,26 +521,60 @@ export default class TrackPlayback {
       resolve();
     },ms));
   }
-  //小车移动迭代函数
-  private async movingIteration(params:ITrackPlayback[],times?:Number){
-    if(this.sumOfInterval){
-      this.sumOfInterval = 0;
+  //小车循环移动函数
+  private async movingIteration(params:ITrackPlayback[]){
+    if(this.movingMsgObj.currentId){
+      this.movingMsgObj.currentId = 0;
+      this.movingMsgObj.currentRoad = 0;
     }
 
     let length = this.movingPtLayer.graphics.length;
-    for(let i=0;i<params.length;i++){
-      // this.showMovingCar(params[i])
-      await this.showAPartRoad(params[i]).then(()=>{
-        if(i == params.length - 1){
-          i=-1;
-          this.sumOfInterval = 0;
+    this.movingMsgObj.sumOfIds = length;
+    this.movingMsgObj.sumOfRoads = params.length;
+    this.movingMsgObj.tempCache = params
+
+    let movingStatus:string = "normal";
+
+    await this.showAPartRoad().then((value)=>{
+      //value = "pause",处理暂停情况
+      if(value === "pause"){
+        movingStatus = value;
+        console.log("pause playback");
+      }
+      else {
+          this.movingMsgObj.currentRoad = 0;
+          this.movingMsgObj.currentId = 0;
           this.movingPtLayer.graphics.getItemAt(length-1).visible = false;
 
           const overlay = OverlayArcgis2D.getInstance(this.view);
           overlay.deleteOverlays({types:["alarm","normal"]},this.trackLineLayer);
-        }
-      });
+
+          this.movingIteration(this.movingMsgObj.tempCache);
+      }
+    });
+
+    if(movingStatus === "pause"){
+      return movingStatus;
     }
+  }
+
+  private async goOnMovingIteration(){
+    await this.showAPartRoad().then((value)=>{
+      //value = "pause",处理暂停情况
+      if(value === "pause"){
+        console.log("pause playback");
+      }
+      else {
+        this.movingMsgObj.currentRoad = 0;
+        this.movingMsgObj.currentId = 0;
+        this.movingPtLayer.graphics.getItemAt(length-1).visible = false;
+
+        const overlay = OverlayArcgis2D.getInstance(this.view);
+        overlay.deleteOverlays({types:["alarm","normal"]},this.trackLineLayer);
+
+        this.movingIteration(this.movingMsgObj.tempCache);
+      }
+    });
   }
   //小车行进速度
   private async calculateSpeed(params:ITrackPlayback[]):Promise<ITrackPlayback[]>{
@@ -690,11 +737,12 @@ export default class TrackPlayback {
   }
 
   public pausePlayback() {
-
+    this.canGo = false;
   }
 
   public continuePlayback() {
-
+    this.canGo = true;
+    this.goOnMovingIteration();
   }
 
   public nextRoad(){

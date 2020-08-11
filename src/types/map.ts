@@ -173,7 +173,7 @@ export interface IMapContainer {
   startDrawOverlays: (param: IDrawOverlayParameter) => Promise<IResult>
   startTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>
   startRealTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>
-
+  pausePlayback: () => void;
 }
 export interface IPopUpTemplate {
   title?: string;
