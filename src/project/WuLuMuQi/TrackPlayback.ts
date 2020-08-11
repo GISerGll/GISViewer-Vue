@@ -17,12 +17,32 @@ export default class TrackPlayback {
   //小车行进步长设定
   private stepLength: number
   private sumOfInterval: number
+  private intervalTime: number
+  private canGo: Boolean
+  private defaultDotSymbol = {
+    type: "simple-line", //line-2d/line-3d
+    style:"short-dot",
+    color: [8, 146, 251],
+    // opacity: symbol.opacity,
+    width: 2,
+    cap:"square"
+  }
+
   private defaultLineSymbol = {
     type: "simple-line", //line-2d/line-3d
     style:"solid",
     color: [8, 146, 251],
     // opacity: symbol.opacity,
-    width: 8
+    width: 4
+  }
+
+  private alarmDotSymbol = {
+    type: "simple-line", //line-2d/line-3d
+    style:"short-dot",
+    color: [244, 26, 26],
+    // opacity: symbol.opacity,
+    width: 2,
+    cap:"square"
   }
 
   private alarmLineSymbol = {
@@ -30,13 +50,15 @@ export default class TrackPlayback {
     style:"solid",
     color: [244, 26, 26],
     // opacity: symbol.opacity,
-    width: 8
+    width: 4
   }
 
   constructor(view: __esri.MapView) {
     this.view = view
-    this.stepLength = 0.001
+    this.stepLength = 0.0005
     this.sumOfInterval = 0;
+    this.intervalTime = 100;
+    this.canGo = true;
   }
 
   public static getInstance(view: __esri.MapView){
@@ -128,7 +150,7 @@ export default class TrackPlayback {
       //output:[{path:[coordinate...],time:number,speed:number,movingLength:number}...]
       for(let pathObj of pathObjArray){
         //展示小车移动轨迹
-        await this.showTrackLine(pathObj.path);
+        await this.showTrackLine(pathObj);
         //获取每段路径小车需要移动的次数，为小车移动做准备
         pathObj = await this.prepareForCarMove(pathObj);
       }
@@ -378,8 +400,9 @@ export default class TrackPlayback {
     trackPlaybackObj.movingLength = movingLength;
     return trackPlaybackObj;
   }
-  //展示轨迹
-  private async showTrackLine(paths:number[][],symbolType?:string){
+  //展示完整轨迹
+  private async showTrackLine(params:ITrackPlayback){
+    let paths = params.path;
     const [Graphic, Polyline] = await loadModules([
       'esri/Graphic',
       'esri/geometry/Polyline'
@@ -390,6 +413,39 @@ export default class TrackPlayback {
       spatialReference: { wkid:4326 }
     });
 
+    let stage = params.stage;
+    let symbol:any;
+    switch (stage) {
+      case "normal":
+        symbol = this.defaultDotSymbol;
+        break;
+      case "alarm":
+        symbol = this.alarmDotSymbol;
+        break;
+      default:
+        symbol = this.defaultDotSymbol;
+    }
+    let lineGraphic = new Graphic({
+      geometry:lineGeometry,
+      symbol: symbol,
+    });
+
+    if (!this.trackLineLayer) {
+      await this.createOverlayLayer();
+    }
+    await this.trackLineLayer.add(lineGraphic);
+  }
+  //展示移动轨迹
+  private async showMovingTrackLine(paths:number[][],symbolType:string){
+    const [Graphic, Polyline] = await loadModules([
+      'esri/Graphic',
+      'esri/geometry/Polyline'
+    ]);
+
+    let lineGeometry = new Polyline({
+      paths: paths,
+      spatialReference: { wkid:4326 }
+    });
     let symbol:any;
     switch (symbolType) {
       case "normal":
@@ -403,7 +459,7 @@ export default class TrackPlayback {
     }
     let lineGraphic = new Graphic({
       geometry:lineGeometry,
-      symbol: symbol || this.defaultLineSymbol,
+      symbol: symbol,
     });
 
     if(symbol === this.alarmLineSymbol){
@@ -416,65 +472,41 @@ export default class TrackPlayback {
     }
     await this.trackLineLayer.add(lineGraphic);
   }
-  //展示移动小车
-  private showMovingCar(params:ITrackPlayback) {
-    let count = params.startId || 0;
-    let numOfCars = params.endId || this.movingPtLayer.graphics.length;
-    let intervalTime = 100;
-    let speed = params.speed;
-
-    let movingFunc = (i:number,timer:number) => {
-      setTimeout(()=>{
-        this.movingPtLayer.graphics.getItemAt(i).visible = true;
-        if(i){
-          this.movingPtLayer.graphics.getItemAt(i-1).visible = false;
-        }
-        if(i === numOfCars){
-          console.log("该段轨迹回放结束！")
-        }
-      },timer)
-    }
-
-    for(let i=count;i<=numOfCars;i++){
-      this.sumOfInterval += intervalTime/speed;
-      movingFunc(i,this.sumOfInterval);
-    }
-  }
   //展示一段路
   private async showAPartRoad(params:ITrackPlayback) {
     let count = params.startId || 0;
     let numOfCars = params.endId || this.movingPtLayer.graphics.length;
     let stage = params.stage || "normal";
-    let intervalTime = 100;
+    // let intervalTime = 100;
     let speed = params.speed;
-    let path = params.path;
 
     for(let i=count;i<=numOfCars;i++){
-      this.sumOfInterval += intervalTime/speed;
-      await this.showOneMovingCar(i,intervalTime/speed,stage)
+      if(this.canGo){
+        this.sumOfInterval += this.intervalTime/speed;
+        await this.showOneMovingCar(i,stage)
+      }
     }
   }
   //展示一段路中的某一点
-  private async showOneMovingCar(startId:number,sleepTime?:number,stage?:string) {
-    let intervalTime = sleepTime || 100;
+  private async showOneMovingCar(startId:number,stage:string) {
+    // let intervalTime = sleepTime || 100;
     let path;
     if(startId){
       let graphic1:any = this.movingPtLayer.graphics.getItemAt(startId-1);
       let graphic2:any = this.movingPtLayer.graphics.getItemAt(startId);
 
       path = [[graphic1.geometry.x, graphic1.geometry.y],[graphic2.geometry.x, graphic2.geometry.y]]
-      if(stage === "alarm"){
-        await this.showTrackLine(path,stage);
-      }
-
-      await this.sleep(intervalTime);
+      await this.showMovingTrackLine(path,stage);
+      await this.sleep(this.intervalTime);
       this.movingPtLayer.graphics.getItemAt(startId-1).visible = false;
     }
     this.movingPtLayer.graphics.getItemAt(startId).visible = true;
   }
   //promise+setTimeout =>sleep
   private sleep(ms:number):Promise<any>{
-    return new Promise((resolve)=>setTimeout(resolve,ms));
+    return new Promise((resolve)=>setTimeout(()=>{
+      resolve();
+    },ms));
   }
   //小车移动迭代函数
   private async movingIteration(params:ITrackPlayback[],times?:Number){
@@ -492,7 +524,7 @@ export default class TrackPlayback {
           this.movingPtLayer.graphics.getItemAt(length-1).visible = false;
 
           const overlay = OverlayArcgis2D.getInstance(this.view);
-          overlay.deleteOverlays({types:["alarm"]},this.trackLineLayer);
+          overlay.deleteOverlays({types:["alarm","normal"]},this.trackLineLayer);
         }
       });
     }
@@ -644,8 +676,32 @@ export default class TrackPlayback {
     return params;
   }
 
-  private adjustPlaybackSpeed(speed:number,rate:number){
-    return speed*rate;
+  public adjustPlaybackSpeed(rate:number){
+    if(rate >= 2){
+      rate = 2;
+    }else if(rate<2 && rate >= 1.5){
+      rate = 1.5
+    }else if(rate <1.5 && rate>= 1){
+      rate = 1
+    }else if(rate <1){
+      rate = 0.5
+    }
+    this.intervalTime = this.intervalTime * (1/rate);
+  }
+
+  public pausePlayback() {
+
+  }
+
+  public continuePlayback() {
+
+  }
+
+  public nextRoad(){
+
+  }
+  public lastRoad(){
+
   }
 
 }

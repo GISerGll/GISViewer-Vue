@@ -157,11 +157,9 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async startDrawOverlays(param: IDrawOverlayParameter):Promise<IResult>{
     return this.mapContainer.startDrawOverlays(param)
   }
-
   public async startTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
     return await this.mapContainer.startTrackPlayback(params);
   }
-
   public async startRealTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
     return await this.mapContainer.startRealTrackPlayback(params);
   }
