@@ -18,6 +18,7 @@
       <button @click="btn_startTrackPlayback">轨迹回放</button><br>
       <button @click="btn_startRealTrackPlayback">实际轨迹回放</button>
       <button @click="btn_pausePlayback">暂停</button>
+      <button @click="btn_goOnPlayback">继续</button>
 
 <!--      <button @click="btn_">删除</button><br>-->
 <!--      <button @click="btn_addHeatMap">添加热力图</button>-->
@@ -343,6 +344,10 @@ export default class PluginTest extends Vue {
   private async btn_pausePlayback(){
     let map = this.$refs.gisViewer as any;
     await map.pausePlayback();
+  }
+  private async btn_goOnPlayback(){
+    let map = this.$refs.gisViewer as any;
+    await map.goOnPlayback();
   }
   private async loadImageAsync(url:string) {
         return new Promise(function(resolve, reject) {

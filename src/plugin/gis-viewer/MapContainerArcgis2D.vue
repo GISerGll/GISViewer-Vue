@@ -108,6 +108,9 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public pausePlayback(){
     this.mapApp.pausePlayback();
   }
+  public goOnPlayback(){
+    this.mapApp.goOnPlayback();
+  }
 }
 </script>
 

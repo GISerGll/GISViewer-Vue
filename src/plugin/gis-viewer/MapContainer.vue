@@ -166,6 +166,9 @@ export default class MapContainer extends Vue implements IMapContainer {
   public pausePlayback(){
     this.mapContainer.pausePlayback();
   }
+  public goOnPlayback(){
+    this.mapContainer.goOnPlayback();
+  }
 }
 </script>
 

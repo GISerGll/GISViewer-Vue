@@ -258,4 +258,8 @@ export default class MapAppArcGIS2D {
     const trackPlayback = TrackPlayback.getInstance(this.view);
     trackPlayback.pausePlayback();
   }
+  public goOnPlayback(){
+    const trackPlayback = TrackPlayback.getInstance(this.view);
+    trackPlayback.goOnPlayback();
+  }
 }

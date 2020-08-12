@@ -174,6 +174,7 @@ export interface IMapContainer {
   startTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>
   startRealTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>
   pausePlayback: () => void;
+  goOnPlayback: () => void;
 }
 export interface IPopUpTemplate {
   title?: string;

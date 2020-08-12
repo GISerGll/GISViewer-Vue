@@ -352,6 +352,7 @@ export default class TrackPlayback {
 
   private async prepareForCarMove(params:ITrackPlayback):Promise<ITrackPlayback>{
     let trackPoints = params.path;
+    let stage = params.stage;
     //轨迹上每条线段需要移动的次数
     let numOfSegmentPoints = null;
     //[i,numOfSegmentPoints]
@@ -405,6 +406,7 @@ export default class TrackPlayback {
           movingLength++;
           //将所有小车隐藏
           pictureGraphic.visible = false;
+          pictureGraphic.type = stage;
           this.movingPtLayer.add(pictureGraphic);
         }
       }
@@ -486,14 +488,12 @@ export default class TrackPlayback {
   }
   //展示从当前id到终点的一段路
   private async showAPartRoad() {
-    let count = this.movingMsgObj.currentId;
     let numOfCars = this.movingMsgObj.sumOfIds;
-    let stage = this.movingMsgObj.currentStatus;
 
-    for(let i=count;i<=numOfCars;i++){
+    for(let i=this.movingMsgObj.currentId;i<numOfCars;i++){
       if(this.canGo){
         this.movingMsgObj.currentId = i;
-        await this.showOneMovingCar(i,stage)
+        await this.showOneMovingCar(i)
       }
       else {
         return "pause"
@@ -501,13 +501,13 @@ export default class TrackPlayback {
     }
   }
   //展示一段路中的某一点
-  private async showOneMovingCar(startId:number,stage:string) {
+  private async showOneMovingCar(startId:number) {
     // let intervalTime = sleepTime || 100;
     let path;
     if(startId){
       let graphic1:any = this.movingPtLayer.graphics.getItemAt(startId-1);
       let graphic2:any = this.movingPtLayer.graphics.getItemAt(startId);
-
+      let stage = graphic1.type;
       path = [[graphic1.geometry.x, graphic1.geometry.y],[graphic2.geometry.x, graphic2.geometry.y]]
       await this.showMovingTrackLine(path,stage);
       await this.sleep(this.intervalTime);
@@ -523,15 +523,18 @@ export default class TrackPlayback {
   }
   //小车循环移动函数
   private async movingIteration(params:ITrackPlayback[]){
-    if(this.movingMsgObj.currentId){
+    let length = this.movingPtLayer.graphics.length;
+    if(this.movingMsgObj.currentId === this.movingMsgObj.sumOfIds-1){
+      //id>0,已经运行过
       this.movingMsgObj.currentId = 0;
       this.movingMsgObj.currentRoad = 0;
     }
-
-    let length = this.movingPtLayer.graphics.length;
-    this.movingMsgObj.sumOfIds = length;
-    this.movingMsgObj.sumOfRoads = params.length;
-    this.movingMsgObj.tempCache = params
+    else {
+      //id=0,未运行过
+      this.movingMsgObj.sumOfIds = length;
+      this.movingMsgObj.sumOfRoads = params.length;
+      this.movingMsgObj.tempCache = params
+    }
 
     let movingStatus:string = "normal";
 
@@ -542,26 +545,26 @@ export default class TrackPlayback {
         console.log("pause playback");
       }
       else {
-          this.movingMsgObj.currentRoad = 0;
-          this.movingMsgObj.currentId = 0;
+          //删除最后一辆小车
           this.movingPtLayer.graphics.getItemAt(length-1).visible = false;
-
+          //删除运动轨迹
           const overlay = OverlayArcgis2D.getInstance(this.view);
           overlay.deleteOverlays({types:["alarm","normal"]},this.trackLineLayer);
-
+          //继续迭代
           this.movingIteration(this.movingMsgObj.tempCache);
       }
     });
 
-    if(movingStatus === "pause"){
-      return movingStatus;
-    }
+    return movingStatus;
   }
 
   private async goOnMovingIteration(){
+    let movingStatus:string = "normal";
+
     await this.showAPartRoad().then((value)=>{
       //value = "pause",处理暂停情况
       if(value === "pause"){
+        movingStatus = value;
         console.log("pause playback");
       }
       else {
@@ -572,9 +575,11 @@ export default class TrackPlayback {
         const overlay = OverlayArcgis2D.getInstance(this.view);
         overlay.deleteOverlays({types:["alarm","normal"]},this.trackLineLayer);
 
-        this.movingIteration(this.movingMsgObj.tempCache);
+        this.goOnMovingIteration();
       }
     });
+
+    return movingStatus;
   }
   //小车行进速度
   private async calculateSpeed(params:ITrackPlayback[]):Promise<ITrackPlayback[]>{
@@ -740,9 +745,13 @@ export default class TrackPlayback {
     this.canGo = false;
   }
 
-  public continuePlayback() {
+  public goOnPlayback() {
+    if(this.canGo){
+      console.log("该播放在执行！")
+      return;
+    }
     this.canGo = true;
-    this.goOnMovingIteration();
+    let result = this.movingIteration(this.movingMsgObj.tempCache);
   }
 
   public nextRoad(){
