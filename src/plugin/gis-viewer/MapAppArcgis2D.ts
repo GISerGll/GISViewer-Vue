@@ -14,9 +14,7 @@ import {
     IOverlayClusterParameter,
     routeParameter
 } from '@/types/map';
-import {OverlayArcgis2D} from '@/plugin/gis-viewer/widgets/OverlayArcgis2D';
-import {FindFeature} from './widgets/FindFeature';
-import {HeatMap} from './widgets/HeatMap';
+
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback.ts";
 import {OverlayArcgis2D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis2D';
@@ -214,7 +212,6 @@ export default class MapAppArcGIS2D {
     return selLayer;
   }
   private async doIdentifyTask(clickpoint: any) {
-    console.log(clickpoint);
     let layers = this.view.map.allLayers.filter((layer: any) => {
       if (
         layer.visible &&
@@ -370,18 +367,18 @@ export default class MapAppArcGIS2D {
     return await cluster.deleteAllOverlaysCluster();
   }
   public async findFeature(params: IFindParameter) {
-    // const overlay = OverlayArcgis2D.getInstance(this.view);
-    // return await overlay.findFeature(params);
-    const findfeature = FindFeature.getInstance(this.view);
-    return await findfeature.findLayerFeature(params);
+    const overlay = OverlayArcgis2D.getInstance(this.view);
+    return await overlay.findFeature(params);
   }
-
+  public async findLayerFeature(params: IFindParameter) {
+    const find = FindFeature.getInstance(this.view);
+    return await find.findLayerFeature(params);
+  }
   public async showToolTip(){
     const tooltip = OverlayArcgis2D.getInstance(this.view);
     await tooltip.showToolTip();
   }
   public async showLayer(params: ILayerConfig) {
-    console.log(params);
     this.view.map.allLayers.forEach((baselayer: ILayerConfig) => {
       if (params.label && baselayer.label === params.label) {
         if (!baselayer.visible) {
@@ -391,7 +388,6 @@ export default class MapAppArcGIS2D {
     });
   }
   public async hideLayer(params: ILayerConfig) {
-    console.log(params);
     this.view.map.allLayers.forEach((baselayer: ILayerConfig) => {
       if (params.label && baselayer.label === params.label) {
         if (baselayer.visible) {
@@ -456,7 +452,6 @@ export default class MapAppArcGIS2D {
     trackPlayback.goOnPlayback();
   }
   public setMapStyle(param: string) {}
-
   public async routeSearch(params: routeParameter): Promise<IResult> {
     return {status: 0, message: ''};
   }

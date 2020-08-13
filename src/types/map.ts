@@ -160,13 +160,12 @@ export interface IMapContainer {
   hideJurisdiction: () => void;
   showDistrictMask: (param: IDistrictParameter) => void;
   hideDistrictMask: () => void;
-  findFeature: (param: IFindParameter) => void;
+  findFeature: (param: IFindParameter) => Promise<IResult>;
   showRoad: (param: {ids: string[]}) => void;
   hideRoad: () => void;
   showStreet: () => void;
   hideStreet: () => void;
   locateStreet: (param: IStreetParameter) => void;
-  findLayerFeature: (param: IFindParameter) => void;
   startDrawOverlays: (param: IDrawOverlayParameter) => Promise<IResult>
   startTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>
   startRealTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>

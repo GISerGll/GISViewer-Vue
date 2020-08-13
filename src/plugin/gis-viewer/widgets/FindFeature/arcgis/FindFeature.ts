@@ -8,7 +8,6 @@ import {
 import {loadModules} from 'esri-loader';
 import HighFeauture3D from '../../Overlays/arcgis/HighFeauture3D';
 import HighFeauture2D from '../../Overlays/arcgis/HighFeauture2D';
-import HighFeauture2D from './Render/HighFeauture2D';
 
 export class FindFeature {
   private static findFeature: FindFeature;

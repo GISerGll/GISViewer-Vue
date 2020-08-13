@@ -22,6 +22,8 @@
 import {Vue, Component, Prop, Ref, Emit} from 'vue-property-decorator';
 import MapContainerArcgisThreeD from '@/plugin/gis-viewer/MapContainerArcgis3D.vue';
 import MapContainerArcgisTwoD from '@/plugin/gis-viewer/MapContainerArcgis2D.vue';
+import MapContainerBaidu from '@/plugin/gis-viewer/MapContainerBaidu.vue';
+import MapContainerGaode from '@/plugin/gis-viewer/MapContainerGaode.vue';
 import {
   Platforms,
   IMapContainer,
@@ -35,9 +37,8 @@ import {
   IFindParameter,
   IResult,
   IDistrictParameter,
-  IStreetParameter,
   IDrawOverlayParameter,
-  ITrackPlaybackParameter
+  ITrackPlaybackParameter,
   IStreetParameter,
   routeParameter
 } from '@/types/map';
@@ -46,7 +47,9 @@ import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 @Component({
   components: {
     MapContainerArcgisThreeD,
-    MapContainerArcgisTwoD
+    MapContainerArcgisTwoD,
+    MapContainerBaidu,
+    MapContainerGaode
   }
 })
 export default class MapContainer extends Vue implements IMapContainer {
@@ -94,7 +97,6 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     return await this.mapContainer.addOverlays(params);
   }
-
   public addOverlaysCluster(params: IOverlayClusterParameter) {
     this.mapContainer.addOverlaysCluster(params);
   }
@@ -107,7 +109,6 @@ export default class MapContainer extends Vue implements IMapContainer {
   public deleteOverlaysCluster(params: IOverlayDelete) {
     this.mapContainer.deleteOverlaysCluster(params);
   }
-
   public deleteAllOverlays() {
     this.mapContainer.deleteAllOverlays();
   }
@@ -141,8 +142,8 @@ export default class MapContainer extends Vue implements IMapContainer {
   public hideDistrictMask() {
     this.mapContainer.hideDistrictMask();
   }
-  public findFeature(params: IFindParameter) {
-    this.mapContainer.findFeature(params);
+  public async findFeature(params: IFindParameter) {
+    return await this.mapContainer.findFeature(params);
   }
   public showRoad(param: {ids: string[]}) {
     this.mapContainer.showRoad(param);

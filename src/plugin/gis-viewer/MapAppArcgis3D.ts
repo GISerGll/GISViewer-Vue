@@ -22,6 +22,7 @@ import {HeatMap} from './widgets/HeatMap/arcgis/HeatMap';
 import {HeatMap3D} from './widgets/HeatMap/arcgis/HeatMap3D';
 import ToolTip from './widgets/Overlays/arcgis/ToolTip';
 import {Cluster} from './widgets/Cluster/arcgis/Cluster';
+import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
 export default class MapAppArcGIS3D implements IMapContainer {
   public view!: __esri.SceneView;
@@ -423,9 +424,15 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async hideStreet() {}
   public async locateStreet(param: IStreetParameter) {}
   public setMapStyle(param: string) {}
-
   public async routeSearch(params: routeParameter): Promise<IResult> {
     return {status: 0, message: ''};
   }
   public clearRouteSearch() {}
+  public async startTrackPlayback() :Promise<any>{}
+  public async startRealTrackPlayback() :Promise<any>{}
+  public pausePlayback(){}
+  public goOnPlayback(){}
+  public async startDrawOverlays():Promise<any>{}
+  public async showToolTip():Promise<any>{}
+  public async findLayerFeature():Promise<any>{}
 }

@@ -3,7 +3,7 @@ import {
     IResult
 } from '@/types/map';
 import {loadModules} from 'esri-loader';
-import {OverlayArcgis2D} from "@/plugin/gis-viewer/widgets/OverlayArcgis2D";
+import {OverlayArcgis2D} from "@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis2D";
 import Graphic = __esri.Graphic;
 export class Draw2D {
     private static draw2D: Draw2D;

@@ -104,6 +104,13 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     return {status: 0, message: ''};
   }
   public clearRouteSearch() {}
+  public async startTrackPlayback() :Promise<any>{}
+  public async startRealTrackPlayback() :Promise<any>{}
+  public pausePlayback(){}
+  public goOnPlayback(){}
+  public async startDrawOverlays():Promise<any>{}
+  public async showToolTip():Promise<any>{}
+  public async findLayerFeature():Promise<any>{}
 }
 </script>
 

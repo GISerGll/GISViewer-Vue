@@ -9,8 +9,6 @@ import {
 } from '@/types/map';
 import {loadModules} from 'esri-loader';
 import ToolTip from './ToolTip2D';
-import HighFeauture2D from './Render/HighFeauture2D';
-import ToolTip from './ToolTip';
 import HighFeauture from './HighFeauture3D';
 import HighFeauture2D from './HighFeauture2D';
 
@@ -310,13 +308,8 @@ export class OverlayArcgis2D {
       message: 'ok'
     };
   }
-  public async findFeature(params: IFindParameter): Promise<IResult> {
-    if (!this.overlayLayer) {
-      return {
-        status: 0,
-        message: 'ok'
-      };
-    }
+  public async findFeature(params: IFindParameter,overlaysLayer?:__esri.GraphicsLayer): Promise<IResult> {
+
     let type = params.layerName;
     let ids = params.ids || [];
     let level = params.level || this.view.zoom;
@@ -327,21 +320,17 @@ export class OverlayArcgis2D {
     //此处graphics能访问的属性只有length，访问其items属性会提示错误
     let lengthOfOverlays = overlays.length;
 
-    let processObj = new Promise(async resolve => {
-      let i = 0;
-      for(i;i<lengthOfOverlays;i++){
-        let overlay = overlays.getItemAt(i);
-        await this.goToView(overlay, type, ids, centerResult, level);
-        if(i == lengthOfOverlays - 1){
-          resolve("finish animating")
-        }
-        this.startJumpPoint([overlay]);
+    for(let i = 0;i<lengthOfOverlays;i++){
+      let overlay = overlays.getItemAt(i);
+      await this.goToView(overlay, type, ids, centerResult, level);
+      if(i == lengthOfOverlays - 1){
+        console.log("finish animating");
       }
-    });
+    }
+
     return {
       status: 0,
-      message: 'ok',
-      result: processObj
+      message: '完成定位居中',
     };
   }
   private async startJumpPoint(graphics: any[]) {

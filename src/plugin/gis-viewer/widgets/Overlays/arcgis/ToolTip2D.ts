@@ -1,4 +1,4 @@
-import MapToolTip from "../../../components/tooltips";
+import MapToolTip from "@/components/tooltips";
 import { Vue } from "vue-property-decorator";
 
 export default class ToolTip {

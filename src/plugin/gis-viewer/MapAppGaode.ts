@@ -238,4 +238,10 @@ export default class MapAppGaode implements IMapContainer {
     const route = Route.getInstance(this.view);
     route.clearRouteSearch();
   }
+  public async startTrackPlayback() :Promise<any>{}
+  public async startRealTrackPlayback() :Promise<any>{}
+  public pausePlayback(){}
+  public goOnPlayback(){}
+  public async startDrawOverlays():Promise<any>{}
+  public async showToolTip():Promise<any>{}
 }

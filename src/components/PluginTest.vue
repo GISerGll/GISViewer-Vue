@@ -81,11 +81,7 @@ export default class PluginTest extends Vue {
           ids:["test001","test002"],
           centerResult:true
       })
-
-      let resultMsg = result.result;
-      resultMsg.then((msg:any) =>{
-          console.log(msg);
-      })
+    console.log(result);
   }
   private async btn_addOverlays_pt() {
       let map = this.$refs.gisViewer as any;
@@ -444,7 +440,26 @@ export default class PluginTest extends Vue {
 }
 #test {
   position: absolute;
-  z-index: 99;
-  display: block;
+  right: 20px;
+  top: 100px;
+  width: 400px;
+  height: 300px;
+  z-index: 100;
+  background: #ffffff;
+  color: #777777;
+  padding: 5px;
+  border: 2px solid #666666;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.fa-close{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    color: #7d98bf;
 }
 </style>

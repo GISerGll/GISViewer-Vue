@@ -6,7 +6,7 @@ import {
 import {loadModules} from "esri-loader";
 import Geometry = __esri.geometry.Geometry;
 import Graphic = __esri.Graphic;
-import {OverlayArcgis2D} from "@/plugin/gis-viewer/widgets/OverlayArcgis2D"
+import {OverlayArcgis2D} from "@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis2D"
 
 export default class TrackPlayback {
   private static trackPlayback:TrackPlayback
