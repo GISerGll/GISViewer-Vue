@@ -14,6 +14,7 @@
       @map-loaded="mapLoaded"
       @marker-click="showGisDeviceInfo"
     />
+
   </div>
 </template>
 
@@ -37,6 +38,8 @@ import {
   IStreetParameter,
   IDrawOverlayParameter,
   ITrackPlaybackParameter
+  IStreetParameter,
+  routeParameter
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -56,6 +59,8 @@ export default class MapContainer extends Vue implements IMapContainer {
 
   @Ref() readonly containerArcgis3D!: MapContainerArcgisThreeD;
   @Ref() readonly containerArcgis2D!: MapContainerArcgisTwoD;
+  @Ref() readonly containerBaidu!: MapContainerBaidu;
+  @Ref() readonly containerGaode!: MapContainerGaode;
 
   //当前的地图容器
   get mapContainer(): IMapContainer {
@@ -64,6 +69,10 @@ export default class MapContainer extends Vue implements IMapContainer {
         return this.containerArcgis2D;
       case Platforms.ArcGIS3D:
         return this.containerArcgis3D;
+      case Platforms.BDMap:
+        return this.containerBaidu;
+      case Platforms.AMap:
+        return this.containerGaode;
       default:
         return this.containerArcgis2D;
     }
@@ -85,6 +94,7 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     return await this.mapContainer.addOverlays(params);
   }
+
   public addOverlaysCluster(params: IOverlayClusterParameter) {
     this.mapContainer.addOverlaysCluster(params);
   }
@@ -97,6 +107,7 @@ export default class MapContainer extends Vue implements IMapContainer {
   public deleteOverlaysCluster(params: IOverlayDelete) {
     this.mapContainer.deleteOverlaysCluster(params);
   }
+
   public deleteAllOverlays() {
     this.mapContainer.deleteAllOverlays();
   }
@@ -130,11 +141,8 @@ export default class MapContainer extends Vue implements IMapContainer {
   public hideDistrictMask() {
     this.mapContainer.hideDistrictMask();
   }
-  public findFeature(params: IFindParameter) :Promise<IResult>{
-    return this.mapContainer.findFeature(params)
-  }
-  public findLayerFeature(params: IFindParameter) {
-    this.mapContainer.findLayerFeature(params);
+  public findFeature(params: IFindParameter) {
+    this.mapContainer.findFeature(params);
   }
   public showRoad(param: {ids: string[]}) {
     this.mapContainer.showRoad(param);
@@ -168,6 +176,15 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public goOnPlayback(){
     this.mapContainer.goOnPlayback();
+  }
+  public setMapStyle(param: string) {
+    this.mapContainer.setMapStyle(param);
+  }
+  public async routeSearch(params: routeParameter): Promise<IResult> {
+    return await this.mapContainer.routeSearch(params);
+  }
+  public clearRouteSearch() {
+    this.mapContainer.clearRouteSearch();
   }
 }
 </script>

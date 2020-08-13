@@ -16,7 +16,8 @@ import {
   IFindParameter,
   IResult,
   IDistrictParameter,
-  IStreetParameter, IDrawOverlayParameter
+  IStreetParameter,
+  routeParameter
 } from '@/types/map';
 @Component({
   name: 'MapAppBaidu'
@@ -88,19 +89,21 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   }
   public showDistrictMask(param: IDistrictParameter) {}
   public hideDistrictMask() {}
-  public findFeature(params: IFindParameter):Promise<any>{
-    return this.mapApp.findFeature(params);
+  public findFeature(params: IFindParameter) {
+    this.mapApp.findFeature(params);
   }
-  public findLayerFeature(params: IFindParameter) {}
   public showRoad() {}
   public hideRoad() {}
   public showStreet() {}
   public hideStreet() {}
-  public showToolTip(){}
   public locateStreet(param: IStreetParameter) {}
-  public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
-    return await this.mapApp.startDrawOverlays(params);
+  public setMapStyle(param: string) {
+    this.mapApp.setMapStyle(param);
   }
+  public async routeSearch(params: routeParameter): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public clearRouteSearch() {}
 }
 </script>
 

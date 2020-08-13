@@ -11,11 +11,12 @@ import {
   IFindParameter,
   IResult,
   IDistrictParameter,
-  IStreetParameter, IDrawOverlayParameter
+  IStreetParameter,
+  routeParameter
 } from '@/types/map';
-import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/OverlayBaidu';
-import {HeatMapBD} from './widgets/BD/HeatMapBD';
-import {JurisdictionPolice} from './widgets/BD/JurisdictionPolice';
+import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
+import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
+import {JurisdictionPolice} from './widgets/JurisdictionPolice/bd/JurisdictionPolice';
 declare let BMap: any;
 
 export default class MapAppBaidu implements IMapContainer {
@@ -114,12 +115,15 @@ export default class MapAppBaidu implements IMapContainer {
         break;
     }
   }
+  public setMapStyle(param: string) {
+    //this.view.setMapStyle(param);
+  }
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     const overlay = OverlayBaidu.getInstance(this.view);
     overlay.showGisDeviceInfo = this.showGisDeviceInfo;
     return await overlay.addOverlays(params);
   }
-  public async findFeature(params: IFindParameter):Promise<any>{
+  public async findFeature(params: IFindParameter) {
     const overlay = OverlayBaidu.getInstance(this.view);
     await overlay.findFeature(params);
   }
@@ -212,12 +216,9 @@ export default class MapAppBaidu implements IMapContainer {
   public async hideRoad() {}
   public async showStreet() {}
   public async hideStreet() {}
-  public async showToolTip() {}
   public async locateStreet(param: IStreetParameter) {}
-  public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
-    return {
-      status:1,
-      message:"Not implemented"
-    }
+  public async routeSearch(params: routeParameter): Promise<IResult> {
+    return {status: 0, message: ''};
   }
+  public clearRouteSearch() {}
 }

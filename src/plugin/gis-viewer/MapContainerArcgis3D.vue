@@ -17,7 +17,8 @@ import {
   IFindParameter,
   IResult,
   IDistrictParameter,
-  IStreetParameter, IDrawOverlayParameter
+  IStreetParameter,
+  routeParameter
 } from '@/types/map';
 
 @Component({
@@ -52,15 +53,21 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public addHeatMap(params: IHeatParameter) {
     this.mapApp.addHeatMap(params);
   }
-  public addOverlaysCluster(params: IOverlayClusterParameter) {}
+  public addOverlaysCluster(params: IOverlayClusterParameter) {
+    this.mapApp.addOverlaysCluster(params);
+  }
   public deleteOverlays(params: IOverlayDelete) {
     this.mapApp.deleteOverlays(params);
   }
-  public deleteOverlaysCluster(params: IOverlayDelete) {}
+  public deleteOverlaysCluster(params: IOverlayDelete) {
+    this.mapApp.deleteOverlaysCluster(params);
+  }
   public deleteAllOverlays() {
     this.mapApp.deleteAllOverlays();
   }
-  public deleteAllOverlaysCluster() {}
+  public deleteAllOverlaysCluster() {
+    this.mapApp.deleteAllOverlaysCluster();
+  }
   public deleteHeatMap() {
     this.mapApp.deleteHeatMap();
   }
@@ -80,25 +87,24 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public hideJurisdiction() {}
   public showDistrictMask(param: IDistrictParameter) {}
   public hideDistrictMask() {}
-  public findFeature(params: IFindParameter):Promise<any>{
-    return this.mapApp.findFeature(params);
-  }
-  public findLayerFeature(params: IFindParameter) {
-    this.mapApp.findLayerFeature(params);
+  public findFeature(params: IFindParameter) {
+    this.mapApp.findFeature(params);
   }
   public showRoad() {}
   public hideRoad() {}
   public showStreet() {}
   public hideStreet() {}
   public locateStreet(param: IStreetParameter) {}
-  public showToolTip(){}
-  public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
-    return await this.mapApp.startDrawOverlays(params);
+  public setMapStyle(param: string) {}
+  public async routeSearch(params: routeParameter): Promise<IResult> {
+    return {status: 0, message: ''};
   }
+  public clearRouteSearch() {}
 }
 </script>
 
 <style scoped>
+/* @import './styles/map.css'; */
 #divArcGISMap3D {
   padding: 0;
   margin: 0;

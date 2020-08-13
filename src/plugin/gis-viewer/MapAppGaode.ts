@@ -11,14 +11,17 @@ import {
   IFindParameter,
   IResult,
   IDistrictParameter,
-  IStreetParameter, IDrawOverlayParameter
+  IStreetParameter,
+  routeParameter
 } from '@/types/map';
-import {OverlayGaode} from '@/plugin/gis-viewer/widgets/OverlayGaode';
-import {JurisdictionPoliceGD} from './widgets/GD/JurisdictionPoliceGD';
-import {HeatMapGD} from './widgets/GD/HeatMapGD';
-import {ClusterGD} from './widgets/GD/ClusterGD';
+import {OverlayGaode} from '@/plugin/gis-viewer/widgets/Overlays/gd/OverlayGaode';
+import {JurisdictionPoliceGD} from './widgets/JurisdictionPolice/gd/JurisdictionPoliceGD';
+import {HeatMapGD} from './widgets/HeatMap/gd/HeatMapGD';
+import {ClusterGD} from './widgets/Cluster/gd/ClusterGD';
 import '@amap/amap-jsapi-types';
-import {DrawSteet} from './widgets/GD/DrawStreet';
+import AMapLoader from '@amap/amap-jsapi-loader';
+import {DrawSteet} from './widgets/DrawStreet/gd/DrawStreet';
+import Route from './widgets/Route/Route';
 
 export default class MapAppGaode implements IMapContainer {
   public view!: AMap.Map;
@@ -28,17 +31,29 @@ export default class MapAppGaode implements IMapContainer {
 
   public async initialize(mapConfig: any, mapContainer: string) {
     let apiUrl = mapConfig.arcgis_api || mapConfig.api_url;
-    let plugins =
-      '&plugin=AMap.DistrictSearch,AMap.CustomLayer,AMap.ControlBar,AMap.MarkerClusterer';
+    let plugins = [
+      'AMap.DistrictSearch',
+      'AMap.CustomLayer',
+      'AMap.ControlBar',
+      'AMap.MarkerClusterer',
+      'AMap.Driving',
+      'AMap.Walking',
+      'AMap.Riding'
+    ];
     let version = '1.0';
     if (apiUrl.indexOf('v=2') > -1) {
-      plugins += ',AMap.HeatMap';
+      plugins.push('AMap.HeatMap');
       version = '2.0';
     } else {
-      plugins += ',AMap.Heatmap';
+      plugins.push('AMap.Heatmap');
     }
-    apiUrl = apiUrl + plugins;
-    await this.loadScripts([apiUrl]);
+    let key = this.getQueryString(apiUrl, 'key');
+    let v = this.getQueryString(apiUrl, 'v');
+    await AMapLoader.load({
+      key: key,
+      version: v,
+      plugins: plugins
+    });
     this.view = new AMap.Map(mapContainer, mapConfig.options);
     (this.view as any).version = version;
     (this.view as any).mapOptions = mapConfig.options;
@@ -54,20 +69,14 @@ export default class MapAppGaode implements IMapContainer {
       });
     });
   }
-  private async loadScripts(scriptUrls: string[]): Promise<any> {
-    let promises = scriptUrls.map((url) => {
-      return new Promise((resolve, reject) => {
-        const scriptElement = document.createElement('script');
-        scriptElement.src = url;
-        scriptElement.onload = resolve;
-        document.body.appendChild(scriptElement);
-      });
-    });
-    return new Promise((resolve) => {
-      Promise.all(promises).then((e) => {
-        resolve(e);
-      });
-    });
+  private getQueryString(url: string, name: string): string {
+    let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)'); //构造一个含有目标参数的正则表达式对象
+    let search = url.split('?')[1];
+    let r = search.match(reg); //匹配目标参数
+    if (r != null) {
+      return decodeURIComponent(r[2]);
+    }
+    return ''; //返回参数值
   }
   public createLayer(view: any, layer: any) {
     switch (layer.type) {
@@ -218,12 +227,15 @@ export default class MapAppGaode implements IMapContainer {
     const jurisdiction = JurisdictionPoliceGD.getInstance(this.view);
     await jurisdiction.locateStreet(param);
   }
-  public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
-    return {
-      status:1,
-      message:"Not implemented"
-    }
+  public setMapStyle(param: string) {
+    this.view.setMapStyle(param);
   }
-
-  public async showToolTip(){}
+  public async routeSearch(params: routeParameter): Promise<IResult> {
+    const route = Route.getInstance(this.view);
+    return await route.routeSearch(params);
+  }
+  public clearRouteSearch() {
+    const route = Route.getInstance(this.view);
+    route.clearRouteSearch();
+  }
 }

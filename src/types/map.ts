@@ -1,4 +1,3 @@
-
 export interface IResult {
   //本次接口调用状态，如果成功返回0，如果失败返回其他数字。
   status: number;
@@ -74,7 +73,6 @@ export interface IPolylineSymbol {
 export interface IPolygonSymbol {
   type: string;
   outline: IPolylineSymbol;
-  // style: "backward-diagonal" | "cross" | "diagonal-cross" | "forward-diagonal"
   color?: string;
   opacity?: number;
   zIndex?: number;
@@ -123,7 +121,6 @@ export interface IOverlayParameter {
   showToolTip?: boolean; //鼠标移到该点位是，是否显示悬浮窗
   toolTipContent?: string; //悬浮窗内容
 }
-
 export interface IOverlayClusterParameter {
   points: Array<IOverlay>;
   type?: string;
@@ -163,7 +160,7 @@ export interface IMapContainer {
   hideJurisdiction: () => void;
   showDistrictMask: (param: IDistrictParameter) => void;
   hideDistrictMask: () => void;
-  findFeature: (param: IFindParameter) => Promise<IResult>;
+  findFeature: (param: IFindParameter) => void;
   showRoad: (param: {ids: string[]}) => void;
   hideRoad: () => void;
   showStreet: () => void;
@@ -175,6 +172,9 @@ export interface IMapContainer {
   startRealTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>
   pausePlayback: () => void;
   goOnPlayback: () => void;
+  setMapStyle: (style: string) => void;
+  routeSearch: (param: any) => Promise<IResult>;
+  clearRouteSearch: () => void;
 }
 export interface IPopUpTemplate {
   title?: string;
@@ -247,3 +247,9 @@ export interface ITrackPlaybackParameter{
   canSuspend?:Boolean
 }
 
+export interface routeParameter {
+  start: IPointGeometry;
+  end: IPointGeometry;
+  waypoints: IPointGeometry[];
+  model: string; //"car","ride","walk"
+}

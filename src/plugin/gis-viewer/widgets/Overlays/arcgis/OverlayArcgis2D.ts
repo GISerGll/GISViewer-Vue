@@ -3,11 +3,16 @@ import {
   IPointSymbol,
   IResult,
   IOverlayDelete,
-  IFindParameter, IPolylineSymbol, IPolygonSymbol
+  IFindParameter,
+  IPolylineSymbol,
+  IPolygonSymbol
 } from '@/types/map';
 import {loadModules} from 'esri-loader';
 import ToolTip from './ToolTip2D';
 import HighFeauture2D from './Render/HighFeauture2D';
+import ToolTip from './ToolTip';
+import HighFeauture from './HighFeauture3D';
+import HighFeauture2D from './HighFeauture2D';
 
 export class OverlayArcgis2D {
   private static overlayArcgis2D: OverlayArcgis2D;
@@ -209,11 +214,15 @@ export class OverlayArcgis2D {
     for (let i = 0; i < params.overlays.length; i++) {
       const overlay = params.overlays[i];
       const overlaySymbol = OverlayArcgis2D.makeSymbol(overlay.symbol);
+
+      const geometry = geometryJsonUtils.fromJSON(overlay.geometry);
+      if (overlay.symbol && !overlay.symbol.type) {
+        overlay.symbol.type = geometry.type;
+      }
       //TODO: 加入更详细的参数是否合法判断
       if (!defaultSymbol && !overlaySymbol) {
         continue;
       }
-      const geometry = geometryJsonUtils.fromJSON(overlay.geometry);
       const fields = overlay.fields;
       fields.type = params.type;
       fields.id = overlay.id;
@@ -224,7 +233,6 @@ export class OverlayArcgis2D {
         symbol: overlaySymbol || defaultSymbol,
         attributes: fields || {}
       });
-
       graphic.type = params.type;
       graphic.id = overlay.id;
       graphic.buttons = buttons || defaultButtons;
@@ -289,14 +297,12 @@ export class OverlayArcgis2D {
         i--;
       }
     }
-
     return {
       status: 0,
       message: 'ok',
       result: `成功删除${delcount}个覆盖物`
     };
   }
-
   public async deleteAllOverlays(): Promise<IResult> {
     this.overlayLayer.removeAll();
     return {
@@ -304,8 +310,13 @@ export class OverlayArcgis2D {
       message: 'ok'
     };
   }
-
-  public async findFeature(params: IFindParameter,overlaysLayer?:__esri.GraphicsLayer): Promise<IResult> {
+  public async findFeature(params: IFindParameter): Promise<IResult> {
+    if (!this.overlayLayer) {
+      return {
+        status: 0,
+        message: 'ok'
+      };
+    }
     let type = params.layerName;
     let ids = params.ids || [];
     let level = params.level || this.view.zoom;
@@ -324,16 +335,15 @@ export class OverlayArcgis2D {
         if(i == lengthOfOverlays - 1){
           resolve("finish animating")
         }
+        this.startJumpPoint([overlay]);
       }
-    })
-
+    });
     return {
       status: 0,
       message: 'ok',
       result: processObj
     };
   }
-
   private async startJumpPoint(graphics: any[]) {
     let high = HighFeauture2D.getInstance(this.view);
     await high.startup(graphics);

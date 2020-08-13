@@ -30,9 +30,8 @@
       :map-config= mapConfig
       @map-loaded="mapLoaded"
       @marker-click="showGisDeviceInfo"
+      @marker-over="moveGisDeviceInfo"
     />
-
-
   </div>
 </template>
 <script lang="ts">
@@ -430,6 +429,9 @@ export default class PluginTest extends Vue {
   private showGisDeviceInfo(type: string, id: string, detail: any) {
     console.log(type, id, detail);
   }
+  private moveGisDeviceInfo(type: string, id: string, detail: any) {
+    console.log(type, id, detail);
+  }
 }
 </script>
 
@@ -442,26 +444,7 @@ export default class PluginTest extends Vue {
 }
 #test {
   position: absolute;
-  right: 20px;
-  top: 100px;
-  width: 400px;
-  height: 300px;
-  z-index: 100;
-  background: #ffffff;
-  color: #777777;
-  padding: 5px;
-  border: 2px solid #666666;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
-  font-size: 12px;
-}
-
-.fa-close{
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-    color: #7d98bf;
+  z-index: 99;
+  display: block;
 }
 </style>

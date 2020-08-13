@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
+import gd from './components/PluginGD.vue';
 import arc from './components/PluginTest.vue';
 import App from './App.vue';
 import GisViewer from './plugin/index';
@@ -11,6 +12,8 @@ Vue.use(GisViewer);
 Vue.use(VueRouter);
 //定义路由
 const routes = [
+  {path: '', component: arc},
+  {path: '/gd', component: gd},
   {path: '/arc', component: arc}
 ];
 
