@@ -245,10 +245,15 @@ export interface ITrackPlaybackParameter{
   routeUrl?:string
   canSuspend?:Boolean
 }
-
 export interface routeParameter {
   start: IPointGeometry;
   end: IPointGeometry;
   waypoints: IPointGeometry[];
   model: string; //"car","ride","walk"
+}
+export interface IElectronicFenceParameter {
+
+}
+export interface IElectronicFence {
+
 }
