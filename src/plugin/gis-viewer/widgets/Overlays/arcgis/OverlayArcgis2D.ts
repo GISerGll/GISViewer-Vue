@@ -267,7 +267,6 @@ export class OverlayArcgis2D {
       result: `成功添加${params.overlays.length}中的${addCount}个覆盖物`
     };
   }
-
   public async deleteOverlays(params: IOverlayDelete,overlayLayer?:__esri.GraphicsLayer): Promise<IResult> {
     let types = params.types || [];
     let ids = params.ids || [];
@@ -337,7 +336,6 @@ export class OverlayArcgis2D {
     let high = HighFeauture2D.getInstance(this.view);
     await high.startup(graphics);
   }
-
   private async goToView(overlay: any,type: any,ids:any[],centerResult:boolean,level:number){
     if (type == overlay.type && ids.indexOf(overlay.id) >= 0) {
       if (centerResult) {
@@ -356,7 +354,6 @@ export class OverlayArcgis2D {
       }
     }
   }
-
   public async showToolTip() {
     const view = this.view;
     const moveLayer = this.overlayLayer;

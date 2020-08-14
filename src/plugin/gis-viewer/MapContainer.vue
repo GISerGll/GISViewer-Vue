@@ -40,7 +40,7 @@ import {
   IDrawOverlayParameter,
   ITrackPlaybackParameter,
   IStreetParameter,
-  routeParameter
+  routeParameter, IElectronicFenceParameter
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -186,6 +186,9 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public clearRouteSearch() {
     this.mapContainer.clearRouteSearch();
+  }
+  public showMonitorArea(params:IElectronicFenceParameter) {
+    return this.mapContainer.showMonitorArea(params);
   }
 }
 </script>

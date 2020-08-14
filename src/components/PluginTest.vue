@@ -18,7 +18,8 @@
       <button @click="btn_startTrackPlayback">轨迹回放</button><br>
       <button @click="btn_startRealTrackPlayback">实际轨迹回放</button>
       <button @click="btn_pausePlayback">暂停</button>
-      <button @click="btn_goOnPlayback">继续</button>
+      <button @click="btn_goOnPlayback">继续</button><br>
+      <button @click="btn_showMonitorArea">四色围栏</button>
 
 <!--      <button @click="btn_">删除</button><br>-->
 <!--      <button @click="btn_addHeatMap">添加热力图</button>-->
@@ -343,6 +344,22 @@ export default class PluginTest extends Vue {
   private async btn_goOnPlayback(){
     let map = this.$refs.gisViewer as any;
     await map.goOnPlayback();
+  }
+  private async btn_showMonitorArea(){
+    let map = this.$refs.gisViewer as any;
+    await map.showMonitorArea({
+      geometry:{
+        rings:[[[87.716, 43.842],[87.716, 43.839],[87.715, 43.836],[87.714, 43.833],[87.713, 43.830],[87.711, 43.827],[87.708, 43.824],
+          [87.705, 43.822],[87.702, 43.819],[87.699, 43.817],[87.695, 43.816],[87.691, 43.814],[87.687, 43.813],[87.683, 43.812],
+          [87.678, 43.812],[87.674, 43.812],[87.670, 43.812],[87.665, 43.812],[87.661, 43.813],[87.657, 43.814],[87.653, 43.816],
+          [87.649, 43.817],[87.646, 43.819],[87.643, 43.822],[87.640, 43.824],[87.638, 43.827],[87.636, 43.830],[87.634, 43.833],
+          [87.633, 43.836],[87.632, 43.839],[87.632, 43.842],[87.632, 43.845],[87.633, 43.848],[87.634, 43.851],[87.636, 43.854],
+          [87.638, 43.857],[87.640, 43.860],[87.643, 43.862],[87.646, 43.865],[87.649, 43.867],[87.653, 43.868],[87.657, 43.870],
+          [87.661, 43.871],[87.665, 43.872],[87.670, 43.872],[87.674, 43.872],[87.678, 43.872],[87.683, 43.872],[87.687, 43.871],
+          [87.691, 43.870],[87.695, 43.868],[87.699, 43.867],[87.702, 43.865],[87.705, 43.862],[87.708, 43.860],[87.711, 43.857],
+          [87.713, 43.854],[87.714, 43.851],[87.715, 43.848],[87.716, 43.845],[87.716, 43.842]]]},
+      buffers:[1000,2000,3000,4000],
+      id:"四色围栏"});
   }
   private async loadImageAsync(url:string) {
         return new Promise(function(resolve, reject) {

@@ -1,22 +1,23 @@
 import {setDefaultOptions, loadCss, loadModules} from 'esri-loader';
 import {
-    ILayerConfig,
-    IOverlayParameter,
-    IResult,
-    IPointGeometry,
-    ICenterLevel,
-    IOverlayDelete,
-    IFindParameter,
-    IStreetParameter,
-    IHeatParameter,
-    IDrawOverlayParameter,
-    ITrackPlaybackParameter,
-    IOverlayClusterParameter,
-    routeParameter
+  ILayerConfig,
+  IOverlayParameter,
+  IResult,
+  IPointGeometry,
+  ICenterLevel,
+  IOverlayDelete,
+  IFindParameter,
+  IStreetParameter,
+  IHeatParameter,
+  IDrawOverlayParameter,
+  ITrackPlaybackParameter,
+  IOverlayClusterParameter,
+  routeParameter, IElectronicFenceParameter
 } from '@/types/map';
 
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback.ts";
+import ElectronicFence from "@/project/WuLuMuQi/ElectronicFence";
 import {OverlayArcgis2D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis2D';
 import {FindFeature} from './widgets/FindFeature/arcgis/FindFeature';
 import {HeatMap} from './widgets/HeatMap/arcgis/HeatMap';
@@ -456,4 +457,9 @@ export default class MapAppArcGIS2D {
     return {status: 0, message: ''};
   }
   public clearRouteSearch() {}
+
+  public showMonitorArea(params:IElectronicFenceParameter) {
+    const electronicFence = ElectronicFence.getInstance(this.view);
+    return electronicFence.showMonitorArea(params);
+  }
 }

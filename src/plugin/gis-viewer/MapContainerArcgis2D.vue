@@ -6,21 +6,21 @@
 import {Vue, Component, Emit, Prop} from 'vue-property-decorator';
 import MapApp from '@/plugin/gis-viewer/MapAppArcgis2D';
 import {
-    IMapContainer,
-    IOverlayParameter,
-    IHeatParameter,
-    IOverlayClusterParameter,
-    IOverlayDelete,
-    ILayerConfig,
-    IPointGeometry,
-    ICenterLevel,
-    IFindParameter,
-    IResult,
-    IDistrictParameter,
-    IStreetParameter,
-    IDrawOverlayParameter,
-    ITrackPlaybackParameter,
-    routeParameter
+  IMapContainer,
+  IOverlayParameter,
+  IHeatParameter,
+  IOverlayClusterParameter,
+  IOverlayDelete,
+  ILayerConfig,
+  IPointGeometry,
+  ICenterLevel,
+  IFindParameter,
+  IResult,
+  IDistrictParameter,
+  IStreetParameter,
+  IDrawOverlayParameter,
+  ITrackPlaybackParameter,
+  routeParameter, IElectronicFenceParameter
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -120,6 +120,10 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   }
   public goOnPlayback(){
     this.mapApp.goOnPlayback();
+  }
+
+  public showMonitorArea(params:IElectronicFenceParameter){
+    return this.mapApp.showMonitorArea(params);
   }
 }
 </script>

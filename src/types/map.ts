@@ -160,7 +160,7 @@ export interface IMapContainer {
   hideJurisdiction: () => void;
   showDistrictMask: (param: IDistrictParameter) => void;
   hideDistrictMask: () => void;
-  findFeature: (param: IFindParameter) => Promise<IResult>;
+  findFeature: (param: IFindParameter) => any;
   showRoad: (param: {ids: string[]}) => void;
   hideRoad: () => void;
   showStreet: () => void;
@@ -174,6 +174,7 @@ export interface IMapContainer {
   setMapStyle: (style: string) => void;
   routeSearch: (param: any) => Promise<IResult>;
   clearRouteSearch: () => void;
+  showMonitorArea: (param:IElectronicFenceParameter)=> Promise<IResult>;
 }
 export interface IPopUpTemplate {
   title?: string;
@@ -252,8 +253,29 @@ export interface routeParameter {
   model: string; //"car","ride","walk"
 }
 export interface IElectronicFenceParameter {
-
+  geometry:{
+    rings?:number[][][],
+    path?:number[][][],
+    x?:number,
+    y?:number
+  }
+  buffers:number[],
+  id?:string,
+  type?:string
 }
 export interface IElectronicFence {
-
+  geometry:{
+    rings?:number[][][],
+    path?:number[][][],
+    x?:number,
+    y?:number
+  }
+  buffers:number[],
+  id?:string,
+  type?:string
+}
+export interface IFenceDelete {
+  ids?:string[],
+  types?:string[],
+  message?:string
 }

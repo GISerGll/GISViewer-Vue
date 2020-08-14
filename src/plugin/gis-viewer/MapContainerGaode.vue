@@ -136,6 +136,7 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public async startDrawOverlays():Promise<any>{}
   public async showToolTip():Promise<any>{}
   public async findLayerFeature():Promise<any>{}
+  public showMonitorArea():any{}
 }
 </script>
 

@@ -244,4 +244,5 @@ export default class MapAppGaode implements IMapContainer {
   public goOnPlayback(){}
   public async startDrawOverlays():Promise<any>{}
   public async showToolTip():Promise<any>{}
+  public showMonitorArea():any{}
 }
