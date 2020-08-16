@@ -35,7 +35,10 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
     this.mapApp = new MapApp();
     await this.mapApp.initialize(this.mapConfig, 'divArcGISMap3D');
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
+    this.mapApp.mapClick = this.mapClick;
   }
+  @Emit('map-click')
+  public mapClick(point: object) {}
   @Emit('marker-click')
   public showGisDeviceInfo(type: string, id: string, detail: any) {}
   @Emit('marker-mouse')
@@ -107,6 +110,21 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public async startDrawOverlays():Promise<any>{}
   public async showToolTip():Promise<any>{}
   public showMonitorArea():any{}
+  public showRoutePoint(params: any) {}
+  public clearRoutePoint() {}
+
+  public async addDrawLayer(params: any): Promise<IResult> {
+    return await this.mapApp.addDrawLayer(params);
+  }
+  public clearDrawLayer(params: any) {
+    this.mapApp.clearDrawLayer(params);
+  }
+  public showMigrateChart(params: any) {
+    this.mapApp.showMigrateChart(params);
+  }
+  public hideMigrateChart() {
+    this.mapApp.hideMigrateChart();
+  }
 }
 </script>
 

@@ -23,6 +23,7 @@ export default class MapAppBaidu implements IMapContainer {
   public view!: any;
   public baseLayers: Array<any> = [];
   public showGisDeviceInfo: any;
+  public mapClick: any;
 
   public async initialize(mapConfig: any, mapContainer: string): Promise<void> {
     const apiUrl = mapConfig.arcgis_api; //"http://localhost:8090/baidu/BDAPI.js";
@@ -221,6 +222,16 @@ export default class MapAppBaidu implements IMapContainer {
     return {status: 0, message: ''};
   }
   public clearRouteSearch() {}
+
+  public showRoutePoint(params: any) {}
+  public clearRoutePoint() {}
+  public async addDrawLayer(params: any): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public clearDrawLayer(params: ILayerConfig) {}
+
+  public showMigrateChart(params: any) {}
+  public hideMigrateChart() {}
   public async startTrackPlayback() :Promise<any>{}
   public async startRealTrackPlayback() :Promise<any>{}
   public pausePlayback(){}

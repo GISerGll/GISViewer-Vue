@@ -31,7 +31,7 @@
       :map-config= mapConfig
       @map-loaded="mapLoaded"
       @marker-click="showGisDeviceInfo"
-      @marker-over="moveGisDeviceInfo"
+      @map-click="mapClick"
     />
   </div>
 </template>
@@ -444,6 +444,9 @@ export default class PluginTest extends Vue {
   }
   private moveGisDeviceInfo(type: string, id: string, detail: any) {
     console.log(type, id, detail);
+  }
+  private mapClick(pt: object) {
+    console.log(pt);
   }
 }
 </script>

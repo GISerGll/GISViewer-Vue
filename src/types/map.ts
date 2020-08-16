@@ -174,6 +174,12 @@ export interface IMapContainer {
   setMapStyle: (style: string) => void;
   routeSearch: (param: any) => Promise<IResult>;
   clearRouteSearch: () => void;
+  showRoutePoint: (params: any) => void;
+  clearRoutePoint: () => void;
+  addDrawLayer: (params: any) => Promise<IResult>;
+  clearDrawLayer: (params: ILayerConfig) => void;
+  showMigrateChart: (params: any) => void;
+  hideMigrateChart: () => void;
   showMonitorArea: (param:IElectronicFenceParameter)=> Promise<IResult>;
 }
 export interface IPopUpTemplate {
@@ -183,6 +189,16 @@ export interface IPopUpTemplate {
 export interface IHeatParameter {
   points: Array<IHeatPoint>;
   options: IHeatOptions;
+}
+export interface IHeatImageParameter {
+  points: Array<IHeatPoint>;
+  options: IHeatOptions;
+  images: {
+    url: string;
+    width: number;
+    heigth: number;
+    geometry: {x: number; y: number};
+  };
 }
 export interface IHeatOptions {
   field: string;

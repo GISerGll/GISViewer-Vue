@@ -37,8 +37,10 @@ export default class MapContainerGd extends Vue implements IMapContainer {
 
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
     this.mapApp.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
+    this.mapApp.mapClick = this.mapClick;
   }
-
+  @Emit('map-click')
+  public mapClick(point: object) {}
   @Emit('marker-click')
   public showGisDeviceInfo(type: string, id: string, detail: any) {}
   @Emit('marker-mouse')
@@ -129,6 +131,19 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public clearRouteSearch() {
     this.mapApp.clearRouteSearch();
   }
+  public showRoutePoint(params: any) {
+    this.mapApp.showRoutePoint(params);
+  }
+  public clearRoutePoint() {
+    this.mapApp.clearRoutePoint();
+  }
+  public async addDrawLayer(params: any): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public clearDrawLayer(params: ILayerConfig) {}
+
+  public showMigrateChart(params: any) {}
+  public hideMigrateChart() {}
   public async startTrackPlayback() :Promise<any>{}
   public async startRealTrackPlayback() :Promise<any>{}
   public pausePlayback(){}
@@ -141,6 +156,7 @@ export default class MapContainerGd extends Vue implements IMapContainer {
 </script>
 
 <style scoped>
+@import 'styles/main.css';
 #divAMap {
   padding: 0;
   margin: 0;

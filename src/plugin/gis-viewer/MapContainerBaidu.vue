@@ -34,7 +34,8 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     await this.mapApp.initialize(this.mapConfig, 'divBMap');
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
   }
-
+  @Emit('map-click')
+  public mapClick(point: object) {}
   @Emit('marker-click')
   public showGisDeviceInfo(type: string, id: string, detail: any) {}
   @Emit('marker-mouse')
@@ -112,6 +113,14 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async showToolTip():Promise<any>{}
   public async findLayerFeature():Promise<any>{}
   public showMonitorArea():any{}
+  public showRoutePoint(params: any) {}
+  public clearRoutePoint() {}
+  public async addDrawLayer(params: any): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public clearDrawLayer(params: ILayerConfig) {}
+  public showMigrateChart(params: any) {}
+  public hideMigrateChart() {}
 }
 </script>
 
