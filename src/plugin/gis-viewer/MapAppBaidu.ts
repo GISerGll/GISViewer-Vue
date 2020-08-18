@@ -239,4 +239,6 @@ export default class MapAppBaidu implements IMapContainer {
   public async startDrawOverlays():Promise<any>{}
   public async showToolTip():Promise<any>{}
   public showMonitorArea():any{}
+  public showCircleOutline():any{}
+  public createPlaceFence():any{}
 }

@@ -20,7 +20,7 @@ import {
   IStreetParameter,
   IDrawOverlayParameter,
   ITrackPlaybackParameter,
-  routeParameter, IElectronicFenceParameter
+  routeParameter, IElectronicFenceParameter, ICircleOutline, IMonitorAreaParameter
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -138,8 +138,14 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     this.mapApp.goOnPlayback();
   }
 
-  public showMonitorArea(params:IElectronicFenceParameter){
-    return this.mapApp.showMonitorArea(params);
+  public async showMonitorArea(params:IMonitorAreaParameter){
+    return await this.mapApp.showMonitorArea(params);
+  }
+  public async showCircleOutline(param:ICircleOutline):Promise<IResult> {
+    return await this.mapApp.showCircleOutline(param);
+  }
+  public async createPlaceFence(param:IElectronicFenceParameter):Promise<IResult> {
+    return await this.mapApp.createPlaceFence(param);
   }
 }
 </script>

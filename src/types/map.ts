@@ -180,7 +180,9 @@ export interface IMapContainer {
   clearDrawLayer: (params: ILayerConfig) => void;
   showMigrateChart: (params: any) => void;
   hideMigrateChart: () => void;
-  showMonitorArea: (param:IElectronicFenceParameter)=> Promise<IResult>;
+  showMonitorArea: (param:IMonitorAreaParameter)=> Promise<IResult>;
+  showCircleOutline: (param:ICircleOutline)=> Promise<IResult>;
+  createPlaceFence: (param:IElectronicFenceParameter)=> Promise<IResult>;
 }
 export interface IPopUpTemplate {
   title?: string;
@@ -269,6 +271,11 @@ export interface routeParameter {
   model: string; //"car","ride","walk"
 }
 export interface IElectronicFenceParameter {
+  pointsGeometry:number[][],
+  placeFenceId:string | number,
+  centerResults?:boolean,
+}
+export interface IMonitorAreaParameter {
   geometry:{
     rings?:number[][][],
     path?:number[][][],
@@ -294,4 +301,15 @@ export interface IFenceDelete {
   ids?:string[],
   types?:string[],
   message?:string
+}
+export interface ICircleOutline {
+  outlineSymbol?:{
+    colorAndTransp:number[],
+    width:number[],
+    style:string
+  },
+  circleId?:string,
+  circleType?:string,
+  geometry:number[],
+  radius:number
 }

@@ -460,4 +460,6 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async showToolTip():Promise<any>{}
   public async findLayerFeature():Promise<any>{}
   public showMonitorArea():any{}
+  public showCircleOutline():any{}
+  public createPlaceFence():any{}
 }

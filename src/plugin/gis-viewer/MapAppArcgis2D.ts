@@ -12,7 +12,7 @@ import {
   IDrawOverlayParameter,
   ITrackPlaybackParameter,
   IOverlayClusterParameter,
-  routeParameter, IElectronicFenceParameter
+  routeParameter, IElectronicFenceParameter, ICircleOutline, IMonitorAreaParameter
 } from '@/types/map';
 
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
@@ -457,7 +457,6 @@ export default class MapAppArcGIS2D {
     trackPlayback.goOnPlayback();
   }
   public setMapStyle(param: string) {}
-
   public async routeSearch(params: routeParameter): Promise<IResult> {
     return {status: 0, message: ''};
   }
@@ -480,9 +479,18 @@ export default class MapAppArcGIS2D {
     const chart = MigrateChart.getInstance(this.view);
     chart.hideMigrateChart();
   }
-
-  public showMonitorArea(params:IElectronicFenceParameter) {
+  public async showMonitorArea(params:IMonitorAreaParameter) {
     const electronicFence = ElectronicFence.getInstance(this.view);
-    return electronicFence.showMonitorArea(params);
+    return await electronicFence.showMonitorArea(params);
+  }
+
+  public async showCircleOutline(param:ICircleOutline):Promise<IResult> {
+    const electronicFence = ElectronicFence.getInstance(this.view);
+    return await electronicFence.showCircleOutline(param);
+  }
+
+  public async createPlaceFence(param:IElectronicFenceParameter):Promise<IResult> {
+    const electronicFence = ElectronicFence.getInstance(this.view);
+    return await electronicFence.createPlaceFence(param);
   }
 }

@@ -20,6 +20,8 @@
       <button @click="btn_pausePlayback">暂停</button>
       <button @click="btn_goOnPlayback">继续</button><br>
       <button @click="btn_showMonitorArea">四色围栏</button>
+      <button @click="btn_createPlaceFence">场所围栏</button>
+      <button @click="btn_showCircleOutline">圆边界</button>
 
 <!--      <button @click="btn_">删除</button><br>-->
 <!--      <button @click="btn_addHeatMap">添加热力图</button>-->
@@ -347,7 +349,7 @@ export default class PluginTest extends Vue {
   }
   private async btn_showMonitorArea(){
     let map = this.$refs.gisViewer as any;
-    await map.showMonitorArea({
+    const result = await map.showMonitorArea({
       geometry:{
         rings:[[[87.716, 43.842],[87.716, 43.839],[87.715, 43.836],[87.714, 43.833],[87.713, 43.830],[87.711, 43.827],[87.708, 43.824],
           [87.705, 43.822],[87.702, 43.819],[87.699, 43.817],[87.695, 43.816],[87.691, 43.814],[87.687, 43.813],[87.683, 43.812],
@@ -360,6 +362,22 @@ export default class PluginTest extends Vue {
           [87.713, 43.854],[87.714, 43.851],[87.715, 43.848],[87.716, 43.845],[87.716, 43.842]]]},
       buffers:[1000,2000,3000,4000],
       id:"四色围栏"});
+    console.log(result);
+  }
+  private async btn_showCircleOutline(){
+    let map = this.$refs.gisViewer as any;
+    await map.showCircleOutline({
+      geometry:[87.597,43.824],
+      radius:1000
+    })
+  }
+  private async btn_createPlaceFence(){
+    let map = this.$refs.gisViewer as any;
+    let fenceParamsObj:any = {};
+    fenceParamsObj.pointsGeometry = [[87.611,43.799],[87.608,43.799],[87.609,43.801],[87.612,43.801]];
+    fenceParamsObj.placeFenceId = "1";
+    fenceParamsObj.centerResults = true;
+    await map.createPlaceFence(fenceParamsObj);
   }
   private async loadImageAsync(url:string) {
         return new Promise(function(resolve, reject) {

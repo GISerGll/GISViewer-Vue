@@ -58,7 +58,7 @@ import {
   IDrawOverlayParameter,
   ITrackPlaybackParameter,
   IStreetParameter,
-  routeParameter, IElectronicFenceParameter
+  routeParameter, IElectronicFenceParameter, ICircleOutline, IMonitorAreaParameter
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -129,7 +129,6 @@ export default class MapContainer extends Vue implements IMapContainer {
   public deleteOverlaysCluster(params: IOverlayDelete) {
     this.mapContainer.deleteOverlaysCluster(params);
   }
-
   public deleteAllOverlays() {
     this.mapContainer.deleteAllOverlays();
   }
@@ -208,8 +207,8 @@ export default class MapContainer extends Vue implements IMapContainer {
   public clearRouteSearch() {
     this.mapContainer.clearRouteSearch();
   }
-  public showMonitorArea(params:IElectronicFenceParameter) {
-    return this.mapContainer.showMonitorArea(params);
+  public async showMonitorArea(params:IMonitorAreaParameter) {
+    return await this.mapContainer.showMonitorArea(params);
   }
   public showRoutePoint(params: any) {
     this.mapContainer.showRoutePoint(params);
@@ -228,6 +227,12 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public hideMigrateChart() {
     this.mapContainer.hideMigrateChart();
+  }
+  public async showCircleOutline(param:ICircleOutline):Promise<IResult> {
+    return await this.mapContainer.showCircleOutline(param);
+  }
+  public async createPlaceFence(param:IElectronicFenceParameter):Promise<IResult> {
+    return await this.mapContainer.createPlaceFence(param);
   }
 }
 </script>

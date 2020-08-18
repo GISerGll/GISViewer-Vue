@@ -125,6 +125,8 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public hideMigrateChart() {
     this.mapApp.hideMigrateChart();
   }
+  public showCircleOutline(params:any):any{}
+  public createPlaceFence(params:any):any{}
 }
 </script>
 
