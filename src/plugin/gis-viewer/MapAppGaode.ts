@@ -127,7 +127,9 @@ export default class MapAppGaode implements IMapContainer {
     const overlay = OverlayGaode.getInstance(this.view);
     return await overlay.findFeature(params);
   }
+
   public async findLayerFeature(params: IFindParameter) {}
+
   public async addOverlaysCluster(params: IOverlayClusterParameter) {
     const cluster = ClusterGD.getInstance(this.view);
     cluster.showGisDeviceInfo = this.showGisDeviceInfo;

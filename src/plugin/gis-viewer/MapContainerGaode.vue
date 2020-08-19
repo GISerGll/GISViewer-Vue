@@ -1,5 +1,5 @@
 <template>
-  <div :id="mapId" class="my-map-div" />
+  <div id="divAMap" />
 </template>
 
 <script lang="ts">
@@ -28,31 +28,29 @@ import {
 export default class MapContainerGd extends Vue implements IMapContainer {
   private mapApp!: MapApp;
 
-  @Prop({type: String, default: 'divAMap'}) mapId: string =
-    'divAMap' + (Math.random() * 10000).toFixed(0);
   //地图配置
   @Prop({type: Object}) readonly mapConfig!: Object;
 
   @Emit('map-loaded')
   async mounted() {
     this.mapApp = new MapApp();
-    await this.mapApp.initialize(this.mapConfig, this.mapId);
+    await this.mapApp.initialize(this.mapConfig, 'divAMap');
 
-    this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
-    this.mapApp.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
+    // this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
+    // this.mapApp.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
     this.mapApp.mapClick = this.mapClick;
   }
   @Emit('map-click')
   public mapClick(point: object) {}
-  @Emit('marker-click')
-  public showGisDeviceInfo(type: string, id: string, detail: any) {}
-  @Emit('marker-mouse')
-  public mouseGisDeviceInfo(
-    event: any,
-    type: string,
-    id: string,
-    detail: any
-  ) {}
+  // @Emit('marker-click')
+  // public showGisDeviceInfo(type: string, id: string, detail: any) {}
+  // @Emit('marker-mouse')
+  // public mouseGisDeviceInfo(
+  //   event: any,
+  //   type: string,
+  //   id: string,
+  //   detail: any
+  // ) {}
 
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     return await this.mapApp.addOverlays(params);
@@ -163,7 +161,7 @@ export default class MapContainerGd extends Vue implements IMapContainer {
 
 <style scoped>
 @import 'styles/main.css';
-.my-map-div {
+#divAMap {
   padding: 0;
   margin: 0;
   width: 100%;

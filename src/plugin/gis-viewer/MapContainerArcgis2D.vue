@@ -1,5 +1,5 @@
 <template>
-  <div :id="mapId" class="my-map-div" />
+  <div id="divArcGISMap2D" />
 </template>
 
 <script lang="ts">
@@ -34,15 +34,13 @@ import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 export default class MapContainerArcgis extends Vue implements IMapContainer {
   private mapApp!: MapApp;
 
-  @Prop({type: String, default: 'divArcGISMap2D'}) mapId: string =
-    'divArcGISMap2D' + (Math.random() * 10000).toFixed(0);
   //地图配置
   @Prop({type: Object}) readonly mapConfig!: Object;
 
   @Emit('map-loaded')
   async mounted() {
     this.mapApp = new MapApp();
-    await this.mapApp.initialize(this.mapConfig, this.mapId);
+    await this.mapApp.initialize(this.mapConfig, 'divArcGISMap2D');
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
     this.mapApp.mapClick = this.mapClick;
   }
@@ -165,7 +163,7 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
 <style scoped>
 /* @import './styles/map.css'; */
 @import './styles/cluter.css';
-.my-map-div {
+#divArcGISMap2D {
   padding: 0;
   margin: 0;
   width: 100%;

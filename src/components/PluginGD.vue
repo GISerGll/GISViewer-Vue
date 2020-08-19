@@ -10,10 +10,11 @@
       platform="gd"
       :map-config="mapConfig"
       @map-loaded="mapLoaded"
-      @marker-click="showGisDeviceInfo"
-      @marker-mouse="mouseGisDeviceInfo"
       @map-click="mapClick"
     />
+<!--      @marker-click="showGisDeviceInfo"-->
+<!--      @marker-mouse="mouseGisDeviceInfo"-->
+
   </div>
 </template>
 <script lang="ts">

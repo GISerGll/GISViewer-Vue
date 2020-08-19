@@ -29,10 +29,11 @@
       v-if="this.platform === 'gd'"
       :map-config="this.mapConfig"
       @map-loaded="mapLoaded"
-      @marker-click="showGisDeviceInfo"
-      @map-click="mapClick"
-      @marker-mouse="mouseGisDeviceInfo"
-    />
+      @map-click="mapClick"/>
+<!--      @marker-click="showGisDeviceInfo"-->
+
+<!--      @marker-mouse="mouseGisDeviceInfo"-->
+
   </div>
 </template>
 
