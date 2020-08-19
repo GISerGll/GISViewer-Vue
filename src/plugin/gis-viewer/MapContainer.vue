@@ -58,7 +58,11 @@ import {
   IDrawOverlayParameter,
   ITrackPlaybackParameter,
   IStreetParameter,
-  routeParameter, IElectronicFenceParameter, ICircleOutline, IMonitorAreaParameter
+  IElectronicFenceParameter,
+  ICircleOutline,
+  IMonitorAreaParameter,
+  routeParameter,
+  IHeatImageParameter
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -129,6 +133,7 @@ export default class MapContainer extends Vue implements IMapContainer {
   public deleteOverlaysCluster(params: IOverlayDelete) {
     this.mapContainer.deleteOverlaysCluster(params);
   }
+
   public deleteAllOverlays() {
     this.mapContainer.deleteAllOverlays();
   }
@@ -221,6 +226,12 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public clearDrawLayer(params: ILayerConfig) {
     this.mapContainer.clearDrawLayer(params);
+  }
+  public addHeatImage(params: IHeatImageParameter) {
+    this.mapContainer.addHeatImage(params);
+  }
+  public deleteHeatImage() {
+    this.mapContainer.deleteHeatImage();
   }
   public showMigrateChart(params: any) {
     this.mapContainer.showMigrateChart(params);

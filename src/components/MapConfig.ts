@@ -10,14 +10,27 @@ export default class MapConfig {
     //arcgis_api: "http://localhost:8090/baidu/BDAPI.js",
     theme: 'dark', //dark,vec
     baseLayers: [
+      // {
+      //   type: 'tiled',
+      //   url:
+      //     'https://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',
+      //   visible: true
+      // },
       {
         type: 'tiled',
         url:
-          'https://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',
+          'https://cache1.arcgisonline.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',
         visible: true
       }
     ],
     operationallayers: [
+      // {
+      //   label: 'fbd',
+      //   url:
+      //     'http://172.30.30.1:6080/arcgis/rest/services/ShangHai/FBD_GD/MapServer',
+      //   type: 'dynamic',
+      //   visible: true
+      // },
       // {
       //   label: '地铁1',
       //   url: 'http://localhost:8090/TGISViewer_v200/images/guozhanzhongxin.svg',
@@ -206,8 +219,8 @@ export default class MapConfig {
     //gisServer: 'http://128.64.151.245:8019',
     options: {
       //for arcgis-2d
-      center: [121.441, 31.159],
-      zoom: 12,
+      center: [121.415, 31.174],
+      zoom: 14,
       //viewingMode: 'local'
       // ground: {opacity: 0},
       // alphaCompositingEnabled: true,
@@ -333,8 +346,57 @@ export default class MapConfig {
     //const result = await map.addOverlays(points);
   }
   public btn_test1(map: any) {
-    map.showMigrateChart();
-    //map.addDrawLayer({});
+    var points = [];
+    var x = 121.43;
+    var y = 31.15;
+    for (var i = 0; i < 1000; i++) {
+      var x1 = x + (Math.random() * 2 - 1) / 10;
+      var y1 = y + (Math.random() * 2 - 1) / 10;
+      var value = Math.floor(1000 * Math.random() + 1);
+      var a = i % 2 == 0 ? '1' : '0';
+      points.push({
+        geometry: {x: x1, y: y1},
+        fields: {desc: '上海体育馆停车场', totalSpace: value, type: a}
+      });
+    }
+    var json = {
+      points: points,
+      images: {geometry: {x: x - 0.1, y: y + 0.1}, width: 500, height: 500},
+      options: {
+        field: 'totalSpace',
+        radius: '20',
+        colors: [
+          'rgb(255, 255, 255)',
+          'rgba(206, 199, 25,0.9)',
+          'rgba(255, 140, 27,0.9)',
+          'rgba(246, 64, 64,0.9)'
+        ],
+        maxValue: 1000,
+        minValue: 1,
+        zoom: 15,
+        renderer: {
+          type: 'simple',
+          symbol: {
+            type: 'esriPMS',
+            url: 'assets/image/Anchor.png',
+            width: 64,
+            height: 66,
+            yoffset: 16
+          }
+        }
+      }
+    };
+    //map.addHeatImage(json);
+
+    // map.showMigrateChart();
+    map.addDrawLayer({
+      layerUrls: './config/fbd/morph_ksl.json',
+      label: '快速路'
+    });
+    map.addDrawLayer({
+      layerUrls: './config/fbd/morph_fbd.json',
+      label: '发布段'
+    });
     // map
     //   .routeSearch({
     //     start: {x: 121.31, y: 31.46}, //开始坐标
@@ -476,7 +538,9 @@ export default class MapConfig {
     });
   }
   public btn_test3(map: any) {
-    map.clearRouteSearch(); //清除
+    map.deleteHeatImage();
+    map.hideMigrateChart();
+    //map.clearRouteSearch(); //清除
     //map.setMapStyle('amap://styles/darkblue');
     //map.locateStreet({id: '10013'});
     // map.showLayer({type: 'traffic'});
@@ -488,10 +552,10 @@ export default class MapConfig {
     // });
     //map.hideLayer({label: '匝道灯'});
     //map.deleteHeatMap();
-    map.deleteOverlaysCluster({types: ['sxj1']});
+    //map.deleteOverlaysCluster({types: ['sxj1']});
     //map.deleteAllOverlays();
     //map.deleteOverlays({ids: ['test001']});
-    //map.hideLayer({ type: "traffic" });
+    map.hideLayer({label: '发布段'});
     //map.setMapCenter({x: 121.12, y: 31.23});
     //map.setMapCenterAndLevel({
     //   x: 121.12,

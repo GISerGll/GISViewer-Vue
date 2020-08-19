@@ -1,6 +1,6 @@
 import {IHeatImageParameter} from '@/types/map';
 import {loadModules} from 'esri-loader';
-import {getThumbnailUrl} from 'esri/widgets/BasemapToggle/BasemapToggleViewModel';
+
 export class HeatImage {
   private static intance: HeatImage;
   private view!: any;
@@ -31,12 +31,13 @@ export class HeatImage {
     (HeatImage.intance as any) = null;
   }
 
-  public async deleteHeatMap() {
+  public async deleteHeatImage() {
     this.clear();
   }
   private clear() {
     if (this.canvas) {
       this.canvas.parentNode.removeChild(this.canvas);
+      this.canvas = null;
     }
     if (this.centerwatchHandle) {
       this.centerwatchHandle.remove();
@@ -45,7 +46,7 @@ export class HeatImage {
       this.scalewatchHandle = null;
     }
   }
-  public async addHeatMap(params: IHeatImageParameter) {
+  public async addHeatImage(params: IHeatImageParameter) {
     // Create featurelayer from client-side graphics
     this.clear();
     let options = params.options;
@@ -70,9 +71,9 @@ export class HeatImage {
     parent.appendChild(canvas);
     this.canvas = canvas;
     this.image = new Image();
-    this.image.src = 'http://localhost/gz.svg';
-    this.image.width = this.imageOpt.width;
-    this.image.heigth = this.imageOpt.height;
+    this.image.src = imageOpt.url || 'http://localhost/vc.png';
+    this.image.width = this.imageOpt.width || 1133;
+    this.image.heigth = this.imageOpt.height || 713;
     let that = this;
     this.image.onload = (e: any) => {
       var ctx = that.canvas.firstChild.getContext('2d');
@@ -100,9 +101,9 @@ export class HeatImage {
       container: this.canvas,
       radius: rad,
       gradient: this.getHeatColor(options.colors),
-      maxOpacity: 0.5,
+      maxOpacity: 1,
       minOpacity: 0,
-      blur: 0.75
+      blur: 1
     });
     let fieldName = this.options.field;
     this.pointdata = [];
@@ -165,9 +166,9 @@ export class HeatImage {
       container: this.canvas,
       radius: rad,
       gradient: this.getHeatColor(this.options.colors),
-      maxOpacity: 0.5,
+      maxOpacity: 1,
       minOpacity: 0,
-      blur: 0.75
+      blur: 1
     });
     this.heatmapInstance.setData(data);
     let p = this.view.toScreen(this.imagePos);

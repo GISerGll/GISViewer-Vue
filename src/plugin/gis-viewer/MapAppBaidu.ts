@@ -12,7 +12,8 @@ import {
   IResult,
   IDistrictParameter,
   IStreetParameter,
-  routeParameter
+  routeParameter,
+  IHeatImageParameter
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -241,4 +242,6 @@ export default class MapAppBaidu implements IMapContainer {
   public showMonitorArea():any{}
   public showCircleOutline():any{}
   public createPlaceFence():any{}
+  public addHeatImage(params: IHeatImageParameter) {}
+  public deleteHeatImage() {}
 }

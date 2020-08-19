@@ -180,6 +180,8 @@ export interface IMapContainer {
   clearDrawLayer: (params: ILayerConfig) => void;
   showMigrateChart: (params: any) => void;
   hideMigrateChart: () => void;
+  addHeatImage: (params: IHeatImageParameter) => void;
+  deleteHeatImage: () => void;
   showMonitorArea: (param:IMonitorAreaParameter)=> Promise<IResult>;
   showCircleOutline: (param:ICircleOutline)=> Promise<IResult>;
   createPlaceFence: (param:IElectronicFenceParameter)=> Promise<IResult>;

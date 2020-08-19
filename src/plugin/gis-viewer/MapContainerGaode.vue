@@ -1,5 +1,5 @@
 <template>
-  <div id="divAMap" />
+  <div :id="mapId" class="my-map-div" />
 </template>
 
 <script lang="ts">
@@ -18,7 +18,8 @@ import {
   IResult,
   IDistrictParameter,
   IStreetParameter,
-  routeParameter
+  routeParameter,
+  IHeatImageParameter
 } from '@/types/map';
 
 @Component({
@@ -27,13 +28,15 @@ import {
 export default class MapContainerGd extends Vue implements IMapContainer {
   private mapApp!: MapApp;
 
+  @Prop({type: String, default: 'divAMap'}) mapId: string =
+    'divAMap' + (Math.random() * 10000).toFixed(0);
   //地图配置
   @Prop({type: Object}) readonly mapConfig!: Object;
 
   @Emit('map-loaded')
   async mounted() {
     this.mapApp = new MapApp();
-    await this.mapApp.initialize(this.mapConfig, 'divAMap');
+    await this.mapApp.initialize(this.mapConfig, this.mapId);
 
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
     this.mapApp.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
@@ -141,7 +144,8 @@ export default class MapContainerGd extends Vue implements IMapContainer {
     return {status: 0, message: ''};
   }
   public clearDrawLayer(params: ILayerConfig) {}
-
+  public addHeatImage(params: IHeatImageParameter) {}
+  public deleteHeatImage() {}
   public showMigrateChart(params: any) {}
   public hideMigrateChart() {}
   public async startTrackPlayback() :Promise<any>{}
@@ -159,7 +163,7 @@ export default class MapContainerGd extends Vue implements IMapContainer {
 
 <style scoped>
 @import 'styles/main.css';
-#divAMap {
+.my-map-div {
   padding: 0;
   margin: 0;
   width: 100%;

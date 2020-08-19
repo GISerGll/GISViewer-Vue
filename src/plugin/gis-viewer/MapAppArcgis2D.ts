@@ -12,7 +12,11 @@ import {
   IDrawOverlayParameter,
   ITrackPlaybackParameter,
   IOverlayClusterParameter,
-  routeParameter, IElectronicFenceParameter, ICircleOutline, IMonitorAreaParameter
+  IHeatImageParameter,
+  routeParameter,
+  IElectronicFenceParameter,
+  ICircleOutline,
+  IMonitorAreaParameter
 } from '@/types/map';
 
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
@@ -26,6 +30,7 @@ import {TextSymbol} from 'esri/symbols';
 import {Cluster} from './widgets/Cluster/arcgis/Cluster';
 import {DrawLayer} from './widgets/DrawLayer/arcgis/DrawLayer';
 import {MigrateChart} from './widgets/MigrateChart/arcgis/MigrateChart';
+import {HeatImage} from './widgets/HeatMap/arcgis/HeatImage';
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
@@ -190,6 +195,8 @@ export default class MapAppArcGIS2D {
     HeatMap.destroy();
     FindFeature.destroy();
     MigrateChart.destroy();
+    DrawLayer.destroy();
+    HeatImage.destroy();
   }
   //使toolTip中支持{字段}的形式
   private getContent(attr: any, content: string): string {
@@ -478,6 +485,14 @@ export default class MapAppArcGIS2D {
   public hideMigrateChart() {
     const chart = MigrateChart.getInstance(this.view);
     chart.hideMigrateChart();
+  }
+  public addHeatImage(params: IHeatImageParameter) {
+    const heat = HeatImage.getInstance(this.view);
+    heat.addHeatImage(params);
+  }
+  public deleteHeatImage() {
+    const heat = HeatImage.getInstance(this.view);
+    heat.deleteHeatImage();
   }
   public async showMonitorArea(params:IMonitorAreaParameter) {
     const electronicFence = ElectronicFence.getInstance(this.view);

@@ -12,7 +12,8 @@ import {
   IResult,
   IDistrictParameter,
   IStreetParameter,
-  routeParameter
+  routeParameter,
+  IHeatImageParameter
 } from '@/types/map';
 import {OverlayGaode} from '@/plugin/gis-viewer/widgets/Overlays/gd/OverlayGaode';
 import {JurisdictionPoliceGD} from './widgets/JurisdictionPolice/gd/JurisdictionPoliceGD';
@@ -112,6 +113,7 @@ export default class MapAppGaode implements IMapContainer {
     HeatMapGD.destroy();
     JurisdictionPoliceGD.destroy();
     DrawSteet.destroy();
+    Route.destroy();
     RoutePoint.destroy();
   }
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
@@ -270,4 +272,6 @@ export default class MapAppGaode implements IMapContainer {
   public showMonitorArea():any{}
   public showCircleOutline():any{}
   public createPlaceFence():any{}
+  public addHeatImage(params: IHeatImageParameter) {}
+  public deleteHeatImage() {}
 }
