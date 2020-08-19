@@ -185,6 +185,8 @@ export interface IMapContainer {
   showMonitorArea: (param:IMonitorAreaParameter)=> Promise<IResult>;
   showCircleOutline: (param:ICircleOutline)=> Promise<IResult>;
   createPlaceFence: (param:IElectronicFenceParameter)=> Promise<IResult>;
+  createLineFence: (param:IElectronicFenceParameter)=> Promise<IResult>;
+  createElectFenceByEndPtsConnection: (param:IElectronicFenceParameter)=> Promise<IResult>;
 }
 export interface IPopUpTemplate {
   title?: string;
@@ -274,7 +276,8 @@ export interface routeParameter {
 }
 export interface IElectronicFenceParameter {
   pointsGeometry:number[][],
-  placeFenceId:string | number,
+  fenceId:string | number,
+  fenceType?:"placeFence" | "lineFence"
   centerResults?:boolean,
 }
 export interface IMonitorAreaParameter {

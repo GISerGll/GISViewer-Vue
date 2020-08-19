@@ -56,21 +56,6 @@ export default class ElectronicFence {
     this.view.map.add(this.fenceLayer);
   }
 
-  public async MonitorControl(params:IElectronicFenceParameter):Promise<IResult>{
-
-    return {
-      message:"not finish",
-      status:0
-    }
-  }
-
-  public async clearMonitorControl(params:IFenceDelete):Promise<IResult>{
-    return {
-      message:"not finish",
-      status:0
-    }
-  }
-
   public async showMonitorArea(params:IMonitorAreaParameter):Promise<IResult>{
     if(!this.fenceLayer){
       await this.createOverlayLayer();
@@ -216,11 +201,10 @@ export default class ElectronicFence {
     });
     lineGraphic.id = circleId;
     lineGraphic.type = circleType;
-    let field = {
+    lineGraphic.attributes = {
       id:circleId,
       type:circleType
-    }
-    lineGraphic.attributes = field
+    };
 
     this.fenceLayer.add(lineGraphic);
 
@@ -232,7 +216,24 @@ export default class ElectronicFence {
   }
 
   public async deleteCircleOutline(params:IFenceDelete):Promise<IResult>{
-    return await this.clearMonitorArea(params);
+    if(!params.ids && !params.types){
+      //不输入参数删除默认类型值为"circleOultine"的圆边界
+      const result = await this.clearMonitorArea({types:["circleOutline"]});
+      return {
+        status:0,
+        message:"clear the circle Outline of default type 'circleOutline'",
+        result:result.result
+      }
+    }
+    else {
+      const result = await this.clearMonitorArea({types:params.types,ids:params.ids});
+
+      return {
+        status:0,
+        message:`clear the circle Outline of type:${params.types},ids:${params.ids}`,
+        result:result.result
+      }
+    }
   }
 
   public async createPlaceFence(params:IElectronicFenceParameter):Promise<IResult>{
@@ -256,27 +257,26 @@ export default class ElectronicFence {
     //场所围栏初始坐标
     var ptsGeometry = params.pointsGeometry;
     //场所围栏id
-    if(typeof params.placeFenceId === "string"){
-      this.fenceId = parseInt(params.placeFenceId,10);
+    if(typeof params.fenceId === "string"){
+      this.fenceId = parseInt(params.fenceId,10);
     }
     else {
-      this.fenceId = params.placeFenceId
+      if(!this.fenceId){
+        return {
+          message:"invalidate placeFence ID,input only number!",
+          status:0
+        };
+      }
+
+      this.fenceId = params.fenceId
     }
 
     let centerResults = params.centerResults;
-    if(!this.fenceId){
-      return {
-        message:"invalidate placeFence ID,input only number!",
-        status:0
-      };
-    }
-
     //判断是否存在id值为placeFenceId的围栏,有则删除
     await this.clearMonitorArea({ids:[this.fenceId.toString()]});
 
     let trackFeatures:__esri.Graphic[] = [];
     let featuresCount = 0;
-
     ptsGeometry.forEach((ptGeometry)=>{
       //点位加载
       let point = new Point({
@@ -323,16 +323,144 @@ export default class ElectronicFence {
   }
 
   public async createLineFence(params:IElectronicFenceParameter):Promise<IResult>{
+    if(!this.fenceLayer){
+      await this.createOverlayLayer();
+    }
+
+    type MapModules = [
+      typeof import('esri/Graphic'),
+      typeof import('esri/geometry/Point'),
+      typeof import('esri/geometry/support/jsonUtils'),
+      typeof import('esri/geometry/support/webMercatorUtils')
+    ];
+    const [Graphic,Point,geometryJsonUtils,WebMercatorUtils] = await (loadModules([
+      'esri/Graphic',
+      'esri/geometry/Point',
+      'esri/geometry/support/jsonUtils',
+      'esri/geometry/support/webMercatorUtils'
+    ]) as Promise<MapModules>);
+
+    //场所围栏初始坐标
+    let ptsGeometry = params.pointsGeometry;
+    //场所围栏id
+    if(typeof params.fenceId === "string"){
+      this.fenceId = parseInt(params.fenceId,10);
+    }
+    else {
+      if(!this.fenceId){
+        return {
+          message:"invalidate placeFence ID,input only number!",
+          status:0
+        };
+      }
+
+      this.fenceId = params.fenceId
+    }
+    let centerResults = params.centerResults;
+
+    //判断是否存在id值为placeFenceId的围栏,有则删除
+    await this.clearMonitorArea({ids:[this.fenceId.toString()]});
+
+    let trackFeatures:__esri.Graphic[] = [];
+    let featuresCount = 0;
+    ptsGeometry.forEach((ptGeometry)=>{
+      //点位加载
+      let point = new Point({
+        x:ptGeometry[0],
+        y:ptGeometry[1]
+      }) as any;
+
+      if (this.view.spatialReference.isWebMercator) {
+        point = WebMercatorUtils.geographicToWebMercator(point);
+      }
+      //点位生成覆盖物
+      let graphic:any = new Graphic(point);
+      graphic.id = "trackPoint" + featuresCount++;
+      graphic.type = "trackPoints";
+      //加载点位覆盖物
+      trackFeatures.push(graphic);
+    })
+
+    let routeUrl = "http://128.64.151.245:6080/arcgis/rest/services/WuLuMuQi/wlmq_road_analyst/NAServer/Route";
+    await this.solveRoute(routeUrl,trackFeatures).then(async (results)=>{
+      if(!results){
+        console.log("cannot solve the routes!","color: blue;font-size:13px");
+        return {
+          status:0,
+          message:"there is nothing road between the given points..."
+        };
+      }
+      else {
+        this.endPtsGeometryArray = results;
+        // this.endPtsGeometryArray = paths[0];
+        await this.createPolylineGraphics();
+        if(this.fenceGraphic){
+          console.log(this.fenceGraphic);
+          this.fenceLayer.add(this.fenceGraphic);
+          if(centerResults){
+            await this.view.goTo(this.fenceGraphic.geometry.extent.expand(2));
+          }
+        }
+        await this.afterOneFenceFinished();
+      }
+    })
+
     return {
       message:"not finish",
       status:0
     }
   }
 
-  public async createElectFenceByEndptsConnection(params:IElectronicFenceParameter):Promise<IResult>{
+  public async createElectFenceByEndPtsConnection(params:IElectronicFenceParameter):Promise<IResult>{
+    this.endPtsGeometryArray = params.pointsGeometry;
+    //场所围栏id
+    if(typeof params.fenceId === "string"){
+      this.fenceId = parseInt(params.fenceId,10);
+    }
+    else {
+      if(!this.fenceId){
+        return {
+          message:"invalidate placeFence ID,input only number!",
+          status:0
+        };
+      }
+
+      this.fenceId = params.fenceId
+    }
+    let centerResults = params.centerResults;
+    //场所类型,默认为场所围栏
+    let fenceType = params.fenceType || "placeFence";
+
+    await this.clearMonitorArea({ids:[this.fenceId.toString()]});
+    if(this.endPtsGeometryArray.length <= 2){
+      return {
+        status:0,
+        message:"Clear fences with the same ID attribute because of the pts' length no longer than 2"
+      };
+    }
+
+    if(fenceType === "placeFence"){
+      await this.createPolygonGraphics();
+    }
+    else if(fenceType === "lineFence"){
+      await this.createPolylineGraphics();
+    }
+    else {
+      return {
+        status:0,
+        message:"please check out the fenceType attribute"
+      }
+    }
+
+    this.fenceLayer.add(this.fenceGraphic);
+    if(centerResults){
+      await this.view.goTo(this.fenceGraphic.geometry.extent.expand(2));
+    }
+
+    await this.afterOneFenceFinished();
     return {
-      message:"not finish",
-      status:0
+      status:0,
+      message:"finish createElectFenceByEndptsConnection",
     }
   }
 
@@ -355,7 +483,7 @@ export default class ElectronicFence {
     let types = params.types || [];
     let message = params.message;
     let delCount = 0;
-    if (!ids && !types) {
+    if (!ids.length && !types.length) {
       this.fenceLayer.removeAll();
     }
 
@@ -416,6 +544,41 @@ export default class ElectronicFence {
     return bufferPolygon;
   }
 
+  private async createPolylineGraphics() {
+    type MapModules = [
+      typeof import('esri/Graphic'),
+      typeof import('esri/geometry/Polyline'),
+      typeof import('esri/geometry/support/webMercatorUtils')
+    ];
+    const [Graphic,Polyline,WebMercatorUtils] = await (loadModules([
+      'esri/Graphic',
+      'esri/geometry/Polyline',
+      'esri/geometry/support/webMercatorUtils'
+    ]) as Promise<MapModules>);
+
+    let polylineGeometry = new Polyline({
+      paths: [this.endPtsGeometryArray]
+    });
+    let webMercatorPolygon = WebMercatorUtils.geographicToWebMercator(polylineGeometry);
+    let polylineSymbol = {
+      type: "simple-line",  // autocasts as SimpleLineSymbol()
+      color: [8, 146, 251, 255],
+      width: 10
+    };
+
+    this.fenceGraphic = new Graphic({
+      geometry:polylineGeometry,
+      symbol:polylineSymbol,
+    });
+
+    this.fenceGraphic.attributes = {
+      id:this.fenceId,
+      type:"lineFence"
+    };
+    this.fenceGraphic.type = "lineFence";
+    this.fenceGraphic.id = this.fenceId;
+  }
+
   private async solveRoute(url:string,features:__esri.Graphic[]):Promise<any>{
     let onePath:any = [];
 
@@ -442,7 +605,6 @@ export default class ElectronicFence {
 
     return onePath;
   }
-
   //向服务器请求数据
   private async requireRoute(url:string,features:__esri.Graphic[]):Promise<__esri.RouteResult>{
     const [RouteTask,RouteParameters,FeatureSet] = await loadModules([
@@ -496,6 +658,11 @@ export default class ElectronicFence {
       geometry:webMercatorPolygon,
       symbol:sfs,
     });
+    this.fenceGraphic.attributes = {
+      id:this.fenceId,
+      type:"lineFence"
+    };
+
     this.fenceGraphic.type = "placeFence";
     this.fenceGraphic.id = this.fenceId;
   }
@@ -511,7 +678,6 @@ export default class ElectronicFence {
     //重排序围栏
     await this.reorderGraphics();
   }
-
   //对地图上的围栏进行重排序
   private async reorderGraphics () {
     function compare(value1:any,value2:any){

@@ -246,6 +246,12 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async createPlaceFence(param:IElectronicFenceParameter):Promise<IResult> {
     return await this.mapContainer.createPlaceFence(param);
   }
+  public async createLineFence(param:IElectronicFenceParameter):Promise<IResult> {
+    return await this.mapContainer.createLineFence(param);
+  }
+  public async createElectFenceByEndPtsConnection(param:IElectronicFenceParameter):Promise<IResult> {
+    return await this.mapContainer.createElectFenceByEndPtsConnection(param);
+  }
 }
 </script>
 

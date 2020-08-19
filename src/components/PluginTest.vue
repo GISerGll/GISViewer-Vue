@@ -21,6 +21,8 @@
       <button @click="btn_goOnPlayback">继续</button><br>
       <button @click="btn_showMonitorArea">四色围栏</button>
       <button @click="btn_createPlaceFence">场所围栏</button>
+      <button @click="btn_createLineFence">线路围栏</button>
+      <button @click="btn_createElectFenceByEndPtsConnection">直线围栏</button>
       <button @click="btn_showCircleOutline">圆边界</button>
 
 <!--      <button @click="btn_">删除</button><br>-->
@@ -375,9 +377,25 @@ export default class PluginTest extends Vue {
     let map = this.$refs.gisViewer as any;
     let fenceParamsObj:any = {};
     fenceParamsObj.pointsGeometry = [[87.611,43.799],[87.608,43.799],[87.609,43.801],[87.612,43.801]];
-    fenceParamsObj.placeFenceId = "1";
+    fenceParamsObj.fenceId = "1";
     fenceParamsObj.centerResults = true;
     await map.createPlaceFence(fenceParamsObj);
+  }
+  private async btn_createLineFence(){
+    let map = this.$refs.gisViewer as any;
+    let fenceParamsObj:any = {};
+    fenceParamsObj.pointsGeometry = [[87.611,43.799],[87.608,43.799],[87.609,43.801],[87.612,43.801]];
+    fenceParamsObj.fenceId = "2";
+    fenceParamsObj.centerResults = true;
+    await map.createLineFence(fenceParamsObj);
+  }
+  private async btn_createElectFenceByEndPtsConnection(){
+    let map = this.$refs.gisViewer as any;
+    let fenceParamsObj:any = {};
+    fenceParamsObj.pointsGeometry = [[87.611,43.799],[87.608,43.799],[87.609,43.801],[87.612,43.801]];
+    fenceParamsObj.fenceId = "3";
+    fenceParamsObj.centerResults = true;
+    await map.createElectFenceByEndPtsConnection(fenceParamsObj);
   }
   private async loadImageAsync(url:string) {
         return new Promise(function(resolve, reject) {

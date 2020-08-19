@@ -157,6 +157,12 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async createPlaceFence(param:IElectronicFenceParameter):Promise<IResult> {
     return await this.mapApp.createPlaceFence(param);
   }
+  public async createLineFence(param:IElectronicFenceParameter):Promise<IResult> {
+    return await this.mapApp.createLineFence(param);
+  }
+  public async createElectFenceByEndPtsConnection(param:IElectronicFenceParameter):Promise<IResult> {
+    return await this.mapApp.createElectFenceByEndPtsConnection(param);
+  }
 }
 </script>
 

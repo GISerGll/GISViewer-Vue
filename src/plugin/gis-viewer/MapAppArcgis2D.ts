@@ -508,4 +508,14 @@ export default class MapAppArcGIS2D {
     const electronicFence = ElectronicFence.getInstance(this.view);
     return await electronicFence.createPlaceFence(param);
   }
+
+  public async createLineFence(param:IElectronicFenceParameter):Promise<IResult> {
+    const electronicFence = ElectronicFence.getInstance(this.view);
+    return await electronicFence.createLineFence(param);
+  }
+
+  public async createElectFenceByEndPtsConnection(param:IElectronicFenceParameter):Promise<IResult> {
+    const electronicFence = ElectronicFence.getInstance(this.view);
+    return await electronicFence.createElectFenceByEndPtsConnection(param);
+  }
 }
