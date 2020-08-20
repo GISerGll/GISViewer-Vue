@@ -1,5 +1,5 @@
 <template>
-  <div :id="mapId" class="my-map-div" />
+  <div id="divArcGISMap3D" />
 </template>
 
 <script lang="ts">
@@ -28,15 +28,15 @@ import {
 export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   private mapApp!: MapApp;
 
-  @Prop({type: String, default: 'divArcGISMap3D'}) mapId: string =
-    'divArcGISMap3D' + (Math.random() * 10000).toFixed(0);
+  // @Prop({type: String, default: 'divArcGISMap3D'}) mapId: string =
+  //   'divArcGISMap3D' + (Math.random() * 10000).toFixed(0);
   //地图配置
   @Prop({type: Object}) readonly mapConfig!: Object;
 
   @Emit('map-loaded')
   async mounted() {
     this.mapApp = new MapApp();
-    await this.mapApp.initialize(this.mapConfig, this.mapId);
+    await this.mapApp.initialize(this.mapConfig, 'divArcGISMap3D');
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
     this.mapApp.mapClick = this.mapClick;
   }
@@ -132,12 +132,14 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   }
   public showCircleOutline(params:any):any{}
   public createPlaceFence(params:any):any{}
+  public createLineFence(params:any):any{}
+  public createElectFenceByEndPtsConnection(params:any):any{}
 }
 </script>
 
 <style scoped>
 /* @import './styles/map.css'; */
-.my-map-div {
+#divArcGISMap3D {
   padding: 0;
   margin: 0;
   width: 100%;

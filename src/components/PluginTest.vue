@@ -32,7 +32,7 @@
     <gis-viewer
       ref="gisViewer"
       platform="arcgis2d"
-      :map-config= mapConfig
+      :map-config="mapConfig"
       @map-loaded="mapLoaded"
       @marker-click="showGisDeviceInfo"
       @map-click="mapClick"
@@ -44,12 +44,7 @@ import {Vue, Component} from 'vue-property-decorator';
 import WuLuMuQiConfig from '@/project/WuLuMuQi/mapConfig';
 import axios from 'axios';
 import {IResult} from "@/types/map";
-import Parent from "@/components/tooltips/Parent.vue";
-@Component({
-  components: {
-    Parent,
-  }
-})
+@Component
 export default class PluginTest extends Vue {
   private mapConfig = WuLuMuQiConfig.mapConfig;
 

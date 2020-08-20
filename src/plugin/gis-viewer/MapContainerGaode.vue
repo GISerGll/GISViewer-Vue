@@ -156,6 +156,8 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public showMonitorArea():any{}
   public showCircleOutline(params:any):any{}
   public createPlaceFence(params:any):any{}
+  public createLineFence(params:any):any{}
+  public createElectFenceByEndPtsConnection(params:any):any{}
 }
 </script>
 

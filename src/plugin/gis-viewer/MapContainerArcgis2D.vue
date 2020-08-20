@@ -26,7 +26,6 @@ import {
   ICircleOutline,
   IMonitorAreaParameter
 } from '@/types/map';
-import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
 @Component({
   name: 'MapContainerArcgisTwoD'
@@ -38,7 +37,7 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   @Prop({type: Object}) readonly mapConfig!: Object;
 
   @Emit('map-loaded')
-  async mounted() {
+ async mounted() {
     this.mapApp = new MapApp();
     await this.mapApp.initialize(this.mapConfig, 'divArcGISMap2D');
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;

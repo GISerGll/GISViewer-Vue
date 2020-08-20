@@ -26,8 +26,7 @@ import {
 export default class MapContainerArcgis extends Vue implements IMapContainer {
   private mapApp!: MapApp;
 
-  @Prop({type: String, default: 'divBMap'}) mapId: string =
-    'divBMap' + (Math.random() * 10000).toFixed(0);
+  private mapId: string = 'divBMap' + (Math.random() * 10000).toFixed(0);
   //地图配置
   @Prop({type: Object}) readonly mapConfig!: Object;
 
@@ -128,6 +127,8 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public hideMigrateChart() {}
   public showCircleOutline(params:any):any{}
   public createPlaceFence(params:any):any{}
+  public createLineFence(params:any):any{}
+  public createElectFenceByEndPtsConnection(params:any):any{}
 }
 </script>
 

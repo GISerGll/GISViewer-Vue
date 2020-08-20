@@ -242,6 +242,8 @@ export default class MapAppBaidu implements IMapContainer {
   public showMonitorArea():any{}
   public showCircleOutline():any{}
   public createPlaceFence():any{}
+  public createLineFence(params:any):any{}
+  public createElectFenceByEndPtsConnection(params:any):any{}
   public addHeatImage(params: IHeatImageParameter) {}
   public deleteHeatImage() {}
 }
