@@ -309,8 +309,6 @@ export interface IEditFenceLabel {
   clearOtherLabels?:boolean
   isEditable?:boolean
   endEditing?:boolean
-  startEditingType:"click" | "dbl-click"
-  endEditingType:"click" | "dbl-click"
 }
 export interface IFenceDelete {
   ids?:string[],

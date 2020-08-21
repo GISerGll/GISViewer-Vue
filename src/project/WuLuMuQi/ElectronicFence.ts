@@ -498,7 +498,7 @@ export default class ElectronicFence {
       }
       editingFenceId = params.fenceId
     }
-    //如果上一个监听事件孩子执行，则关闭
+    //如果上一个监听事件还在执行，则关闭
     if(this.onHandlerObj.onClick){
       this.onHandlerObj.onClick.remove();
       this.onHandlerObj.onMouseMove.remove();
@@ -546,8 +546,8 @@ export default class ElectronicFence {
       }
 
       //监控事件联动条件
-      let canEdit = false;
-      let canCreatePoint = false;
+      let canStart = false;
+      let canStop = false;
       //标注点图层注册监听事件
       this.onHandlerObj.onClick = this.view.on('click',async (event)=>{
         const response = await this.view.hitTest(event);
@@ -555,15 +555,34 @@ export default class ElectronicFence {
           response.results.forEach((result) => {
             const graphic: any = result.graphic;
             if (graphic.type === "labelText" || graphic.type === "labelMarker") {
-              canEdit = true;
+              canStart = true;
               this.editingId = graphic.id;
             }
           })
         }
+
+        if(canStop && event.x){
+          canStart = false;
+          canStop = false;
+          let pointGeometry = this.view.toMap({x: event.x, y: event.y});
+          fencePtsArray[parseInt(this.editingId,10) - 1] = [pointGeometry.longitude,pointGeometry.latitude];
+          await this.createElectFenceByEndPtsConnection({
+            pointsGeometry:fencePtsArray,
+            fenceId:editingFenceId,
+            fenceType:fenceType,
+            centerResults: false
+          })
+          await this.createSimpleAndLabelPt(this.editingId,[pointGeometry.longitude,pointGeometry.latitude]);
+
+          if(endDeleting){
+            await this.removeEditingLabel();
+          }
+        }
       })
+
       this.onHandlerObj.onMouseMove = this.view.on('pointer-move',async (event) =>{
-        if(canEdit){
-          canCreatePoint = true;
+        if(canStart){
+          canStop = true;
           let pointGeometry = this.view.toMap({x: event.x, y: event.y});
           if (event.pointerId) {
             fencePtsArray[parseInt(this.editingId,10) - 1] = [pointGeometry.longitude,pointGeometry.latitude];
@@ -577,26 +596,6 @@ export default class ElectronicFence {
           })
 
           await this.createSimpleAndLabelPt(this.editingId,[pointGeometry.longitude,pointGeometry.latitude]);
-        }
-      })
-      this.onHandlerObj.onDblClick = this.view.on('double-click',async (event:any) => {
-        if(canCreatePoint && event.x){
-          canEdit = false;
-          canCreatePoint = true;
-          let pointGeometry = this.view.toMap({x: event.x, y: event.y});
-          fencePtsArray[parseInt(this.editingId,10) - 1] = [pointGeometry.longitude,pointGeometry.latitude];
-          canCreatePoint = false;
-          await this.createElectFenceByEndPtsConnection({
-            pointsGeometry:fencePtsArray,
-            fenceId:editingFenceId,
-            fenceType:fenceType,
-            centerResults: false
-          })
-          await this.createSimpleAndLabelPt(this.editingId,[pointGeometry.longitude,pointGeometry.latitude]);
-
-          if(endDeleting){
-            await this.removeEditingLabel();
-          }
         }
       })
     }

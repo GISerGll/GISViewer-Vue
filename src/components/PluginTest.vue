@@ -407,7 +407,7 @@ export default class PluginTest extends Vue {
       //编辑围栏id
       editingFenceId:"1",
       //编辑结束后自动删除
-      endEditing:false
+      endEditing:false,
     })
   }
   private async loadImageAsync(url:string) {
