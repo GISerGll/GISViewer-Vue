@@ -24,7 +24,7 @@ import {
   routeParameter,
   IElectronicFenceParameter,
   ICircleOutline,
-  IMonitorAreaParameter
+  IMonitorAreaParameter, IEditFenceLabel
 } from '@/types/map';
 
 @Component({
@@ -161,6 +161,9 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   }
   public async createElectFenceByEndPtsConnection(param:IElectronicFenceParameter):Promise<IResult> {
     return await this.mapApp.createElectFenceByEndPtsConnection(param);
+  }
+  public async showEditingLabel(param:IEditFenceLabel):Promise<IResult> {
+    return await this.mapApp.showEditingLabel(param);
   }
 }
 </script>

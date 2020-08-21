@@ -24,6 +24,7 @@
       <button @click="btn_createLineFence">线路围栏</button>
       <button @click="btn_createElectFenceByEndPtsConnection">直线围栏</button>
       <button @click="btn_showCircleOutline">圆边界</button>
+      <button @click="btn_showEditingLabel">编辑围栏</button>
 
 <!--      <button @click="btn_">删除</button><br>-->
 <!--      <button @click="btn_addHeatMap">添加热力图</button>-->
@@ -391,6 +392,23 @@ export default class PluginTest extends Vue {
     fenceParamsObj.fenceId = "3";
     fenceParamsObj.centerResults = true;
     await map.createElectFenceByEndPtsConnection(fenceParamsObj);
+  }
+  private async btn_showEditingLabel(){
+    let map = this.$refs.gisViewer as any;
+    map.showEditingLabel({
+      //编辑点坐标
+      labelGeometry:[87.611,43.799],
+      //编辑点数值
+      fenceId:"1",
+      //是否保留其他编辑点（多点同时编辑操作）
+      clearOtherLabels:true,
+      //是否开启编辑
+      isEditable:true,
+      //编辑围栏id
+      editingFenceId:"1",
+      //编辑结束后自动删除
+      endEditing:false
+    })
   }
   private async loadImageAsync(url:string) {
         return new Promise(function(resolve, reject) {

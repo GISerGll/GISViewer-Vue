@@ -187,6 +187,7 @@ export interface IMapContainer {
   createPlaceFence: (param:IElectronicFenceParameter)=> Promise<IResult>;
   createLineFence: (param:IElectronicFenceParameter)=> Promise<IResult>;
   createElectFenceByEndPtsConnection: (param:IElectronicFenceParameter)=> Promise<IResult>;
+  showEditingLabel:(param:IEditFenceLabel) => Promise<IResult>;
 }
 export interface IPopUpTemplate {
   title?: string;
@@ -301,6 +302,15 @@ export interface IElectronicFence {
   buffers:number[],
   id?:string,
   type?:string
+}
+export interface IEditFenceLabel {
+  fenceId:number | string
+  labelGeometry:number[]
+  clearOtherLabels?:boolean
+  isEditable?:boolean
+  endEditing?:boolean
+  startEditingType:"click" | "dbl-click"
+  endEditingType:"click" | "dbl-click"
 }
 export interface IFenceDelete {
   ids?:string[],

@@ -16,7 +16,7 @@ import {
   routeParameter,
   IElectronicFenceParameter,
   ICircleOutline,
-  IMonitorAreaParameter
+  IMonitorAreaParameter, IEditFenceLabel
 } from '@/types/map';
 
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
@@ -129,6 +129,9 @@ export default class MapAppArcGIS2D {
       if (response.results.length > 0) {
         response.results.forEach((result) => {
           const graphic = result.graphic;
+          if(!graphic.attributes){
+            return ;
+          }
           let {type, id} = graphic.attributes;
           let label = (graphic.layer as any).label;
           if (
@@ -536,5 +539,10 @@ export default class MapAppArcGIS2D {
   public async createElectFenceByEndPtsConnection(param:IElectronicFenceParameter):Promise<IResult> {
     const electronicFence = ElectronicFence.getInstance(this.view);
     return await electronicFence.createElectFenceByEndPtsConnection(param);
+  }
+
+  public async showEditingLabel(param:IEditFenceLabel):Promise<IResult> {
+    const electronicFence = ElectronicFence.getInstance(this.view);
+    return await electronicFence.showEditingLabel(param);
   }
 }

@@ -63,7 +63,7 @@ import {
   ICircleOutline,
   IMonitorAreaParameter,
   routeParameter,
-  IHeatImageParameter
+  IHeatImageParameter, IEditFenceLabel
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -251,6 +251,9 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public async createElectFenceByEndPtsConnection(param:IElectronicFenceParameter):Promise<IResult> {
     return await this.mapContainer.createElectFenceByEndPtsConnection(param);
+  }
+  public async showEditingLabel(param:IEditFenceLabel):Promise<IResult> {
+    return await this.mapContainer.showEditingLabel(param);
   }
 }
 </script>

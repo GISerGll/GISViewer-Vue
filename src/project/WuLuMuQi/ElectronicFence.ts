@@ -1,6 +1,7 @@
 import {
   IResult,
   IElectronicFence,
+  IEditFenceLabel,
   IElectronicFenceParameter,
   IMonitorAreaParameter,
   IFenceDelete,
@@ -12,6 +13,13 @@ export default class ElectronicFence {
   private static electronicFence:ElectronicFence
   private view!: __esri.MapView
   private fenceLayer!: __esri.GraphicsLayer
+  private editingPtsLayer!:__esri.GraphicsLayer
+  private onHandlerObj:{
+    onClick:any,
+    onMouseMove:any,
+    onDblClick:any
+  }
+  private editingId!:string
   private fenceId!: number
   private fenceGraphic!: any
   // private currentInfo:{
@@ -33,6 +41,11 @@ export default class ElectronicFence {
     this.view = view
     this.fenceId = -1;
     this.endPtsGeometryArray = [];
+    this.onHandlerObj = {
+      onClick: null,
+      onMouseMove: null,
+      onDblClick: null
+    }
   }
 
   public static getInstance(view: __esri.MapView){
@@ -53,9 +66,13 @@ export default class ElectronicFence {
       id:"electronicFence_fenceLayer"
     });
 
-    this.view.map.add(this.fenceLayer);
-  }
+    this.editingPtsLayer = new GraphicsLayer({
+      id:"electronicFence_editingPtsLayer"
+    })
 
+    this.view.map.addMany([this.fenceLayer,this.editingPtsLayer]);
+  }
+  //四色围栏
   public async showMonitorArea(params:IMonitorAreaParameter):Promise<IResult>{
     if(!this.fenceLayer){
       await this.createOverlayLayer();
@@ -146,7 +163,7 @@ export default class ElectronicFence {
       result:resultBuffers
     }
   }
-
+  //搜索圆边界
   public async showCircleOutline(params:ICircleOutline):Promise<IResult>{
     if(!this.fenceLayer){
       await this.createOverlayLayer();
@@ -214,7 +231,7 @@ export default class ElectronicFence {
       result:lineGraphic
     }
   }
-
+  //删除搜索圆边界
   public async deleteCircleOutline(params:IFenceDelete):Promise<IResult>{
     if(!params.ids && !params.types){
       //不输入参数删除默认类型值为"circleOultine"的圆边界
@@ -235,7 +252,7 @@ export default class ElectronicFence {
       }
     }
   }
-
+  //场所围栏
   public async createPlaceFence(params:IElectronicFenceParameter):Promise<IResult>{
     if(!this.fenceLayer){
       await this.createOverlayLayer();
@@ -244,18 +261,16 @@ export default class ElectronicFence {
     type MapModules = [
       typeof import('esri/Graphic'),
       typeof import('esri/geometry/Point'),
-      typeof import('esri/geometry/support/jsonUtils'),
       typeof import('esri/geometry/support/webMercatorUtils')
     ];
-    const [Graphic,Point,geometryJsonUtils,WebMercatorUtils] = await (loadModules([
+    const [Graphic,Point,WebMercatorUtils] = await (loadModules([
       'esri/Graphic',
       'esri/geometry/Point',
-      'esri/geometry/support/jsonUtils',
       'esri/geometry/support/webMercatorUtils',
     ]) as Promise<MapModules>);
 
     //场所围栏初始坐标
-    var ptsGeometry = params.pointsGeometry;
+    let ptsGeometry = params.pointsGeometry;
     //场所围栏id
     if(typeof params.fenceId === "string"){
       this.fenceId = parseInt(params.fenceId,10);
@@ -321,7 +336,7 @@ export default class ElectronicFence {
       status:0
     }
   }
-
+  //线路围栏
   public async createLineFence(params:IElectronicFenceParameter):Promise<IResult>{
     if(!this.fenceLayer){
       await this.createOverlayLayer();
@@ -410,7 +425,7 @@ export default class ElectronicFence {
       status:0
     }
   }
-
+  //按端点生成直线围栏
   public async createElectFenceByEndPtsConnection(params:IElectronicFenceParameter):Promise<IResult>{
     this.endPtsGeometryArray = params.pointsGeometry;
     //场所围栏id
@@ -463,19 +478,137 @@ export default class ElectronicFence {
       message:"finish createElectFenceByEndptsConnection",
     }
   }
+  //展示编辑label
+  public async showEditingLabel(params:IEditFenceLabel):Promise<IResult>{
+    let geometry = params.labelGeometry;
+    let isClearOtherLabels = params.clearOtherLabels === true;
+    let isEditable = params.isEditable;
+    let endDeleting = params.endEditing;
+    let editingFenceId:string;
 
-  public async showEditingLabel(params:IElectronicFenceParameter):Promise<IResult>{
+    if(typeof params.fenceId === "number"){
+      editingFenceId = params.fenceId.toString();
+    }
+    else {
+      if(!params.fenceId){
+        return {
+          message:"invalidate fence ID,input string or number!",
+          status:0
+        };
+      }
+      editingFenceId = params.fenceId
+    }
+    //如果上一个监听事件孩子执行，则关闭
+    if(this.onHandlerObj.onClick){
+      this.onHandlerObj.onClick.remove();
+      this.onHandlerObj.onMouseMove.remove();
+      this.onHandlerObj.onDblClick.remove();
+    }
+    //引入模块作为promise对象
+    type MapModules = [
+      typeof import('esri/geometry/support/webMercatorUtils')
+    ];
+    const [WebMercatorUtils] = await (loadModules([
+      'esri/geometry/support/webMercatorUtils',
+    ]) as Promise<MapModules>);
+
+    if(!this.fenceLayer){
+      await this.createOverlayLayer();
+    }
+    if(isClearOtherLabels){
+      this.editingPtsLayer.removeAll();
+    }
+    //初始化生成一个label
+    await this.createSimpleAndLabelPt(editingFenceId,geometry);
+
+    if(isEditable){
+      //获取将要编辑的围栏
+      let editingFence = this.getElectFence(editingFenceId);
+      if(!editingFence){
+        return {
+          status:0,
+          message:"there is no electronic fence"
+        }
+      }
+      let geoFenceGeometry:any = WebMercatorUtils.webMercatorToGeographic(editingFence.geometry);
+      let fencePtsArray:any;
+      let fenceType = editingFence.type;
+      if(fenceType === "placeFence"){
+        fencePtsArray = geoFenceGeometry.rings[0];
+      }
+      else if(fenceType === "lineFence"){
+        fencePtsArray = geoFenceGeometry.paths[0];
+      }else {
+        return {
+          status:0,
+          message:"can't get the electronic fence type!"
+        }
+      }
+
+      //监控事件联动条件
+      let canEdit = false;
+      let canCreatePoint = false;
+      //标注点图层注册监听事件
+      this.onHandlerObj.onClick = this.view.on('click',async (event)=>{
+        const response = await this.view.hitTest(event);
+        if (response.results.length > 0) {
+          response.results.forEach((result) => {
+            const graphic: any = result.graphic;
+            if (graphic.type === "labelText" || graphic.type === "labelMarker") {
+              canEdit = true;
+              this.editingId = graphic.id;
+            }
+          })
+        }
+      })
+      this.onHandlerObj.onMouseMove = this.view.on('pointer-move',async (event) =>{
+        if(canEdit){
+          canCreatePoint = true;
+          let pointGeometry = this.view.toMap({x: event.x, y: event.y});
+          if (event.pointerId) {
+            fencePtsArray[parseInt(this.editingId,10) - 1] = [pointGeometry.longitude,pointGeometry.latitude];
+          }
+
+          await this.createElectFenceByEndPtsConnection({
+            pointsGeometry:fencePtsArray,
+            fenceId:editingFenceId,
+            fenceType:fenceType,
+            centerResults: false
+          })
+
+          await this.createSimpleAndLabelPt(this.editingId,[pointGeometry.longitude,pointGeometry.latitude]);
+        }
+      })
+      this.onHandlerObj.onDblClick = this.view.on('double-click',async (event:any) => {
+        if(canCreatePoint && event.x){
+          canEdit = false;
+          canCreatePoint = true;
+          let pointGeometry = this.view.toMap({x: event.x, y: event.y});
+          fencePtsArray[parseInt(this.editingId,10) - 1] = [pointGeometry.longitude,pointGeometry.latitude];
+          canCreatePoint = false;
+          await this.createElectFenceByEndPtsConnection({
+            pointsGeometry:fencePtsArray,
+            fenceId:editingFenceId,
+            fenceType:fenceType,
+            centerResults: false
+          })
+          await this.createSimpleAndLabelPt(this.editingId,[pointGeometry.longitude,pointGeometry.latitude]);
+
+          if(endDeleting){
+            await this.removeEditingLabel();
+          }
+        }
+      })
+    }
+
     return {
       message:"not finish",
       status:0
     }
   }
-
-  public async removeEditingLabel(params:IFenceDelete):Promise<IResult>{
-    return {
-      message:"not finish",
-      status:0
-    }
+  //移除编辑label
+  public async removeEditingLabel():Promise<any>{
+    this.editingPtsLayer.removeAll();
   }
 
   private async clearMonitorArea(params:IFenceDelete,overlayLayer?:__esri.GraphicsLayer):Promise<IResult> {
@@ -483,11 +616,11 @@ export default class ElectronicFence {
     let types = params.types || [];
     let message = params.message;
     let delCount = 0;
+    const searchLayer = overlayLayer ? overlayLayer : this.fenceLayer;
+
     if (!ids.length && !types.length) {
       this.fenceLayer.removeAll();
     }
-
-    const searchLayer = overlayLayer ? overlayLayer : this.fenceLayer;
     for (let i = 0; i < searchLayer.graphics.length; i++) {
       let graphic: any = searchLayer.graphics.getItemAt(i);
       if (
@@ -664,7 +797,7 @@ export default class ElectronicFence {
     };
 
     this.fenceGraphic.type = "placeFence";
-    this.fenceGraphic.id = this.fenceId;
+    this.fenceGraphic.id = this.fenceId.toString();
   }
   //单个围栏完成之后的操作
   private async afterOneFenceFinished() {
@@ -697,4 +830,95 @@ export default class ElectronicFence {
     }
   }
 
+  private async createSimpleAndLabelPt(id:string,geometry:number[]){
+    type MapModules = [
+      typeof import('esri/Graphic'),
+      typeof import('esri/geometry/Point'),
+      typeof import('esri/geometry/support/webMercatorUtils'),
+      typeof import('esri/symbols/Font'),
+      typeof import('esri/symbols/TextSymbol'),
+    ];
+    const [Graphic,Point,WebMercatorUtils,Font,TextSymbol] = await (loadModules([
+      'esri/Graphic',
+      'esri/geometry/Point',
+      'esri/geometry/support/webMercatorUtils',
+      'esri/symbols/Font',
+      'esri/symbols/TextSymbol'
+    ]) as Promise<MapModules>);
+
+    //获取并删除前一个
+    await this.getLabelPointAndRemove(id);
+
+    let font = new Font({
+      size:"20px",
+      weight:"bolder"
+    });
+
+    let textSymbol = new TextSymbol(
+      {
+        text:id,
+        font:font,
+        color:"red",
+      });
+
+    let idLength = id.length;
+    textSymbol.set({
+      xoffset:15+(idLength-1)*5,
+      yoffset:-6.5
+    });
+
+    let labelPtGeometry = new Point({
+      longitude:geometry[0],
+      latitude:geometry[1]
+    })
+
+    let webMercatorLabelPtGeometry = WebMercatorUtils.geographicToWebMercator(labelPtGeometry);
+    let labelPointGraphic = new Graphic({
+      geometry:webMercatorLabelPtGeometry,
+      symbol:textSymbol
+    }) as any;
+    labelPointGraphic.id = id;
+    labelPointGraphic.type = "labelText"
+
+    let simplePointGraphic = new Graphic({
+      geometry:labelPtGeometry,
+      symbol:{
+        type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
+        style: "circle",
+        color: "orange",
+        size: "16px",  // pixels
+        outline: {  // autocasts as new SimpleLineSymbol()
+          color: [ 0, 0, 0 ],
+          width: 0.5  // points
+        }
+      } as any
+    }) as any;
+    simplePointGraphic.id = id;
+    simplePointGraphic.type = "labelMarker"
+
+    this.editingPtsLayer.add(simplePointGraphic);
+    // add the label point graphic to the map
+    this.editingPtsLayer.add(labelPointGraphic);
+  }
+
+  private getLabelPointAndRemove(id:string){
+    return this.clearMonitorArea({ids:[id]},this.editingPtsLayer);
+  }
+
+  private getElectFence(graphicId:string){
+    for(let j = 0;j<this.fenceLayer.graphics.length;j++){
+      let electFence:any = this.fenceLayer.graphics.getItemAt(j);
+      if(graphicId){
+        if(electFence.id === graphicId){
+          return electFence;
+        }
+      }
+      else{
+        if(electFence.id === this.fenceId){
+          return electFence;
+        }
+      }
+    }
+    return null;
+  }
 }
