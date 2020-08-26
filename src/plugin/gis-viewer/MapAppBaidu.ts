@@ -246,4 +246,5 @@ export default class MapAppBaidu implements IMapContainer {
   public createElectFenceByEndPtsConnection(params:any):any{}
   public addHeatImage(params: IHeatImageParameter) {}
   public deleteHeatImage() {}
+  public showEditingLabel(params:any):any{}
 }

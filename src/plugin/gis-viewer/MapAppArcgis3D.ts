@@ -483,8 +483,6 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public createPlaceFence():any{}
   public createLineFence(params:any):any{}
   public createElectFenceByEndPtsConnection(params:any):any{}
-  public addHeatImage(params: IHeatImageParameter) {}
-  public deleteHeatImage() {}
   public addHeatImage(params: IHeatImageParameter) {
     // const heat = HeatImage.getInstance(this.view);
     // heat.addHeatImage(params);
@@ -495,4 +493,5 @@ export default class MapAppArcGIS3D implements IMapContainer {
     const heat = HeatImage.getInstance(this.view);
     heat.deleteHeatImage();
   }
+  public showEditingLabel(params:any):any{}
 }

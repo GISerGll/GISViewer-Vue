@@ -158,6 +158,7 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public createPlaceFence(params:any):any{}
   public createLineFence(params:any):any{}
   public createElectFenceByEndPtsConnection(params:any):any{}
+  public showEditingLabel(params:any):any{}
 }
 </script>
 

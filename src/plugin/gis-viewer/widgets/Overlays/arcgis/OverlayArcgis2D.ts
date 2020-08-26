@@ -44,7 +44,7 @@ export class OverlayArcgis2D {
     return intance;
   }
   public static destroy() {
-    console.log('destry');
+    console.log('destroy');
     (OverlayArcgis2D.intances as any) = null;
   }
   private async createOverlayLayer() {

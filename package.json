@@ -1,6 +1,6 @@
 {
-  "name": "gisviewer-vue",
-  "version": "0.3.32",
+  "name": "gisviewer-vue-cd",
+  "version": "0.3.36",
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -41,10 +41,10 @@
     "vue-router": "^3.3.4",
     "vue-template-compiler": "^2.6.10"
   },
-  "homepage": "https://github.com/herrshi/GISViewer-Vue",
+  "homepage": "https://github.com/GISerGll/GISViewer-Vue.git",
   "repository": {
     "type": "git",
-    "url": "https://github.com/herrshi/GISViewer-Vue.git"
+    "url": "https://github.com/GISerGll/GISViewer-Vue.git"
   },
   "typings": "types/index.d.ts"
 }
