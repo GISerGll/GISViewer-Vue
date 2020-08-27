@@ -18,13 +18,14 @@ import {
   IResult,
   IDistrictParameter,
   IStreetParameter,
-  IHeatImageParameter,
   IDrawOverlayParameter,
   ITrackPlaybackParameter,
   routeParameter,
   IElectronicFenceParameter,
   ICircleOutline,
   IMonitorAreaParameter, IEditFenceLabel
+  IHeatImageParameter,
+  IGeometrySearchParameter
 } from '@/types/map';
 
 @Component({
@@ -37,7 +38,7 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   @Prop({type: Object}) readonly mapConfig!: Object;
 
   @Emit('map-loaded')
- async mounted() {
+  async mounted() {
     this.mapApp = new MapApp();
     await this.mapApp.initialize(this.mapConfig, 'divArcGISMap2D');
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
@@ -166,6 +167,12 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async showEditingLabel(param:IEditFenceLabel):Promise<IResult> {
     return await this.mapApp.showEditingLabel(param);
   }
+  public async startGeometrySearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public clearGeometrySearch() {}
 }
 </script>
 

@@ -13,7 +13,8 @@ import {
   IDistrictParameter,
   IStreetParameter,
   routeParameter,
-  IHeatImageParameter
+  IHeatImageParameter,
+  IGeometrySearchParameter
 } from '@/types/map';
 import {OverlayGaode} from '@/plugin/gis-viewer/widgets/Overlays/gd/OverlayGaode';
 import {JurisdictionPoliceGD} from './widgets/JurisdictionPolice/gd/JurisdictionPoliceGD';
@@ -24,6 +25,7 @@ import AMapLoader from '@amap/amap-jsapi-loader';
 import {DrawSteet} from './widgets/DrawStreet/gd/DrawStreet';
 import Route from './widgets/Route/Route';
 import RoutePoint from './widgets/XinKong/RoutePoint';
+import {GeometrySearchGD} from './widgets/GeometrySearch/gd/GeometrySearchGD';
 
 export default class MapAppGaode implements IMapContainer {
   public view!: AMap.Map;
@@ -127,9 +129,7 @@ export default class MapAppGaode implements IMapContainer {
     const overlay = OverlayGaode.getInstance(this.view);
     return await overlay.findFeature(params);
   }
-
   public async findLayerFeature(params: IFindParameter) {}
-
   public async addOverlaysCluster(params: IOverlayClusterParameter) {
     const cluster = ClusterGD.getInstance(this.view);
     cluster.showGisDeviceInfo = this.showGisDeviceInfo;
@@ -278,5 +278,16 @@ export default class MapAppGaode implements IMapContainer {
   public createElectFenceByEndPtsConnection(params:any):any{}
   public addHeatImage(params: IHeatImageParameter) {}
   public deleteHeatImage() {}
+
+  public async startGeometrySearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    let geometrySearch = GeometrySearchGD.getInstance(this.view);
+    return await geometrySearch.startGeometrySearch(params);
+  }
+  public clearGeometrySearch() {
+    let geometrySearch = GeometrySearchGD.getInstance(this.view);
+    geometrySearch.clearGeometrySearch();
+  }
   public showEditingLabel(params:any):any{}
 }

@@ -16,7 +16,9 @@ import {
   routeParameter,
   IElectronicFenceParameter,
   ICircleOutline,
-  IMonitorAreaParameter, IEditFenceLabel
+  IMonitorAreaParameter,
+  IEditFenceLabel,
+  IGeometrySearchParameter
 } from '@/types/map';
 
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
@@ -488,6 +490,7 @@ export default class MapAppArcGIS2D {
     trackPlayback.goOnPlayback();
   }
   public setMapStyle(param: string) {}
+
   public async routeSearch(params: routeParameter): Promise<IResult> {
     return {status: 0, message: ''};
   }
@@ -520,6 +523,12 @@ export default class MapAppArcGIS2D {
     const heat = HeatImage.getInstance(this.view);
     heat.deleteHeatImage();
   }
+  public async startGeometrySearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public clearGeometrySearch() {}
   public async showMonitorArea(params:IMonitorAreaParameter) {
     const electronicFence = ElectronicFence.getInstance(this.view);
     return await electronicFence.showMonitorArea(params);

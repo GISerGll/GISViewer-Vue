@@ -13,7 +13,8 @@ import {
   IDistrictParameter,
   IStreetParameter,
   routeParameter,
-  IHeatImageParameter
+  IHeatImageParameter,
+  IGeometrySearchParameter
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -246,5 +247,12 @@ export default class MapAppBaidu implements IMapContainer {
   public createElectFenceByEndPtsConnection(params:any):any{}
   public addHeatImage(params: IHeatImageParameter) {}
   public deleteHeatImage() {}
+
+  public async startGeometrySearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public clearGeometrySearch() {}
   public showEditingLabel(params:any):any{}
 }

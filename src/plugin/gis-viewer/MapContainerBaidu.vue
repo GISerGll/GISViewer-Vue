@@ -18,7 +18,8 @@ import {
   IDistrictParameter,
   IStreetParameter,
   routeParameter,
-  IHeatImageParameter
+  IHeatImageParameter,
+  IGeometrySearchParameter
 } from '@/types/map';
 @Component({
   name: 'MapAppBaidu'
@@ -130,6 +131,12 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public createLineFence(params:any):any{}
   public createElectFenceByEndPtsConnection(params:any):any{}
   public showEditingLabel(params:any):any{}
+  public async startGeometrySearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public clearGeometrySearch() {}
 }
 </script>
 

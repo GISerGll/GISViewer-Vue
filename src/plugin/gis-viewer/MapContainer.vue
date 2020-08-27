@@ -29,11 +29,10 @@
       v-if="this.platform === 'gd'"
       :map-config="this.mapConfig"
       @map-loaded="mapLoaded"
-      @map-click="mapClick"/>
-<!--      @marker-click="showGisDeviceInfo"-->
-
-<!--      @marker-mouse="mouseGisDeviceInfo"-->
-
+      @marker-click="showGisDeviceInfo"
+      @map-click="mapClick"
+      @marker-mouse="mouseGisDeviceInfo"
+    />
   </div>
 </template>
 
@@ -63,7 +62,9 @@ import {
   ICircleOutline,
   IMonitorAreaParameter,
   routeParameter,
-  IHeatImageParameter, IEditFenceLabel
+  IHeatImageParameter,
+  IEditFenceLabel,
+  IGeometrySearchParameter
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -103,7 +104,25 @@ export default class MapContainer extends Vue implements IMapContainer {
         return this.containerArcgis2D;
     }
   }
-
+  async mounted() {
+    console.log(this.mapConfig);
+    if ((this.mapConfig as any).arcgis_api.indexOf('arcgis') > -1) {
+      (window as any).dojoConfig = {
+        async: true,
+        tlmSiblingOfDojo: false,
+        baseUrl: (this.mapConfig as any).arcgis_api + '/dojo/',
+        packages: [
+          {
+            name: 'libs',
+            location: 'libs'
+          }
+        ],
+        has: {
+          'esri-promise-compatibility': 1
+        }
+      };
+    }
+  }
   @Emit('map-loaded')
   private mapLoaded() {}
   @Emit('map-click')
@@ -254,6 +273,14 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public async showEditingLabel(param:IEditFenceLabel):Promise<IResult> {
     return await this.mapContainer.showEditingLabel(param);
+  }
+  public async startGeometrySearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return await this.mapContainer.startGeometrySearch(params);
+  }
+  public clearGeometrySearch() {
+    this.mapContainer.clearGeometrySearch();
   }
 }
 </script>

@@ -19,7 +19,8 @@ import {
   IDistrictParameter,
   IStreetParameter,
   routeParameter,
-  IHeatImageParameter
+  IHeatImageParameter,
+  IGeometrySearchParameter
 } from '@/types/map';
 
 @Component({
@@ -36,21 +37,21 @@ export default class MapContainerGd extends Vue implements IMapContainer {
     this.mapApp = new MapApp();
     await this.mapApp.initialize(this.mapConfig, 'divAMap');
 
-    // this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
-    // this.mapApp.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
+    this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
+    this.mapApp.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
     this.mapApp.mapClick = this.mapClick;
   }
   @Emit('map-click')
   public mapClick(point: object) {}
-  // @Emit('marker-click')
-  // public showGisDeviceInfo(type: string, id: string, detail: any) {}
-  // @Emit('marker-mouse')
-  // public mouseGisDeviceInfo(
-  //   event: any,
-  //   type: string,
-  //   id: string,
-  //   detail: any
-  // ) {}
+  @Emit('marker-click')
+  public showGisDeviceInfo(type: string, id: string, detail: any) {}
+  @Emit('marker-mouse')
+  public mouseGisDeviceInfo(
+    event: any,
+    type: string,
+    id: string,
+    detail: any
+  ) {}
 
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     return await this.mapApp.addOverlays(params);
@@ -159,6 +160,15 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public createLineFence(params:any):any{}
   public createElectFenceByEndPtsConnection(params:any):any{}
   public showEditingLabel(params:any):any{}
+
+  public async startGeometrySearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return await this.mapApp.startGeometrySearch(params);
+  }
+  public clearGeometrySearch() {
+    this.mapApp.clearGeometrySearch();
+  }
 }
 </script>
 

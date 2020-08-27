@@ -214,6 +214,7 @@ export class OverlayArcgis2D {
     const defaultInfoTemplate = params.defaultInfoTemplate;
     const autoPopup = params.autoPopup;
     const defaultButtons = params.defaultButtons;
+    const defaultVisible = params.defaultVisible !== false;
 
     let addCount = 0;
     for (let i = 0; i < params.overlays.length; i++) {
@@ -238,6 +239,7 @@ export class OverlayArcgis2D {
         symbol: overlaySymbol || defaultSymbol,
         attributes: fields || {}
       });
+      graphic.visible = defaultVisible;
       graphic.type = params.type;
       graphic.id = overlay.id;
       graphic.buttons = buttons || defaultButtons;
