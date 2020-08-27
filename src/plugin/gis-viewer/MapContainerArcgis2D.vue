@@ -42,6 +42,7 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     await this.mapApp.initialize(this.mapConfig, 'divArcGISMap2D');
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
     this.mapApp.mapClick = this.mapClick;
+    console.log(this.mapApp);
   }
   @Emit('map-click')
   public mapClick(point: object) {}

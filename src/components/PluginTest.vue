@@ -47,6 +47,7 @@ import axios from 'axios';
 import {IResult} from "@/types/map";
 @Component
 export default class PluginTest extends Vue {
+  // private mapConfig = WuLuMuQiConfig.mapConfig;
   private mapConfig = WuLuMuQiConfig.mapConfig;
 
     private async btn_showLayer() {

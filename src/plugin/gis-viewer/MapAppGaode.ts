@@ -33,7 +33,7 @@ export default class MapAppGaode implements IMapContainer {
   public mapClick: any;
 
   public async initialize(mapConfig: any, mapContainer: string) {
-    let apiUrl = mapConfig.arcgis_api || mapConfig.api_url;
+    let apiUrl = mapConfig.gaode_api || mapConfig.api_url;
     let plugins = [
       'AMap.DistrictSearch',
       'AMap.CustomLayer',

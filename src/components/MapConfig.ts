@@ -291,15 +291,16 @@ export default class MapConfig {
     }
   };
   public gdConfig: any = {
-    arcgis_api:
-      'https://webapi.amap.com/maps?v=1.4.15&key=29dd04daa39aa33a7e2cdffa37ebec4d',
-    theme: 'custom', //dark,vec
+    gaode_api:
+      'https://webapi.amap.com/maps?v=1.4.15&key=ec85d3648154874552835438ac6a02b2',
+    theme: 'vec', //dark,vec
     baseLayers: [{type: 'traffic', label: '路况', visible: false}],
     options: {
       center: [121.441, 31.159],
       zoom: 13,
-      //viewMode: '3D'
-      mapStyle: 'amap://styles/darkblue' //设置地图的显示样式
+      viewMode: '3D',
+      mapStyle: 'amap://styles/blue', //设置地图的显示样式
+      showBuildingBlock:true
     }
   };
   public async mapLoaded(map: any) {
