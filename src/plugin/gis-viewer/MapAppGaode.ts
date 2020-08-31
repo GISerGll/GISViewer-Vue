@@ -26,6 +26,7 @@ import {DrawSteet} from './widgets/DrawStreet/gd/DrawStreet';
 import Route from './widgets/Route/Route';
 import RoutePoint from './widgets/XinKong/RoutePoint';
 import {GeometrySearchGD} from './widgets/GeometrySearch/gd/GeometrySearchGD';
+import {OverlayArcgis2D} from "@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis2D";
 
 export default class MapAppGaode implements IMapContainer {
   public view!: AMap.Map;
@@ -124,7 +125,6 @@ export default class MapAppGaode implements IMapContainer {
     overlay.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
     return await overlay.addOverlays(params);
   }
-
   public async findFeature(params: IFindParameter): Promise<IResult> {
     const overlay = OverlayGaode.getInstance(this.view);
     return await overlay.findFeature(params);
@@ -135,27 +135,22 @@ export default class MapAppGaode implements IMapContainer {
     cluster.showGisDeviceInfo = this.showGisDeviceInfo;
     await cluster.addOverlaysCluster(params);
   }
-
   public async addHeatMap(params: IHeatParameter) {
     const heatmap = HeatMapGD.getInstance(this.view);
     await heatmap.addHeatMap(params);
   }
-
   public async deleteOverlays(params: IOverlayDelete) {
     const overlay = OverlayGaode.getInstance(this.view);
     await overlay.deleteOverlays(params);
   }
-
   public async deleteOverlaysCluster(params: IOverlayDelete) {
     const cluster = ClusterGD.getInstance(this.view);
     await cluster.deleteOverlaysCluster(params);
   }
-
   public async deleteAllOverlays() {
     const overlay = OverlayGaode.getInstance(this.view);
     await overlay.deleteAllOverlays();
   }
-
   public async deleteAllOverlaysCluster() {
     const cluster = ClusterGD.getInstance(this.view);
     await cluster.deleteAllOverlaysCluster();
@@ -170,7 +165,6 @@ export default class MapAppGaode implements IMapContainer {
     let center = new AMap.LngLat(x, y);
     this.view.setCenter(center);
   }
-
   public async setMapCenterAndLevel(params: ICenterLevel) {
     let x = params.x;
     let y = params.y;
@@ -178,7 +172,6 @@ export default class MapAppGaode implements IMapContainer {
     let level = params.level || this.view.getZoom();
     this.view.setZoomAndCenter(level, center);
   }
-
   public showLayer(params: ILayerConfig) {
     console.log(params);
     this.baseLayers.forEach((baselayer) => {
@@ -262,7 +255,6 @@ export default class MapAppGaode implements IMapContainer {
     return {status: 0, message: ''};
   }
   public clearDrawLayer(params: ILayerConfig) {}
-
   public showMigrateChart(params: any) {}
   public hideMigrateChart() {}
   public async startTrackPlayback() :Promise<any>{}
@@ -270,7 +262,10 @@ export default class MapAppGaode implements IMapContainer {
   public pausePlayback(){}
   public goOnPlayback(){}
   public async startDrawOverlays():Promise<any>{}
-  public async showToolTip():Promise<any>{}
+  public async showToolTip():Promise<any>{
+      const tooltip = OverlayGaode.getInstance(this.view);
+      await tooltip.showToolTip();
+  }
   public showMonitorArea():any{}
   public showCircleOutline():any{}
   public createPlaceFence():any{}

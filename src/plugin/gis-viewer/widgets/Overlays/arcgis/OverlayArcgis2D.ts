@@ -365,8 +365,6 @@ export class OverlayArcgis2D {
   }
   public async showToolTip() {
     const view = this.view;
-    const moveLayer = this.overlayLayer;
-    let parent = this;
     let tip!: any;
     view.on('click', async (event) =>{
       const response = await view.hitTest(event);

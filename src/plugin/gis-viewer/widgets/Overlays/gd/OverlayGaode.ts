@@ -12,6 +12,7 @@ import {
   IPolygonGeometry
 } from '@/types/map';
 import '@amap/amap-jsapi-types';
+import ToolTipGaoDe from "@/plugin/gis-viewer/widgets/Overlays/gd/ToolTipGaoDe";
 
 export class OverlayGaode {
   private static intances: Map<string, any>;
@@ -507,5 +508,34 @@ export class OverlayGaode {
         return Number(size);
       }
     }
+  }
+  public async showToolTip(){
+      let ptOverlays:any = this.view.getAllOverlays('marker')
+      let tip:any;
+      console.log(ptOverlays);
+      ptOverlays.forEach((ptOverlay:any) => {
+          ptOverlay.on('click',async (e:any) => {
+              let fields = e.target.getExtData().attributes;
+              let center = e.target.getPosition();
+              let infoWindow;
+
+              if(fields){
+                  infoWindow = fields.infoWindow;
+              }
+              if(infoWindow){
+                  if (tip) {
+                      tip.remove();
+                      tip = null;
+                  }
+                  else {
+                      tip = new ToolTipGaoDe(
+                        this.view,
+                        infoWindow,
+                        center
+                      );
+                  }
+              }
+          })
+      })
   }
 }

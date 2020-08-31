@@ -4,7 +4,7 @@ import {loadModules} from 'esri-loader';
 import {Geometry} from 'esri/geometry';
 
 export default class ToolTip {
-  public id: string = "tooltip1";
+  public id: string = "tooltip_arcgis3d";
   private view!: __esri.SceneView;
   private vm!: Vue;
   private postion!: any;

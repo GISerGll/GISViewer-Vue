@@ -19,7 +19,7 @@
         props:{
             type:{
                 type:String,
-                default:"no value"
+                default:"normal"
             },
             value1:{
                 type:String,
@@ -31,8 +31,7 @@
             }
         },
         mounted() {
-            this.$refs.alarm.value = this.$props.value1;
-            console.log("parent",this.type)
+            console.log(this.$refs)
         }
     }
 </script>

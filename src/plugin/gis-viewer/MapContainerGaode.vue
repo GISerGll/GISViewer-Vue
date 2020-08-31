@@ -74,7 +74,6 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public deleteAllOverlays() {
     this.mapApp.deleteAllOverlays();
   }
-
   public deleteAllOverlaysCluster() {
     this.mapApp.deleteAllOverlaysCluster();
   }
@@ -84,21 +83,16 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public showLayer(params: ILayerConfig) {
     this.mapApp.showLayer(params);
   }
-
   public hideLayer(params: ILayerConfig) {
     this.mapApp.hideLayer(params);
   }
-
   public setMapCenter(params: IPointGeometry) {
     this.mapApp.setMapCenter(params);
   }
-
   public setMapCenterAndLevel(params: ICenterLevel) {
     this.mapApp.setMapCenterAndLevel(params);
   }
-
   public showJurisdiction() {}
-
   public hideJurisdiction() {}
   public showDistrictMask(param: IDistrictParameter) {
     this.mapApp.showDistrictMask(param);
@@ -152,7 +146,9 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public pausePlayback(){}
   public goOnPlayback(){}
   public async startDrawOverlays():Promise<any>{}
-  public async showToolTip():Promise<any>{}
+  public showToolTip(){
+      this.mapApp.showToolTip();
+  }
   public async findLayerFeature():Promise<any>{}
   public showMonitorArea():any{}
   public showCircleOutline(params:any):any{}
@@ -160,7 +156,6 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public createLineFence(params:any):any{}
   public createElectFenceByEndPtsConnection(params:any):any{}
   public showEditingLabel(params:any):any{}
-
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {

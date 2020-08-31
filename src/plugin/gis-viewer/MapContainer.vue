@@ -105,28 +105,31 @@ export default class MapContainer extends Vue implements IMapContainer {
     }
   }
   async mounted() {
-    console.log(this.mapConfig);
-    if ((this.mapConfig as any).arcgis_api.indexOf('arcgis') > -1) {
-      (window as any).dojoConfig = {
-        async: true,
-        tlmSiblingOfDojo: false,
-        baseUrl: (this.mapConfig as any).arcgis_api + '/dojo/',
-        packages: [
-          {
-            name: 'libs',
-            location: 'libs'
+    if((this.mapConfig as any).hasOwnProperty('arcgis_api')){
+      if ((this.mapConfig as any).arcgis_api.indexOf('arcgis') > -1) {
+        (window as any).dojoConfig = {
+          async: true,
+          tlmSiblingOfDojo: false,
+          baseUrl: (this.mapConfig as any).arcgis_api + '/dojo/',
+          packages: [
+            {
+              name: 'libs',
+              location: 'libs'
+            }
+          ],
+          has: {
+            'esri-promise-compatibility': 1
           }
-        ],
-        has: {
-          'esri-promise-compatibility': 1
-        }
-      };
+        };
+      }
     }
   }
   @Emit('map-loaded')
   private mapLoaded() {}
   @Emit('map-click')
-  public mapClick(point: object) {}
+  public mapClick(point: object) {
+    console.log('from MapContainer ⬇')
+  }
   @Emit('marker-click')
   private showGisDeviceInfo(type: string, id: string) {}
   @Emit('marker-mouse')

@@ -23,7 +23,8 @@ import {
   routeParameter,
   IElectronicFenceParameter,
   ICircleOutline,
-  IMonitorAreaParameter, IEditFenceLabel
+  IMonitorAreaParameter,
+  IEditFenceLabel,
   IHeatImageParameter,
   IGeometrySearchParameter
 } from '@/types/map';
@@ -43,10 +44,12 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     await this.mapApp.initialize(this.mapConfig, 'divArcGISMap2D');
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
     this.mapApp.mapClick = this.mapClick;
-    console.log(this.mapApp);
+    // this.mapApp.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
   }
   @Emit('map-click')
-  public mapClick(point: object) {}
+  public mapClick(point: object) {
+    console.log('from MapContainerArcgis2D ⬇')
+  }
   @Emit('marker-click')
   public showGisDeviceInfo(type: string, id: string, detail: any) {}
   @Emit('marker-mouse')
