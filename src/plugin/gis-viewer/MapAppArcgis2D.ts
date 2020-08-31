@@ -35,6 +35,9 @@ import {MigrateChart} from './widgets/MigrateChart/arcgis/MigrateChart';
 import {HeatImage} from './widgets/HeatMap/arcgis/HeatImage';
 import HeatImage2D from './widgets/HeatMap/arcgis/HeatImage2D';
 import HeatImageGL from './widgets/HeatMap/arcgis/HeatImageGL';
+import {GeometrySearchGD} from './widgets/GeometrySearch/gd/GeometrySearchGD';
+import {GeometrySearch} from './widgets/GeometrySearch/arcgis/GeometrySearch';
+import {DgeneFusion} from './widgets/DgeneFusion/arcgis/DgeneFusion';
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
@@ -137,10 +140,11 @@ export default class MapAppArcGIS2D {
             return ;
           }
           let {type, id} = graphic.attributes;
-          let label = (graphic.layer as any).label;
+          let label = graphic.layer ? (graphic.layer as any).label : '';
           if (
-            graphic.layer.type == 'feature' ||
-            graphic.layer.type == 'graphics'
+            graphic.layer &&
+            (graphic.layer.type == 'feature' ||
+              graphic.layer.type == 'graphics')
           ) {
             id =
               graphic.attributes['DEVICEID'] ||
@@ -158,9 +162,9 @@ export default class MapAppArcGIS2D {
               label ||
               undefined;
           }
-          if (id) {
-            this.showGisDeviceInfo(type, id, graphic.toJSON());
-          }
+          //if (id) {
+          this.showGisDeviceInfo(type, id, graphic.toJSON());
+          //}
         });
       } else {
         this.doIdentifyTask(event.mapPoint).then((results: any) => {
@@ -211,6 +215,7 @@ export default class MapAppArcGIS2D {
     MigrateChart.destroy();
     DrawLayer.destroy();
     HeatImage.destroy();
+    GeometrySearch.destroy();
   }
   //使toolTip中支持{字段}的形式
   private getContent(attr: any, content: string): string {
@@ -507,7 +512,7 @@ export default class MapAppArcGIS2D {
   }
   public showMigrateChart(params: any) {
     const chart = MigrateChart.getInstance(this.view);
-    chart.showMigrateChart(params);
+    chart.showPathChart(params);
   }
   public hideMigrateChart() {
     const chart = MigrateChart.getInstance(this.view);
@@ -517,7 +522,9 @@ export default class MapAppArcGIS2D {
     // const heat = HeatImage.getInstance(this.view);
     // heat.addHeatImage(params);
     const heat = HeatImageGL.getInstance(this.view);
-    heat.startup();
+    heat.addHeatImage(params);
+    // const heat2 = HeatImage2D.getInstance(this.view);
+    // heat2.startup();
   }
   public deleteHeatImage() {
     const heat = HeatImage.getInstance(this.view);
@@ -526,7 +533,12 @@ export default class MapAppArcGIS2D {
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
-    return {status: 0, message: ''};
+    let geometrySearch = GeometrySearch.getInstance(this.view);
+    return await geometrySearch.startGeometrySearch(params);
+  }
+  public clearGeometrySearch() {
+    let geometrySearch = GeometrySearch.getInstance(this.view);
+    geometrySearch.clearGeometrySearch();
   }
   public clearGeometrySearch() {}
   public async showMonitorArea(params:IMonitorAreaParameter) {
@@ -557,5 +569,14 @@ export default class MapAppArcGIS2D {
   public async showEditingLabel(param:IEditFenceLabel):Promise<IResult> {
     const electronicFence = ElectronicFence.getInstance(this.view);
     return await electronicFence.showEditingLabel(param);
+  }
+
+  public async showDgene(params: any): Promise<IResult> {
+    let dgene = DgeneFusion.getInstance(this.view);
+    return await dgene.showDgene(params);
+  }
+  public hideDgene() {
+    let dgene = DgeneFusion.getInstance(this.view);
+    dgene.hideDgene();
   }
 }

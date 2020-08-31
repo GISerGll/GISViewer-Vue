@@ -185,6 +185,8 @@ export interface IMapContainer {
   deleteHeatImage: () => void;
   startGeometrySearch: (params: IGeometrySearchParameter) => Promise<IResult>;
   clearGeometrySearch: () => void;
+  showDgene: (params: any) => Promise<IResult>;
+  hideDgene: () => void;
   showMonitorArea: (param:IMonitorAreaParameter)=> Promise<IResult>;
   showCircleOutline: (param:ICircleOutline)=> Promise<IResult>;
   createPlaceFence: (param:IElectronicFenceParameter)=> Promise<IResult>;

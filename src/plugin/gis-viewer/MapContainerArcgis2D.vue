@@ -44,7 +44,6 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     await this.mapApp.initialize(this.mapConfig, 'divArcGISMap2D');
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
     this.mapApp.mapClick = this.mapClick;
-    // this.mapApp.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
   }
   @Emit('map-click')
   public mapClick(point: object) {
@@ -173,9 +172,17 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
-    return {status: 0, message: ''};
+    return await this.mapApp.startGeometrySearch(params);
   }
-  public clearGeometrySearch() {}
+  public clearGeometrySearch() {
+    this.mapApp.clearGeometrySearch();
+  }
+  public async showDgene(params: any): Promise<IResult> {
+    return await this.mapApp.showDgene(params);
+  }
+  public hideDgene() {
+    this.mapApp.hideDgene();
+  }
 }
 </script>
 

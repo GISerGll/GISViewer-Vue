@@ -29,6 +29,9 @@ import {DrawLayer} from './widgets/DrawLayer/arcgis/DrawLayer';
 import {MigrateChart} from './widgets/MigrateChart/arcgis/MigrateChart';
 import {HeatImage} from './widgets/HeatMap/arcgis/HeatImage';
 import HeatImage2D from './widgets/HeatMap/arcgis/HeatImage2D';
+import HeatImageGL from './widgets/HeatMap/arcgis/HeatImageGL';
+import HeatImage3D from './widgets/HeatMap/arcgis/HeatImage3D';
+import {GeometrySearch} from './widgets/GeometrySearch/arcgis/GeometrySearch';
 
 export default class MapAppArcGIS3D implements IMapContainer {
   public view!: __esri.SceneView;
@@ -125,10 +128,11 @@ export default class MapAppArcGIS3D implements IMapContainer {
         response.results.forEach((result) => {
           const graphic = result.graphic;
           let {type, id} = graphic.attributes;
-          let label = (graphic.layer as any).label;
+          let label = graphic.layer ? (graphic.layer as any).label : '';
           if (
-            graphic.layer.type == 'feature' ||
-            graphic.layer.type == 'graphics'
+            graphic.layer &&
+            (graphic.layer.type == 'feature' ||
+              graphic.layer.type == 'graphics')
           ) {
             id =
               graphic.attributes['DEVICEID'] ||
@@ -146,9 +150,9 @@ export default class MapAppArcGIS3D implements IMapContainer {
               label ||
               undefined;
           }
-          if (id) {
-            this.showGisDeviceInfo(type, id, graphic.toJSON());
-          }
+          //if (id) {
+          this.showGisDeviceInfo(type, id, graphic.toJSON());
+          //}
         });
       } else {
         this.doIdentifyTask(event.mapPoint).then((results: any) => {
@@ -190,6 +194,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
     DrawLayer.destroy();
     MigrateChart.destroy();
     HeatImage.destroy();
+    GeometrySearch.destroy();
   }
   //使toolTip中支持{字段}的形式
   private getContent(attr: any, content: string): string {
@@ -494,11 +499,22 @@ export default class MapAppArcGIS3D implements IMapContainer {
     const heat = HeatImage.getInstance(this.view);
     heat.deleteHeatImage();
   }
+  public addHeatImage(params: IHeatImageParameter) {}
+  public deleteHeatImage() {}
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
+    let geometrySearch = GeometrySearch.getInstance(this.view);
+    return await geometrySearch.startGeometrySearch(params);
+  }
+  public clearGeometrySearch() {
+    let geometrySearch = GeometrySearch.getInstance(this.view);
+    geometrySearch.clearGeometrySearch();
+  }
+  public async showDgene(params: any): Promise<IResult> {
     return {status: 0, message: ''};
   }
   public clearGeometrySearch() {}
   public showEditingLabel(params:any):any{}
+  public hideDgene() {}
 }

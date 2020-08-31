@@ -143,9 +143,15 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
+    return await this.mapApp.startGeometrySearch(params);
+  }
+  public clearGeometrySearch() {
+    this.mapApp.clearGeometrySearch();
+  }
+  public async showDgene(params: any): Promise<IResult> {
     return {status: 0, message: ''};
   }
-  public clearGeometrySearch() {}
+  public hideDgene() {}
 }
 </script>
 

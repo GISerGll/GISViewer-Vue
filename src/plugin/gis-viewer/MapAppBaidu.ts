@@ -254,5 +254,10 @@ export default class MapAppBaidu implements IMapContainer {
     return {status: 0, message: ''};
   }
   public clearGeometrySearch() {}
+
+  public async showDgene(params: any): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public hideDgene() {}
   public showEditingLabel(params:any):any{}
 }
