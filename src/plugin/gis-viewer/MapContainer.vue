@@ -166,11 +166,11 @@ export default class MapContainer extends Vue implements IMapContainer {
   public deleteHeatMap() {
     this.mapContainer.deleteHeatMap();
   }
-  public showLayer(params: ILayerConfig) {
-    this.mapContainer.showLayer(params);
+  public showLayer(params: ILayerConfig):Promise<IResult> {
+    return this.mapContainer.showLayer(params);
   }
-  public hideLayer(params: ILayerConfig) {
-    this.mapContainer.hideLayer(params);
+  public hideLayer(params: ILayerConfig):Promise<IResult> {
+    return this.mapContainer.hideLayer(params);
   }
   public setMapCenter(params: IPointGeometry) {
     this.mapContainer.setMapCenter(params);
@@ -208,7 +208,7 @@ export default class MapContainer extends Vue implements IMapContainer {
   public locateStreet(param: IStreetParameter) {
     this.mapContainer.locateStreet(param);
   }
-  public showToolTip(param: string){
+  public showToolTip(param: Vue.Component){
     this.mapContainer.showToolTip(param);
   }
   public async startDrawOverlays(param: IDrawOverlayParameter):Promise<IResult>{

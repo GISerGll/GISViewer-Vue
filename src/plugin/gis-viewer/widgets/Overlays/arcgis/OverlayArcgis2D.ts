@@ -11,6 +11,7 @@ import {loadModules} from 'esri-loader';
 import ToolTip from './ToolTip2D';
 import HighFeauture from './HighFeauture3D';
 import HighFeauture2D from './HighFeauture2D';
+import {Vue} from 'vue-property-decorator';
 
 export class OverlayArcgis2D {
   private static intances: Map<string, any>;
@@ -362,7 +363,7 @@ export class OverlayArcgis2D {
       }
     }
   }
-  public async showToolTip() {
+  public async showToolTip(tooltip:Vue.Component) {
     const view = this.view;
     let tip!: any;
     view.on('click', async (event) =>{
@@ -378,6 +379,7 @@ export class OverlayArcgis2D {
                 }
                 tip = new ToolTip(
                   view,
+                  tooltip,
                   content,
                   result.graphic
                 );

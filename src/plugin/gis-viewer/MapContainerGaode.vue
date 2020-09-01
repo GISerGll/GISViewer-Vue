@@ -80,11 +80,11 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public deleteHeatMap() {
     this.mapApp.deleteHeatMap();
   }
-  public showLayer(params: ILayerConfig) {
-    this.mapApp.showLayer(params);
+  public async showLayer(params: ILayerConfig) :Promise<IResult>{
+    return await this.mapApp.showLayer(params);
   }
-  public hideLayer(params: ILayerConfig) {
-    this.mapApp.hideLayer(params);
+  public async hideLayer(params: ILayerConfig) :Promise<IResult>{
+    return await this.mapApp.hideLayer(params);
   }
   public setMapCenter(params: IPointGeometry) {
     this.mapApp.setMapCenter(params);
@@ -146,8 +146,8 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public pausePlayback(){}
   public goOnPlayback(){}
   public async startDrawOverlays():Promise<any>{}
-  public showToolTip(){
-      this.mapApp.showToolTip();
+  public showToolTip(param:Vue.Component){
+      this.mapApp.showToolTip(param);
   }
   public async findLayerFeature():Promise<any>{}
   public showMonitorArea():any{}

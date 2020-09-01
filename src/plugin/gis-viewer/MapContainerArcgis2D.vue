@@ -83,11 +83,11 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public deleteHeatMap() {
     this.mapApp.deleteHeatMap();
   }
-  public showLayer(params: ILayerConfig) {
-    this.mapApp.showLayer(params);
+  public async showLayer(params: ILayerConfig) :Promise<IResult>{
+    return await this.mapApp.showLayer(params);
   }
-  public hideLayer(params: ILayerConfig) {
-    this.mapApp.hideLayer(params);
+  public async hideLayer(params: ILayerConfig) :Promise<IResult>{
+    return await this.mapApp.hideLayer(params);
   }
   public setMapCenter(params: IPointGeometry) {
     this.mapApp.setMapCenter(params);
@@ -102,8 +102,8 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async findFeature(params: IFindParameter) {
     return await this.mapApp.findFeature(params);
   }
-  public showToolTip(){
-    this.mapApp.showToolTip();
+  public showToolTip(param:Vue.Component){
+    this.mapApp.showToolTip(param);
   }
   public showRoad() {}
   public hideRoad() {}

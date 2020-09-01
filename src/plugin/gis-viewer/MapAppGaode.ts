@@ -1,4 +1,4 @@
-import {loadScript, getScript, ILoadScriptOptions} from 'esri-loader';
+import {Vue} from "vue-property-decorator";
 import {
   IMapContainer,
   IOverlayParameter,
@@ -26,7 +26,6 @@ import {DrawSteet} from './widgets/DrawStreet/gd/DrawStreet';
 import Route from './widgets/Route/Route';
 import RoutePoint from './widgets/XinKong/RoutePoint';
 import {GeometrySearchGD} from './widgets/GeometrySearch/gd/GeometrySearchGD';
-import {OverlayArcgis2D} from "@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis2D";
 
 export default class MapAppGaode implements IMapContainer {
   public view!: AMap.Map;
@@ -173,8 +172,8 @@ export default class MapAppGaode implements IMapContainer {
     let level = params.level || this.view.getZoom();
     this.view.setZoomAndCenter(level, center);
   }
-  public showLayer(params: ILayerConfig) {
-    console.log(params);
+  public async showLayer(params: ILayerConfig) :Promise<IResult>{
+    let showResult = false;
     this.baseLayers.forEach((baselayer) => {
       if (
         (params.label && baselayer.label === params.label) ||
@@ -183,11 +182,19 @@ export default class MapAppGaode implements IMapContainer {
         if (!baselayer.visible) {
           this.view.add(baselayer.layer);
           baselayer.visible = true;
+          showResult = true;
         }
       }
     });
+
+    return {
+      status:0,
+      message:'ok',
+      result:showResult ? `成功显示${params.label}图层` : '未找到该图层或该图层已处于显示状态'
+    }
   }
-  public hideLayer(params: ILayerConfig) {
+  public async hideLayer(params: ILayerConfig) :Promise<IResult>{
+    let hideResult = false;
     this.baseLayers.forEach((baselayer) => {
       if (
         (params.label && baselayer.label === params.label) ||
@@ -196,9 +203,16 @@ export default class MapAppGaode implements IMapContainer {
         if (baselayer.visible) {
           this.view.remove(baselayer.layer);
           baselayer.visible = false;
+          hideResult = true;
         }
       }
     });
+
+    return {
+      status:0,
+      message:'ok',
+      result:hideResult ? `成功显示${params.label}图层` : '未找到该图层或该图层已处于隐藏状态'
+    }
   }
 
   public async showJurisdiction() {}
@@ -263,9 +277,9 @@ export default class MapAppGaode implements IMapContainer {
   public pausePlayback(){}
   public goOnPlayback(){}
   public async startDrawOverlays():Promise<any>{}
-  public async showToolTip():Promise<any>{
+  public async showToolTip(param:Vue.Component):Promise<any>{
       const tooltip = OverlayGaode.getInstance(this.view);
-      await tooltip.showToolTip();
+      await tooltip.showToolTip(param);
   }
   public showMonitorArea():any{}
   public showCircleOutline():any{}

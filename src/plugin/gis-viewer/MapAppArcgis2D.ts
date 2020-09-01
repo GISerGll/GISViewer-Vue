@@ -38,6 +38,7 @@ import HeatImageGL from './widgets/HeatMap/arcgis/HeatImageGL';
 import {GeometrySearchGD} from './widgets/GeometrySearch/gd/GeometrySearchGD';
 import {GeometrySearch} from './widgets/GeometrySearch/arcgis/GeometrySearch';
 import {DgeneFusion} from './widgets/DgeneFusion/arcgis/DgeneFusion';
+import {Vue} from 'vue-property-decorator';
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
@@ -417,27 +418,43 @@ export default class MapAppArcGIS2D {
     const find = FindFeature.getInstance(this.view);
     return await find.findLayerFeature(params);
   }
-  public async showToolTip(){
+  public async showToolTip(param:Vue.Component){
     const tooltip = OverlayArcgis2D.getInstance(this.view);
-    await tooltip.showToolTip();
+    await tooltip.showToolTip(param);
   }
-  public async showLayer(params: ILayerConfig) {
+  public async showLayer(params: ILayerConfig) :Promise<IResult>{
+    let showResult = false;
     this.view.map.allLayers.forEach((baselayer: ILayerConfig) => {
       if (params.label && baselayer.label === params.label) {
         if (!baselayer.visible) {
           baselayer.visible = true;
+          showResult = true;
         }
       }
     });
+
+    return {
+      status:0,
+      message:'ok',
+      result:showResult ? `成功显示${params.label}图层` : '未找到该图层或该图层已处于显示状态'
+    }
   }
-  public async hideLayer(params: ILayerConfig) {
+  public async hideLayer(params: ILayerConfig) :Promise<IResult>{
+    let hideResult = false;
     this.view.map.allLayers.forEach((baselayer: ILayerConfig) => {
       if (params.label && baselayer.label === params.label) {
         if (baselayer.visible) {
           baselayer.visible = false;
+          hideResult = true;
         }
       }
     });
+
+    return {
+      status:0,
+      message:'ok',
+      result:hideResult ? `成功隐藏${params.label}图层` : '未找到该图层或该图层已处于隐藏状态'
+    }
   }
   public async setMapCenter(params: IPointGeometry) {
     let x = params.x;

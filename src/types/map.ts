@@ -1,3 +1,4 @@
+import {Vue} from 'vue-property-decorator';
 export interface IResult {
   //本次接口调用状态，如果成功返回0，如果失败返回其他数字。
   status: number;
@@ -145,7 +146,7 @@ export interface IDrawOverlayParameter {
 
 export interface IMapContainer {
   addOverlays: (param: IOverlayParameter) => Promise<IResult>;
-  showToolTip: (param:string) => void;
+  showToolTip: (param:Vue.Component) => void;
   addHeatMap: (param: IHeatParameter) => void;
   addOverlaysCluster: (param: IOverlayClusterParameter) => void;
   deleteOverlays: (param: IOverlayDelete) => void;
@@ -153,8 +154,8 @@ export interface IMapContainer {
   deleteAllOverlays: () => void;
   deleteAllOverlaysCluster: () => void;
   deleteHeatMap: () => void;
-  showLayer: (param: ILayerConfig) => void;
-  hideLayer: (param: ILayerConfig) => void;
+  showLayer: (param: ILayerConfig) => Promise<IResult>;
+  hideLayer: (param: ILayerConfig) => Promise<IResult>;
   setMapCenter: (param: IPointGeometry) => void;
   setMapCenterAndLevel: (param: ICenterLevel) => void;
   showJurisdiction: () => void;

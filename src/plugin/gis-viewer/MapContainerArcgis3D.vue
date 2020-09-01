@@ -78,11 +78,11 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public deleteHeatMap() {
     this.mapApp.deleteHeatMap();
   }
-  public showLayer(params: ILayerConfig) {
-    this.mapApp.showLayer(params);
+  public async showLayer(params: ILayerConfig) :Promise<any>{
+    await this.mapApp.showLayer(params);
   }
-  public hideLayer(params: ILayerConfig) {
-    this.mapApp.hideLayer(params);
+  public async hideLayer(params: ILayerConfig) :Promise<any>{
+    await this.mapApp.hideLayer(params);
   }
   public setMapCenter(params: IPointGeometry) {
     this.mapApp.setMapCenter(params);

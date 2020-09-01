@@ -48,24 +48,29 @@ import WuLuMuQiConfig from '@/config/config_arcgis';
 import axios from 'axios';
 import {IResult} from "@/types/map";
 import MapConfig from "@/config/config_arcgis";
+import Parent from "@/components/tooltips/Parent.vue";
 @Component
 export default class PluginTest extends Vue {
     private arcgisConfig = new MapConfig();
     private mapConfig = this.arcgisConfig.mapConfig;
     private async btn_showLayer() {
         let map = this.$refs.gisViewer as any;
-        await map.showLayer({
+        const result = await map.showLayer({
             label:"xzqh"
         })
+      console.log(result);
     }
     private async btn_switchLayer() {
         let map = this.$refs.gisViewer as any;
-        await map.hideLayer({
+        const result1 = await map.hideLayer({
             label:"浅色底图"
         })
-        await map.showLayer({
+      console.log(result1);
+
+        const result2 = await map.showLayer({
             label:"深色底图"
         })
+      console.log(result2);
     }
     private async btn_hideLayer() {
         let map = this.$refs.gisViewer as any;
@@ -499,7 +504,7 @@ export default class PluginTest extends Vue {
             defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
         });
 
-        map.showToolTip();
+        map.showToolTip(Parent);
     }
     private showGisDeviceInfo(type: string, id: string, detail: any) {
         console.log(type, id, detail);
