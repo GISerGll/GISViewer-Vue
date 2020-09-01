@@ -317,7 +317,6 @@ export class OverlayArcgis2D {
     };
   }
   public async findFeature(params: IFindParameter,overlaysLayer?:__esri.GraphicsLayer): Promise<IResult> {
-
     let type = params.layerName;
     let ids = params.ids || [];
     let level = params.level || this.view.zoom;

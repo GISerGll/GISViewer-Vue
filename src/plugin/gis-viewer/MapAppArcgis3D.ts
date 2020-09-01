@@ -499,8 +499,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
     const heat = HeatImage.getInstance(this.view);
     heat.deleteHeatImage();
   }
-  public addHeatImage(params: IHeatImageParameter) {}
-  public deleteHeatImage() {}
+
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
@@ -514,7 +513,6 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async showDgene(params: any): Promise<IResult> {
     return {status: 0, message: ''};
   }
-  public clearGeometrySearch() {}
   public showEditingLabel(params:any):any{}
   public hideDgene() {}
 }

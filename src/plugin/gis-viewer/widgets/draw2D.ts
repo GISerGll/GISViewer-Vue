@@ -83,14 +83,14 @@ export class Draw2D {
             'esri/Graphic',
         ]);
 
-        var point = {
+        let point = {
             type: "point", // autocasts as /Point
             x: coordinates[0],
             y: coordinates[1],
             spatialReference: this.view.spatialReference
         };
 
-        var graphic = new Graphic({
+        let graphic = new Graphic({
             geometry: point,
             symbol: {
                 type: "simple-marker", // autocasts as SimpleMarkerSymbol
@@ -107,7 +107,7 @@ export class Draw2D {
         this.view.graphics.add(graphic);
     }
 
-    private async addPtsGraphics(coordinates: [number,number],drawProperties:IDrawOverlayParameter):Promise<Graphic>{
+    private async addPtsGraphics(coordinates: number[],drawProperties:IDrawOverlayParameter):Promise<Graphic>{
         const [Graphic] = await loadModules([
             'esri/Graphic',
         ]);
@@ -130,7 +130,11 @@ export class Draw2D {
             }
         }
 
-        const ptSymbol = drawProperties.defaultSymbol;
+        let ptSymbol:any;
+        if(drawProperties.defaultSymbol){
+            ptSymbol = OverlayArcgis2D.makeSymbol(drawProperties.defaultSymbol);
+        }
+
         const isGenerateId = drawProperties.generateId;
         const type = drawProperties.type || "points";
         const clearLastResults = drawProperties.clearLastResults || false;
@@ -174,24 +178,31 @@ export class Draw2D {
             'esri/Graphic',
         ]);
 
+        let defaultLineSymbol = {
+            type: "simple-line", // autocasts as SimpleLineSymbol
+            color: [4, 90, 141],
+            width: 3,
+            cap: "round",
+            join: "round"
+        }
+
+        let lineSymbol:any;
+        if(drawProperties.defaultSymbol){
+            lineSymbol = OverlayArcgis2D.makeSymbol(drawProperties.defaultSymbol);
+        }
+
         let graphic = new Graphic({
             geometry: polyline,
-            symbol: {
-                type: "simple-line", // autocasts as SimpleLineSymbol
-                color: [4, 90, 141],
-                width: 3,
-                cap: "round",
-                join: "round"
-            }
+            symbol: lineSymbol || defaultLineSymbol
         });
 
-      await this.overlayLayer.add(graphic);
+        await this.overlayLayer.add(graphic);
         return graphic;
     }
 
     private async addPolygonGraphic(vertices:any,drawProperties:IDrawOverlayParameter):Promise<Graphic>{
         this.view.graphics.removeAll();
-        var polygon = {
+        let polygon = {
             type: "polygon", // autocasts as Polygon
             rings: vertices,
             spatialReference: this.view.spatialReference
@@ -201,17 +212,23 @@ export class Draw2D {
             'esri/Graphic',
         ]);
 
+        let defaultPolygonSymbol = {
+            type: "simple-fill", // autocasts as SimpleFillSymbol
+            color: "purple",
+            style: "solid",
+            outline: {  // autocasts as SimpleLineSymbol
+                color: "white",
+                width: 1
+            }
+        }
+        let polygonSymbol:any;
+        if(drawProperties.defaultSymbol){
+            polygonSymbol = OverlayArcgis2D.makeSymbol(drawProperties.defaultSymbol);
+        }
+
         var graphic = new Graphic({
             geometry: polygon,
-            symbol: {
-                type: "simple-fill", // autocasts as SimpleFillSymbol
-                color: "purple",
-                style: "solid",
-                outline: {  // autocasts as SimpleLineSymbol
-                    color: "white",
-                    width: 1
-                }
-            }
+            symbol: polygonSymbol || defaultPolygonSymbol
         });
         this.view.graphics.add(graphic);
         return graphic;

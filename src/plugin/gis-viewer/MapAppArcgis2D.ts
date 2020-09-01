@@ -540,7 +540,7 @@ export default class MapAppArcGIS2D {
     let geometrySearch = GeometrySearch.getInstance(this.view);
     geometrySearch.clearGeometrySearch();
   }
-  public clearGeometrySearch() {}
+
   public async showMonitorArea(params:IMonitorAreaParameter) {
     const electronicFence = ElectronicFence.getInstance(this.view);
     return await electronicFence.showMonitorArea(params);

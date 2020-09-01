@@ -365,7 +365,7 @@ export default class MapConfig {
                     fields: {
                         name: '测试3',
                         featureid: '0003',
-                        infoWindow: { type:"normal" ,value1:"这是一个信息弹窗",value2:"随意测试一下"}
+                        infoWindow: { type:"alarm" ,value1:"这是一个信息弹窗",value2:"随意测试一下"}
                     },
 
                 },
@@ -375,7 +375,7 @@ export default class MapConfig {
                     fields: {
                         name: '测试4',
                         featureid: '0001',
-                        infoWindow: { type:"normal" ,value1:"这是一个信息弹窗",value2:"随意测试一下"}
+                        infoWindow: { type:"suspicious" ,value1:"这是一个信息弹窗",value2:"随意测试一下"}
                     }
                 }
             ],
