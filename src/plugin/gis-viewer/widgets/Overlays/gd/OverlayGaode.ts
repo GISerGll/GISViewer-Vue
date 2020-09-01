@@ -519,7 +519,7 @@ export class OverlayGaode {
       }
     }
   }
-  public async showToolTip(tooltip:Vue.Component){
+  public async showToolTip(tooltip:Vue.Component):Promise<IResult>{
       let ptOverlays:any = this.view.getAllOverlays('marker')
       let tip:any;
 
@@ -548,5 +548,10 @@ export class OverlayGaode {
               }
           })
       })
+    return {
+      status:0,
+      message:'ok',
+      result:'成功调用方法，但无法保证可以正确显示弹窗'
+    }
   }
 }

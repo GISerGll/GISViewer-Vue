@@ -127,9 +127,7 @@ export default class MapContainer extends Vue implements IMapContainer {
   @Emit('map-loaded')
   private mapLoaded() {}
   @Emit('map-click')
-  public mapClick(point: object) {
-    console.log('from MapContainer ⬇')
-  }
+  public mapClick(point: object) {}
   @Emit('marker-click')
   private showGisDeviceInfo(type: string, id: string) {}
   @Emit('marker-mouse')
@@ -208,8 +206,8 @@ export default class MapContainer extends Vue implements IMapContainer {
   public locateStreet(param: IStreetParameter) {
     this.mapContainer.locateStreet(param);
   }
-  public showToolTip(param: Vue.Component){
-    this.mapContainer.showToolTip(param);
+  public async showToolTip(param: Vue.Component) :Promise<IResult>{
+    return await this.mapContainer.showToolTip(param);
   }
   public async startDrawOverlays(param: IDrawOverlayParameter):Promise<IResult>{
     return this.mapContainer.startDrawOverlays(param)

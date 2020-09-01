@@ -46,9 +46,7 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     this.mapApp.mapClick = this.mapClick;
   }
   @Emit('map-click')
-  public mapClick(point: object) {
-    console.log('from MapContainerArcgis2D ⬇')
-  }
+  public mapClick(point: object) {}
   @Emit('marker-click')
   public showGisDeviceInfo(type: string, id: string, detail: any) {}
   @Emit('marker-mouse')
@@ -102,8 +100,8 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async findFeature(params: IFindParameter) {
     return await this.mapApp.findFeature(params);
   }
-  public showToolTip(param:Vue.Component){
-    this.mapApp.showToolTip(param);
+  public async showToolTip(param:Vue.Component) :Promise<IResult>{
+    return await this.mapApp.showToolTip(param);
   }
   public showRoad() {}
   public hideRoad() {}

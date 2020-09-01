@@ -363,9 +363,10 @@ export class OverlayArcgis2D {
       }
     }
   }
-  public async showToolTip(tooltip:Vue.Component) {
+  public async showToolTip(tooltip:Vue.Component) :Promise<IResult>{
     const view = this.view;
     let tip!: any;
+
     view.on('click', async (event) =>{
       const response = await view.hitTest(event);
         if (response.results.length > 0) {
@@ -383,6 +384,7 @@ export class OverlayArcgis2D {
                   content,
                   result.graphic
                 );
+
               }
             }
           });
@@ -393,5 +395,11 @@ export class OverlayArcgis2D {
           }
         }
     });
+
+    return {
+      status:0,
+      message:'ok',
+      result:'方法调用成功，但无法保证可以正确显示弹窗'
+    }
   }
 }

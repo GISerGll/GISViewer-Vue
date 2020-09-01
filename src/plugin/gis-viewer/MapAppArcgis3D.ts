@@ -394,25 +394,39 @@ export default class MapAppArcGIS3D implements IMapContainer {
     const cluster = Cluster.getInstance(this.view);
     return await cluster.deleteOverlaysCluster(params);
   }
-  public async showLayer(params: ILayerConfig) {
-    console.log(params);
+  public async showLayer(params: ILayerConfig):Promise<any> {
+    let showResult = false
     this.view.map.allLayers.forEach((baselayer: ILayerConfig) => {
       if (params.label && baselayer.label === params.label) {
         if (!baselayer.visible) {
           baselayer.visible = true;
+          showResult = true;
         }
       }
     });
+
+    return {
+      status:0,
+      message:'ok',
+      result:showResult ? `成功显示${params.label}图层` : '未找到该图层或该图层已处于显示状态'
+    }
   }
-  public async hideLayer(params: ILayerConfig) {
-    console.log(params);
+  public async hideLayer(params: ILayerConfig):Promise<any> {
+    let hideResult = false
     this.view.map.allLayers.forEach((baselayer: ILayerConfig) => {
       if (params.label && baselayer.label === params.label) {
         if (baselayer.visible) {
           baselayer.visible = false;
+          hideResult = true;
         }
       }
     });
+
+    return {
+      status:0,
+      message:'ok',
+      result:hideResult ? `成功隐藏${params.label}图层` : '未找到该图层或该图层已处于隐藏状态'
+    }
   }
   public async setMapCenter(params: IPointGeometry) {
     let x = params.x;

@@ -279,7 +279,7 @@ export default class MapAppGaode implements IMapContainer {
   public async startDrawOverlays():Promise<any>{}
   public async showToolTip(param:Vue.Component):Promise<any>{
       const tooltip = OverlayGaode.getInstance(this.view);
-      await tooltip.showToolTip(param);
+      return await tooltip.showToolTip(param);
   }
   public showMonitorArea():any{}
   public showCircleOutline():any{}
@@ -288,7 +288,6 @@ export default class MapAppGaode implements IMapContainer {
   public createElectFenceByEndPtsConnection(params:any):any{}
   public addHeatImage(params: IHeatImageParameter) {}
   public deleteHeatImage() {}
-
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {

@@ -146,7 +146,7 @@ export interface IDrawOverlayParameter {
 
 export interface IMapContainer {
   addOverlays: (param: IOverlayParameter) => Promise<IResult>;
-  showToolTip: (param:Vue.Component) => void;
+  showToolTip: (param:Vue.Component) => Promise<IResult>;
   addHeatMap: (param: IHeatParameter) => void;
   addOverlaysCluster: (param: IOverlayClusterParameter) => void;
   deleteOverlays: (param: IOverlayDelete) => void;

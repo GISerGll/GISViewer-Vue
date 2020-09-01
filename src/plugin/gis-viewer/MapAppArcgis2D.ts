@@ -116,92 +116,98 @@ export default class MapAppArcGIS2D {
         rotationEnabled: false
       }
     });
+
     view.ui.remove('attribution');
     view.ui.remove('zoom');
     view.ui.remove('compass');
 
-    view.on('click', async (event) => {
-      if (event.mapPoint) {
-        let mp = event.mapPoint;
-        this.mapClick({
-          x: mp.longitude,
-          y: mp.latitude,
-          lat: mp.x,
-          lnt: mp.y,
-          wkid: mp.spatialReference.wkid
-        });
-      } else {
-        this.mapClick(event);
-      }
-      const response = await view.hitTest(event);
-      if (response.results.length > 0) {
-        response.results.forEach((result) => {
-          const graphic = result.graphic;
-          if(!graphic.attributes){
-            return ;
-          }
-          let {type, id} = graphic.attributes;
-          let label = graphic.layer ? (graphic.layer as any).label : '';
-          if (
-            graphic.layer &&
-            (graphic.layer.type == 'feature' ||
-              graphic.layer.type == 'graphics')
-          ) {
-            id =
-              graphic.attributes['DEVICEID'] ||
-              graphic.attributes['FEATUREID'] ||
-              graphic.attributes['SECTIONID'] ||
-              graphic.attributes['id'] ||
-              graphic.attributes['ID'] ||
-              undefined;
-            type =
-              graphic.attributes['DEVICETYPE'] ||
-              graphic.attributes['FEATURETYPE'] ||
-              graphic.attributes['FEATURETYP'] ||
-              graphic.attributes['type'] ||
-              graphic.attributes['TYPE'] ||
-              label ||
-              undefined;
-          }
-          //if (id) {
-          this.showGisDeviceInfo(type, id, graphic.toJSON());
-          //}
-        });
-      } else {
-        this.doIdentifyTask(event.mapPoint).then((results: any) => {
-          if (results.length > 0) {
-            let result = results[0];
-            let type = result.layerName;
-            let layerid = result.layerId;
-            let id =
-              result.feature.attributes['DEVICEID'] ||
-              result.feature.attributes['FEATUREID'] ||
-              result.feature.attributes['SECTIONID'] ||
-              result.feature.attributes[result.displayFieldName];
-            this.showGisDeviceInfo(type, id, result.feature.attributes);
-            let selectLayer = this.getLayerByName(type);
-            if (selectLayer.popupTemplates) {
-              let popup = selectLayer.popupTemplates[layerid];
-              if (popup) {
-                this.view.popup.open({
-                  title: popup.title,
-                  content: this.getContent(
-                    result.feature.attributes,
-                    popup.content
-                  ),
-                  location: event.mapPoint
-                });
+    await view.when(()=>{
+      this.view = view;
+
+      view.on('click', async (event) => {
+        if (event.mapPoint) {
+          let mp = event.mapPoint;
+          this.mapClick({
+            x: mp.longitude,
+            y: mp.latitude,
+            lat: mp.x,
+            lnt: mp.y,
+            wkid: mp.spatialReference.wkid
+          });
+        } else {
+          this.mapClick(event);
+        }
+        const response = await view.hitTest(event);
+        if (response.results.length > 0) {
+          response.results.forEach((result) => {
+            const graphic = result.graphic;
+            if(!graphic.attributes){
+              return ;
+            }
+            let {type, id} = graphic.attributes;
+            let label = graphic.layer ? (graphic.layer as any).label : '';
+            if (
+              graphic.layer &&
+              (graphic.layer.type == 'feature' ||
+                graphic.layer.type == 'graphics')
+            ) {
+              id =
+                graphic.attributes['DEVICEID'] ||
+                graphic.attributes['FEATUREID'] ||
+                graphic.attributes['SECTIONID'] ||
+                graphic.attributes['id'] ||
+                graphic.attributes['ID'] ||
+                undefined;
+              type =
+                graphic.attributes['DEVICETYPE'] ||
+                graphic.attributes['FEATURETYPE'] ||
+                graphic.attributes['FEATURETYP'] ||
+                graphic.attributes['type'] ||
+                graphic.attributes['TYPE'] ||
+                label ||
+                undefined;
+            }
+            //if (id) {
+            this.showGisDeviceInfo(type, id, graphic.toJSON());
+            //}
+          });
+        } else {
+          this.doIdentifyTask(event.mapPoint).then((results: any) => {
+            if (results.length > 0) {
+              let result = results[0];
+              let type = result.layerName;
+              let layerid = result.layerId;
+              let id =
+                result.feature.attributes['DEVICEID'] ||
+                result.feature.attributes['FEATUREID'] ||
+                result.feature.attributes['SECTIONID'] ||
+                result.feature.attributes[result.displayFieldName];
+              this.showGisDeviceInfo(type, id, result.feature.attributes);
+              let selectLayer = this.getLayerByName(type);
+              if (selectLayer.popupTemplates) {
+                let popup = selectLayer.popupTemplates[layerid];
+                if (popup) {
+                  this.view.popup.open({
+                    title: popup.title,
+                    content: this.getContent(
+                      result.feature.attributes,
+                      popup.content
+                    ),
+                    location: event.mapPoint
+                  });
+                }
               }
             }
-          }
-        });
+          });
+        }
+      });
+
+      if (mapConfig.operationallayers) {
+        this.createLayer(view, mapConfig.operationallayers);
       }
+    },()=>{
+
     });
-    await view.when();
-    if (mapConfig.operationallayers) {
-      this.createLayer(view, mapConfig.operationallayers);
-    }
-    this.view = view;
 
     (this.view.popup as any).visibleElements = {
       featureNavigation: false,
@@ -375,9 +381,7 @@ export default class MapAppArcGIS2D {
               drawlayer.addDrawLayer(layerConfig);
               break;
           }
-          // if (layer) {
-          //   layer.id = layerConfig.id || layerConfig.label;
-          // }
+          layerConfig.type = type;
           return layer;
         })
         .filter((layer: any) => {
@@ -418,15 +422,15 @@ export default class MapAppArcGIS2D {
     const find = FindFeature.getInstance(this.view);
     return await find.findLayerFeature(params);
   }
-  public async showToolTip(param:Vue.Component){
+  public async showToolTip(param:Vue.Component) :Promise<IResult>{
     const tooltip = OverlayArcgis2D.getInstance(this.view);
-    await tooltip.showToolTip(param);
+    return await tooltip.showToolTip(param);
   }
   public async showLayer(params: ILayerConfig) :Promise<IResult>{
     let showResult = false;
-    this.view.map.allLayers.forEach((baselayer: ILayerConfig) => {
+    this.view.map.allLayers.forEach((baselayer:any) => {
       if (params.label && baselayer.label === params.label) {
-        if (!baselayer.visible) {
+        if (!baselayer.visible && baselayer.isResolved()) {
           baselayer.visible = true;
           showResult = true;
         }
@@ -441,9 +445,9 @@ export default class MapAppArcGIS2D {
   }
   public async hideLayer(params: ILayerConfig) :Promise<IResult>{
     let hideResult = false;
-    this.view.map.allLayers.forEach((baselayer: ILayerConfig) => {
+    this.view.map.allLayers.forEach((baselayer:any) => {
       if (params.label && baselayer.label === params.label) {
-        if (baselayer.visible) {
+        if (baselayer.visible && baselayer.isResolved()) {
           baselayer.visible = false;
           hideResult = true;
         }

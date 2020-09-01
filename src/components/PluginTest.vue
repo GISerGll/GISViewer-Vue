@@ -504,7 +504,8 @@ export default class PluginTest extends Vue {
             defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
         });
 
-        map.showToolTip(Parent);
+        const results = await map.showToolTip(Parent);
+        console.log(results);
     }
     private showGisDeviceInfo(type: string, id: string, detail: any) {
         console.log(type, id, detail);

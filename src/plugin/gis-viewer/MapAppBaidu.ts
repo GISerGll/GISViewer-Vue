@@ -178,7 +178,7 @@ export default class MapAppBaidu implements IMapContainer {
     this.view.centerAndZoom(center, level);
   }
 
-  public showLayer(params: ILayerConfig) {
+  public showLayer(params: ILayerConfig):any {
     this.baseLayers.forEach((baselayer) => {
       if (
         (params.label && baselayer.label === params.label) ||
@@ -191,7 +191,7 @@ export default class MapAppBaidu implements IMapContainer {
       }
     });
   }
-  public hideLayer(params: ILayerConfig) {
+  public hideLayer(params: ILayerConfig):any {
     this.baseLayers.forEach((baselayer) => {
       if (
         (params.label && baselayer.label === params.label) ||
