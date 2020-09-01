@@ -303,4 +303,10 @@ export default class MapAppGaode implements IMapContainer {
   }
   public hideDgene() {}
   public showEditingLabel(params:any):any{}
+  public async addDgeneFusion(params: any): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public async restoreDegeneFsion(): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
 }

@@ -194,6 +194,8 @@ export interface IMapContainer {
   createLineFence: (param:IElectronicFenceParameter)=> Promise<IResult>;
   createElectFenceByEndPtsConnection: (param:IElectronicFenceParameter)=> Promise<IResult>;
   showEditingLabel:(param:IEditFenceLabel) => Promise<IResult>;
+  addDgeneFusion: (params: any) => Promise<IResult>;
+  restoreDegeneFsion: () => Promise<IResult>;
 }
 export interface IPopUpTemplate {
   title?: string;
