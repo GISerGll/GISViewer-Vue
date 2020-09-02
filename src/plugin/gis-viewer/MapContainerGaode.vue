@@ -149,6 +149,9 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public showToolTip(param:Vue.Component):Promise<IResult>{
       return this.mapApp.showToolTip(param);
   }
+  public closeToolTip() :Promise<IResult> {
+    return this.mapApp.closeToolTip();
+  }
   public async findLayerFeature():Promise<any>{}
   public showMonitorArea():any{}
   public showCircleOutline(params:any):any{}

@@ -21,6 +21,7 @@ export class OverlayGaode {
   private overlayers = new Array();
   private overlayGroup: any;
   private markerClustererLayer = new Array();
+  private tooltip:any
   public showGisDeviceInfo: any;
   public mouseGisDeviceInfo: any;
 
@@ -520,38 +521,56 @@ export class OverlayGaode {
     }
   }
   public async showToolTip(tooltip:Vue.Component):Promise<IResult>{
-      let ptOverlays:any = this.view.getAllOverlays('marker')
-      let tip:any;
+    if(!tooltip){
+      await this.closeToolTip();
+    }
 
-      ptOverlays.forEach((ptOverlay:any) => {
-          ptOverlay.on('click',async (e:any) => {
-              let fields = e.target.getExtData().attributes;
-              let center = e.target.getPosition();
-              let infoWindow;
+    let ptOverlays:any = this.view.getAllOverlays('marker')
+    let tip:any;
 
-              if(fields){
-                  infoWindow = fields.infoWindow;
-              }
-              if(infoWindow){
-                  if (tip) {
-                      tip.remove();
-                      tip = null;
-                  }
-                  else {
-                      tip = new ToolTipGaoDe(
-                        this.view,
-                        tooltip,
-                        infoWindow,
-                        center
-                      );
-                  }
-              }
-          })
+    ptOverlays.forEach((ptOverlay:any) => {
+      ptOverlay.on('click',async (e:any) => {
+        let fields = e.target.getExtData().attributes;
+        let center = e.target.getPosition();
+        let infoWindow;
+
+        if(fields){
+          infoWindow = fields.infoWindow;
+        }
+        if(infoWindow){
+          if (tip) {
+            tip.remove();
+            tip = null;
+          }
+          tip = new ToolTipGaoDe(
+              this.view,
+              tooltip,
+              infoWindow,
+              center
+          );
+          this.tooltip = tip;
+        }
       })
+    })
+
     return {
       status:0,
       message:'ok',
       result:'成功调用方法，但无法保证可以正确显示弹窗'
+    }
+  }
+  public async closeToolTip():Promise<IResult>{
+    let close = false;
+    if(this.tooltip){
+      this.tooltip.remove();
+      this.tooltip = null;
+      close = true;
+    }
+
+    return {
+      status:0,
+      message:'ok',
+      result:close ? '成功关闭VUE弹窗': '未存在VUE弹窗'
     }
   }
 }

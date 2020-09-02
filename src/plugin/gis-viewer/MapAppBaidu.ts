@@ -1,4 +1,4 @@
-import {loadScript, ILoadScriptOptions} from 'esri-loader';
+import {Vue} from "vue-property-decorator";
 import {
   IMapContainer,
   IOverlayParameter,
@@ -35,14 +35,16 @@ export default class MapAppBaidu implements IMapContainer {
 
     await this.loadOtherScripts([
       apiUrl,
-      apiRoot + '/library/Heatmap/Heatmap_min.js',
-      apiRoot + '/library/TextIconOverlay/TextIconOverlay_min.js',
-      apiRoot + '/library/MarkerClusterer/MarkerClusterer_min.js'
+      // apiRoot + '/library/Heatmap/Heatmap_min.js',
+      // apiRoot + '/library/TextIconOverlay/TextIconOverlay_min.js',
+      // apiRoot + '/library/MarkerClusterer/MarkerClusterer_min.js'
     ]).then(function(e: any) {
       console.log("Load Scripts");
     });
 
-    view = new BMap.Map(mapContainer);
+    view = new BMap.Map(mapContainer,{
+      enableMapClick:false
+    });
     let gisUrl = mapConfig.gisServer
       ? mapConfig.gisServer
       : this.getIpPort(apiUrl);
@@ -238,7 +240,14 @@ export default class MapAppBaidu implements IMapContainer {
   public pausePlayback(){}
   public goOnPlayback(){}
   public async startDrawOverlays():Promise<any>{}
-  public async showToolTip():Promise<any>{}
+  public async showToolTip(param:Vue.Component):Promise<any>{
+    const overlay = OverlayBaidu.getInstance(this.view);
+    return await overlay.showToolTip(param);
+  }
+  public async closeToolTip():Promise<any>{
+    const overlay = OverlayBaidu.getInstance(this.view);
+    return await overlay.closeToolTip();
+  }
   public showMonitorArea():any{}
   public showCircleOutline():any{}
   public createPlaceFence():any{}

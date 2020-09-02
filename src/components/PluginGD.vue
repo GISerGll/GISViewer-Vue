@@ -511,6 +511,8 @@
     }
     private mapClick(pt: object) {
       console.log(pt);
+      // let map = this.$refs.gisViewer as any;
+      // map.closeToolTip();
     }
   }
 </script>

@@ -304,13 +304,15 @@ export default class MapConfig {
         }
     };
     public gdConfig: any = {
-        gaode_api:
-          'https://webapi.amap.com/maps?v=1.4.15&key=ec85d3648154874552835438ac6a02b2',
+        // gaode_api:
+        //   'https://webapi.amap.com/maps?v=1.4.15&key=ec85d3648154874552835438ac6a02b2',
+      gaode_api:
+          'http://localhost:8080/gaode/gaode_js_api.js',
         theme: 'vec', //dark,vec
         baseLayers: [{type: 'traffic', label: '路况', visible: false}],
 
         options: {
-            center: [121.441, 31.159],
+            center: [87.597, 43.824],
             zoom: 13,
             viewMode: '3D',
             mapStyle: 'amap://styles/blue', //设置地图的显示样式

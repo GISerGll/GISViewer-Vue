@@ -52,13 +52,25 @@ export default class MapAppGaode implements IMapContainer {
     } else {
       plugins.push('AMap.Heatmap');
     }
-    let key = this.getQueryString(apiUrl, 'key');
-    let v = this.getQueryString(apiUrl, 'v');
-    await AMapLoader.load({
-      key: key,
-      version: v,
-      plugins: plugins
-    });
+
+    let reg = /webapi.amap.com/ig;
+    //匹配正则表达式执行高德自己loader
+    if(reg.test(apiUrl)){
+      let key = this.getQueryString(apiUrl, 'key');
+      let v = this.getQueryString(apiUrl, 'v');
+      await AMapLoader.load({
+        key: key,
+        version: v,
+        plugins: plugins
+      });
+    }else{    //不匹配则将执行本地方法，实现<script>标签写入
+      await this.loadOtherScripts([
+        apiUrl,
+      ]).then(function(e: any) {
+        console.log("Load Scripts");
+      });
+    }
+
     this.destroy();
     this.view = new AMap.Map(mapContainer, mapConfig.options);
     (this.view as any).version = version;
@@ -281,6 +293,10 @@ export default class MapAppGaode implements IMapContainer {
       const tooltip = OverlayGaode.getInstance(this.view);
       return await tooltip.showToolTip(param);
   }
+  public async closeToolTip():Promise<any>{
+    const tooltip = OverlayGaode.getInstance(this.view);
+    return await tooltip.closeToolTip();
+  }
   public showMonitorArea():any{}
   public showCircleOutline():any{}
   public createPlaceFence():any{}
@@ -308,5 +324,20 @@ export default class MapAppGaode implements IMapContainer {
   }
   public async restoreDegeneFsion(): Promise<IResult> {
     return {status: 0, message: ''};
+  }
+  private async loadOtherScripts(scriptUrls: string[]): Promise<any> {
+    let promises = scriptUrls.map((url) => {
+      return new Promise((resolve, reject) => {
+        const scriptElement = document.createElement('script');
+        scriptElement.src = url;
+        scriptElement.onload = resolve;
+        document.body.appendChild(scriptElement);
+      });
+    });
+    return new Promise((resolve) => {
+      Promise.all(promises).then((e) => {
+        resolve(e);
+      });
+    });
   }
 }

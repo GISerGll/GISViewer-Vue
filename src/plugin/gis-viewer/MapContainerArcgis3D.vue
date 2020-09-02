@@ -113,6 +113,9 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public goOnPlayback(){}
   public async startDrawOverlays():Promise<any>{}
   public async showToolTip():Promise<any>{}
+  public closeToolTip() :Promise<IResult> {
+    return this.mapApp.closeToolTip();
+  }
   public showMonitorArea():any{}
   public showRoutePoint(params: any) {}
   public clearRoutePoint() {}

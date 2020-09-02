@@ -112,7 +112,12 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
   public pausePlayback(){}
   public goOnPlayback(){}
   public async startDrawOverlays():Promise<any>{}
-  public async showToolTip():Promise<any>{}
+  public async showToolTip(param:Vue.Component):Promise<any>{
+    return this.mapApp.showToolTip(param);
+  }
+  public closeToolTip() :Promise<IResult> {
+    return this.mapApp.closeToolTip();
+  }
   public async findLayerFeature():Promise<any>{}
   public showMonitorArea():any{}
   public showRoutePoint(params: any) {}

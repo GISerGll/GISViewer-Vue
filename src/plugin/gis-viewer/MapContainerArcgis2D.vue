@@ -187,6 +187,9 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async restoreDegeneFsion(): Promise<IResult> {
     return await this.mapApp.restoreDegeneFsion();
   }
+  public closeToolTip() :Promise<IResult> {
+    return this.mapApp.closeToolTip();
+  }
 }
 </script>
 

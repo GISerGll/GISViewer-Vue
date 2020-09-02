@@ -209,6 +209,9 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async showToolTip(param: Vue.Component) :Promise<IResult>{
     return await this.mapContainer.showToolTip(param);
   }
+  public async closeToolTip() :Promise<IResult>{
+    return await this.mapContainer.closeToolTip();
+  }
   public async startDrawOverlays(param: IDrawOverlayParameter):Promise<IResult>{
     return this.mapContainer.startDrawOverlays(param)
   }

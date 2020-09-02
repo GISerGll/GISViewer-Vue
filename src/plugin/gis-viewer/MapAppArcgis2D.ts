@@ -426,6 +426,10 @@ export default class MapAppArcGIS2D {
     const tooltip = OverlayArcgis2D.getInstance(this.view);
     return await tooltip.showToolTip(param);
   }
+  public closeToolTip() :Promise<IResult>{
+    const tooltip = OverlayArcgis2D.getInstance(this.view);
+    return tooltip.closeToolTip();
+  }
   public async showLayer(params: ILayerConfig) :Promise<IResult>{
     let showResult = false;
     this.view.map.allLayers.forEach((baselayer:any) => {

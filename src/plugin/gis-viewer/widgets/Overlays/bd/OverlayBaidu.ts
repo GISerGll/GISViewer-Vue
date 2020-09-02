@@ -8,6 +8,8 @@ import {
   IOverlayDelete,
   IFindParameter
 } from '@/types/map';
+import {Vue} from "vue-property-decorator";
+import ToolTipBaiDu from "@/plugin/gis-viewer/widgets/Overlays/bd/ToolTipBaiDu";
 declare let BMap: any;
 declare let BMapLib: any;
 
@@ -15,6 +17,7 @@ export class OverlayBaidu {
   private static intances: Map<string, any>;
   private view!: any;
   private overlayers = new Array();
+  private tooltip:any
   private markerClustererLayer = new Array();
   public showGisDeviceInfo: any;
 
@@ -392,5 +395,57 @@ export class OverlayBaidu {
       });
     }
     this.view.closeInfoWindow();
+  }
+  public async showToolTip(tooltip:Vue.Component):Promise<IResult>{
+    if(!tooltip){
+      await this.closeToolTip();
+    }
+    let overlays:any = this.view.getOverlays();
+    let tip:any;
+
+    overlays.forEach((ptOverlay:any) => {
+      ptOverlay.addEventListener('click',async (e:any) => {
+        let fields = e.target.attributes;
+        let center = e.target.getPosition();
+        let infoWindow;
+
+        if(fields){
+          infoWindow = fields.infoWindow;
+        }
+        if(infoWindow){
+          if (tip) {
+            tip.remove();
+            tip = null;
+            this.tooltip = null;
+          }
+          tip = new ToolTipBaiDu(
+              this.view,
+              tooltip,
+              infoWindow,
+              center
+          );
+          this.tooltip = tip;
+        }
+      })
+    })
+    return {
+      status:0,
+      message:'ok',
+      result:'成功调用方法，但无法保证可以正确显示弹窗'
+    }
+  }
+  public async closeToolTip():Promise<IResult>{
+    let close = false;
+    if(this.tooltip){
+      this.tooltip.remove();
+      this.tooltip = null;
+      close = true;
+    }
+
+    return {
+      status:0,
+      message:'ok',
+      result:close ? '成功关闭VUE弹窗': '未存在VUE弹窗'
+    }
   }
 }
