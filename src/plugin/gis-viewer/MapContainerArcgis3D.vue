@@ -63,8 +63,8 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public addOverlaysCluster(params: IOverlayClusterParameter) {
     this.mapApp.addOverlaysCluster(params);
   }
-  public deleteOverlays(params: IOverlayDelete) {
-    this.mapApp.deleteOverlays(params);
+  public deleteOverlays(params: IOverlayDelete) :Promise<IResult>{
+    return this.mapApp.deleteOverlays(params);
   }
   public deleteOverlaysCluster(params: IOverlayDelete) {
     this.mapApp.deleteOverlaysCluster(params);

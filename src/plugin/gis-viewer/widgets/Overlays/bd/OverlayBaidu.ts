@@ -347,6 +347,7 @@ export class OverlayBaidu {
   public async deleteOverlays(params: IOverlayDelete) {
     let types = params.types || [];
     let ids = params.ids || [];
+    let delCount = 0;
     this.overlayers = this.overlayers.filter((graphic) => {
       if (
         //只判断type
@@ -367,6 +368,7 @@ export class OverlayBaidu {
         if (graphic.isOpenInfo === true) {
           this.view.closeInfoWindow();
         }
+        delCount++;
         return false;
       }
       return true;

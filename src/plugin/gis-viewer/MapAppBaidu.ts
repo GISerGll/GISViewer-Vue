@@ -28,19 +28,18 @@ export default class MapAppBaidu implements IMapContainer {
   public mapClick: any;
 
   public async initialize(mapConfig: any, mapContainer: string): Promise<void> {
-    const apiUrl = mapConfig.arcgis_api; //"http://localhost:8090/baidu/BDAPI.js";
+    const apiUrl = mapConfig.baidu_api; //"http://localhost:8090/baidu/BDAPI.js";
     let view: any;
-    await loadScript({
-      url: `${apiUrl}`
-    });
-    const apiRoot = mapConfig.arcgis_api.substring(0, apiUrl.lastIndexOf('/'));
+
+    const apiRoot = apiUrl.substring(0, apiUrl.lastIndexOf('/'));
 
     await this.loadOtherScripts([
+      apiUrl,
       apiRoot + '/library/Heatmap/Heatmap_min.js',
       apiRoot + '/library/TextIconOverlay/TextIconOverlay_min.js',
       apiRoot + '/library/MarkerClusterer/MarkerClusterer_min.js'
     ]).then(function(e: any) {
-      //console.log("Load Scripts");
+      console.log("Load Scripts");
     });
 
     view = new BMap.Map(mapContainer);
@@ -144,7 +143,7 @@ export default class MapAppBaidu implements IMapContainer {
 
   public async deleteOverlays(params: IOverlayDelete) {
     const overlay = OverlayBaidu.getInstance(this.view);
-    await overlay.deleteOverlays(params);
+    return await overlay.deleteOverlays(params);
   }
   public async deleteOverlaysCluster(params: IOverlayDelete) {
     const overlay = OverlayBaidu.getInstance(this.view);

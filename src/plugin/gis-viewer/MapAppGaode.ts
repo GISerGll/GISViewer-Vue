@@ -139,9 +139,9 @@ export default class MapAppGaode implements IMapContainer {
     const heatmap = HeatMapGD.getInstance(this.view);
     await heatmap.addHeatMap(params);
   }
-  public async deleteOverlays(params: IOverlayDelete) {
+  public async deleteOverlays(params: IOverlayDelete) :Promise<IResult>{
     const overlay = OverlayGaode.getInstance(this.view);
-    await overlay.deleteOverlays(params);
+    return await overlay.deleteOverlays(params);
   }
   public async deleteOverlaysCluster(params: IOverlayDelete) {
     const cluster = ClusterGD.getInstance(this.view);

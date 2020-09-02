@@ -148,8 +148,8 @@ export default class MapContainer extends Vue implements IMapContainer {
   public addHeatMap(params: IHeatParameter) {
     this.mapContainer.addHeatMap(params);
   }
-  public deleteOverlays(params: IOverlayDelete) {
-    this.mapContainer.deleteOverlays(params);
+  public deleteOverlays(params: IOverlayDelete) :Promise<IResult>{
+    return this.mapContainer.deleteOverlays(params);
   }
   public deleteOverlaysCluster(params: IOverlayDelete) {
     this.mapContainer.deleteOverlaysCluster(params);

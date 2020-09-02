@@ -149,7 +149,7 @@ export interface IMapContainer {
   showToolTip: (param:Vue.Component) => Promise<IResult>;
   addHeatMap: (param: IHeatParameter) => void;
   addOverlaysCluster: (param: IOverlayClusterParameter) => void;
-  deleteOverlays: (param: IOverlayDelete) => void;
+  deleteOverlays: (param: IOverlayDelete) => Promise<IResult>;
   deleteOverlaysCluster: (param: IOverlayDelete) => void;
   deleteAllOverlays: () => void;
   deleteAllOverlaysCluster: () => void;

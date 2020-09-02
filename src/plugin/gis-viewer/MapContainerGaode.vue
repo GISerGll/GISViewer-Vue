@@ -63,8 +63,8 @@ export default class MapContainerGd extends Vue implements IMapContainer {
     this.mapApp.addOverlaysCluster(params);
   }
 
-  public deleteOverlays(params: IOverlayDelete) {
-    this.mapApp.deleteOverlays(params);
+  public deleteOverlays(params: IOverlayDelete) :Promise<IResult>{
+    return this.mapApp.deleteOverlays(params);
   }
 
   public deleteOverlaysCluster(params: IOverlayDelete) {

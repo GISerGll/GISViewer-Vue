@@ -1,5 +1,5 @@
 <template>
-  <div :id="mapId" class="my-map-div" />
+  <div id="divAMap" />
 </template>
 <script lang="ts">
 import {Vue, Component, Emit, Prop} from 'vue-property-decorator';
@@ -22,19 +22,18 @@ import {
   IGeometrySearchParameter
 } from '@/types/map';
 @Component({
-  name: 'MapAppBaidu'
+  name: 'MapContainerBaidu'
 })
-export default class MapContainerArcgis extends Vue implements IMapContainer {
+export default class MapContainerBaidu extends Vue implements IMapContainer {
   private mapApp!: MapApp;
 
-  private mapId: string = 'divBMap' + (Math.random() * 10000).toFixed(0);
   //地图配置
   @Prop({type: Object}) readonly mapConfig!: Object;
 
   @Emit('map-loaded')
   async mounted() {
     this.mapApp = new MapApp();
-    await this.mapApp.initialize(this.mapConfig, this.mapId);
+    await this.mapApp.initialize(this.mapConfig, 'divAMap');
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
   }
   @Emit('map-click')
@@ -58,8 +57,8 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public addHeatMap(params: IHeatParameter) {
     this.mapApp.addHeatMap(params);
   }
-  public deleteOverlays(params: IOverlayDelete) {
-    this.mapApp.deleteOverlays(params);
+  public deleteOverlays(params: IOverlayDelete) :Promise<IResult>{
+    return this.mapApp.deleteOverlays(params);
   }
   public deleteOverlaysCluster(params: IOverlayDelete) {
     this.mapApp.deleteOverlaysCluster(params);
@@ -151,10 +150,11 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
 </script>
 
 <style scoped>
-.my-map-div {
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  height: 100%;
-}
+  @import 'styles/main.css';
+  #divAMap {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
 </style>
