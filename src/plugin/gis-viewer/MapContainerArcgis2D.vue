@@ -194,7 +194,7 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
 </script>
 
 <style scoped>
-/* @import './styles/map.css'; */
+@import './styles/map.css';
 @import './styles/cluter.css';
 #divArcGISMap2D {
   padding: 0;
