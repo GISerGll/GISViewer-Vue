@@ -20,6 +20,7 @@ export interface ILayerConfig {
   label?: string;
   url?: string;
   visible?: boolean;
+  expression?: string[] | Object[];
   subDomains?: Array<string>;
 }
 
@@ -145,6 +146,9 @@ export interface IDrawOverlayParameter {
 }
 
 export interface IMapContainer {
+  // addLayer: (param:ILayerConfig) => Promise<IResult>;
+  // deleteLayer: (param:ILayerConfig) => Promise<IResult>;
+  // layerDefinition: (param:ILayerConfig) => Promise<IResult>;
   addOverlays: (param: IOverlayParameter) => Promise<IResult>;
   showToolTip: (param:Vue.Component) => Promise<IResult>;
   closeToolTip:() => Promise<IResult>;

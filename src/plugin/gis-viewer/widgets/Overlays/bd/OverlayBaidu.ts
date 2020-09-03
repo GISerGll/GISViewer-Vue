@@ -397,7 +397,7 @@ export class OverlayBaidu {
     this.view.closeInfoWindow();
   }
   public async showToolTip(tooltip:Vue.Component):Promise<IResult>{
-    if(!tooltip){
+    if(this.tooltip){
       await this.closeToolTip();
     }
     let overlays:any = this.view.getOverlays();
@@ -416,7 +416,6 @@ export class OverlayBaidu {
           if (tip) {
             tip.remove();
             tip = null;
-            this.tooltip = null;
           }
           tip = new ToolTipBaiDu(
               this.view,

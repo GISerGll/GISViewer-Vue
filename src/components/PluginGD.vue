@@ -11,13 +11,15 @@
       <button @click="btn_addOverlays_pt">添加点</button>
       <button @click="btn_addOverlays_line">添加线</button>
       <button @click="btn_addOverlays_polygon">添加面</button>
-      <button @click="btn_deleteOverlays">删除</button><br>
+      <button @click="btn_deleteOverlays">删除覆盖物</button><br>
+      <button @click="btn_showToolTip">开启VUE弹窗</button>
+      <button @click="btn_closeToolTip">关闭VUE弹窗</button><br>
       <button @click="btn_drawPoints">撒点</button>
       <button @click="btn_drawLines">画线</button>
       <button @click="btn_drawPolygons">画多边形</button>
       <button @click="btn_drawCircles">画圆</button>
       <button @click="btn_drawRects">画矩形</button><br>
-      <button @click="btn_startTrackPlayback">轨迹回放</button><br>
+      <button @click="btn_startTrackPlayback">轨迹回放</button>
       <button @click="btn_startRealTrackPlayback">实际轨迹回放</button>
       <button @click="btn_pausePlayback">暂停</button>
       <button @click="btn_goOnPlayback">继续</button><br>
@@ -240,6 +242,14 @@
         },
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       })
+    }
+    private async btn_showToolTip(){
+      let map = this.$refs.gisViewer as any;
+      map.showToolTip(Parent);
+    }
+    private async btn_closeToolTip(){
+      let map = this.$refs.gisViewer as any;
+      map.closeToolTip();
     }
     private async btn_deleteOverlays(){
       let map = this.$refs.gisViewer as any;
@@ -501,7 +511,6 @@
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       });
 
-      map.showToolTip(Parent);
     }
     private showGisDeviceInfo(type: string, id: string, detail: any) {
       console.log(type, id, detail);

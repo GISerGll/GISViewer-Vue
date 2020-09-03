@@ -521,7 +521,7 @@ export class OverlayGaode {
     }
   }
   public async showToolTip(tooltip:Vue.Component):Promise<IResult>{
-    if(!tooltip){
+    if(this.tooltip){
       await this.closeToolTip();
     }
 

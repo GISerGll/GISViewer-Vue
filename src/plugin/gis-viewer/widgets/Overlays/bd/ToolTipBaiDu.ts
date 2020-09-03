@@ -52,16 +52,17 @@ export default class ToolTip {
     this.view.addEventListener('zoomend', () => {
       this.changeText();
     });
+    this.view.addEventListener('mousemove', () => {
+      this.changeText();
+    });
 
 
   }
   private changeText() {
-    console.time('111');
     let point = this.view.pointToPixel(this.postion);
     const offset: { xoffset: number; yoffset: number } = this.subLocate("top");
     Object(this.vm.$el).style.left = point.x + 10 + offset.xoffset + "px";
     Object(this.vm.$el).style.top = point.y + offset.yoffset + "px";
-    console.timeEnd('111')
   }
   public remove() {
     // 回收组件
@@ -80,6 +81,9 @@ export default class ToolTip {
       this.changeText();
     });
     this.view.removeEventListener('zoomend', () => {
+      this.changeText();
+    });
+    this.view.removeEventListener('mousemove', () => {
       this.changeText();
     });
   }

@@ -180,12 +180,14 @@ export default class MapAppBaidu implements IMapContainer {
   }
 
   public showLayer(params: ILayerConfig):any {
+    debugger;
     this.baseLayers.forEach((baselayer) => {
       if (
         (params.label && baselayer.label === params.label) ||
         (params.type && baselayer.type === params.type)
       ) {
         if (!baselayer.visible) {
+          console.log(111);
           this.view.addTileLayer(baselayer.layer);
           baselayer.visible = true;
         }
