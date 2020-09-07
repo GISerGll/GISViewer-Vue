@@ -13,7 +13,7 @@ import {
 } from '@/types/map';
 import '@amap/amap-jsapi-types';
 import ToolTipGaoDe from "@/plugin/gis-viewer/widgets/Overlays/gd/ToolTipGaoDe";
-import {Vue} from "vue-property-decorator";
+import {Vue,Component} from "vue-property-decorator";
 
 export class OverlayGaode {
   private static intances: Map<string, any>;
@@ -521,12 +521,11 @@ export class OverlayGaode {
     }
   }
   public async showToolTip(tooltip:Vue.Component):Promise<IResult>{
-    if(this.tooltip){
+    if(!tooltip && this.tooltip){
       await this.closeToolTip();
     }
 
     let ptOverlays:any = this.view.getAllOverlays('marker')
-    let tip:any;
 
     ptOverlays.forEach((ptOverlay:any) => {
       ptOverlay.on('click',async (e:any) => {
@@ -538,17 +537,16 @@ export class OverlayGaode {
           infoWindow = fields.infoWindow;
         }
         if(infoWindow){
-          if (tip) {
-            tip.remove();
-            tip = null;
+          if (this.tooltip) {
+            this.tooltip.remove();
+            this.tooltip = null;
           }
-          tip = new ToolTipGaoDe(
+          this.tooltip = new ToolTipGaoDe(
               this.view,
               tooltip,
               infoWindow,
               center
           );
-          this.tooltip = tip;
         }
       })
     })

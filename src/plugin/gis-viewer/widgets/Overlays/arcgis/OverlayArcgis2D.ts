@@ -18,6 +18,7 @@ export class OverlayArcgis2D {
 
   private overlayLayer!: __esri.GraphicsLayer;
   private view!: __esri.MapView;
+  private tooltip:any;
 
   private static primitive2D = [
     'circle',
@@ -364,8 +365,10 @@ export class OverlayArcgis2D {
     }
   }
   public async showToolTip(tooltip:Vue.Component) :Promise<IResult>{
+    if(!tooltip && this.tooltip){
+      await this.closeToolTip();
+    }
     const view = this.view;
-    let tip!: any;
 
     view.on('click', async (event) =>{
       const response = await view.hitTest(event);
@@ -374,24 +377,23 @@ export class OverlayArcgis2D {
             if(result.graphic.geometry.type === "point"){
               if(result.graphic.attributes && result.graphic.attributes.hasOwnProperty("infoWindow")){
                 let content = result.graphic.attributes.infoWindow;
-                if (tip) {
-                  tip.remove();
-                  tip = null;
+                if (this.tooltip) {
+                  this.tooltip.remove();
+                  this.tooltip = null;
                 }
-                tip = new ToolTip(
+                this.tooltip = new ToolTip(
                   view,
                   tooltip,
                   content,
                   result.graphic
                 );
-
               }
             }
           });
         } else {
-          if (tip) {
-            tip.remove();
-            tip = null;
+          if (this.tooltip) {
+            this.tooltip.remove();
+            this.tooltip = null;
           }
         }
     });
@@ -400,6 +402,20 @@ export class OverlayArcgis2D {
       status:0,
       message:'ok',
       result:'方法调用成功，但无法保证可以正确显示弹窗'
+    }
+  }
+  public async closeToolTip() :Promise<IResult>{
+    let close = false;
+    if(this.tooltip){
+      this.tooltip.remove();
+      this.tooltip = null;
+      close = true;
+    }
+
+    return {
+      status:0,
+      message:'ok',
+      result:close ? '成功关闭VUE弹窗': '未存在VUE弹窗'
     }
   }
 }

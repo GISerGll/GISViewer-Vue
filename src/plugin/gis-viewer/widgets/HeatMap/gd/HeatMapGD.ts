@@ -68,7 +68,7 @@ export class HeatMapGD {
       radius = undefined;
     }
     if (AMap.HeatMap) {
-      this.heatmapOverlay = new AMap.HeatMap(this.view, {
+      this.heatmapOverlay = new AMap.Heatmap(this.view, {
         //radius: radius,
         opacity: [0, 1],
         gradient: gradient,
@@ -158,11 +158,12 @@ export class HeatMapGD {
         let cur_step = parseFloat((Number(step) * (index + 1)).toFixed(2));
         colorObj[cur_step] = element;
       });
+      console.log(colorObj);
       return colorObj;
     }
     return obj;
   }
-  public async addOverlays(params: IHeatParameter) {
+  public async  addOverlays(params: IHeatParameter) {
     const points = params.points;
     const options = params.options;
     const renderer = options.renderer;
@@ -181,6 +182,7 @@ export class HeatMapGD {
       overlays: points,
       type: 'heatpoint'
     };
+    console.log(overlayparams);
     this.overlays = OverlayGaode.getInstance(this.view);
     await this.overlays.addOverlays(overlayparams);
   }

@@ -29,6 +29,7 @@
       <button @click="btn_createElectFenceByEndPtsConnection">直线围栏</button>
       <button @click="btn_showCircleOutline">圆边界</button>
       <button @click="btn_showEditingLabel">编辑围栏</button>
+      <button @click="btn_addHeatMap">热力图</button>
 
       <!--      <button @click="btn_">删除</button><br>-->
       <!--      <button @click="btn_addHeatMap">添加热力图</button>-->
@@ -245,7 +246,8 @@
     }
     private async btn_showToolTip(){
       let map = this.$refs.gisViewer as any;
-      map.showToolTip(Parent);
+      const result = await map.showToolTip(Parent);
+      console.log(result);
     }
     private async btn_closeToolTip(){
       let map = this.$refs.gisViewer as any;
@@ -434,6 +436,54 @@
         //编辑结束后自动删除
         endEditing:false,
       })
+    }
+    private async btn_addHeatMap(){
+      let map = this.$refs.gisViewer as any;
+          var points = [];
+    var x = 87.597;
+      var y = 43.824;
+      for (var i = 0; i < 5000                      ; i++) {
+        var x1 = x + (Math.random() * 2 - 1) / 20;
+        var y1 = y + (Math.random() * 2 - 1) / 20;
+        var value = Math.floor(100 * Math.random() + 1);
+        var a = i % 2 == 0 ? '1' : '0';
+        points.push({
+          geometry: {x: x1, y: y1},
+          fields: {desc: '上海体育馆停车场', totalSpace: value, type: a}
+        });
+      }
+      var json = {
+        points: points,
+        options: {
+          field: 'totalSpace',
+          radius: '1',
+          colors: [
+            'rgb(63, 63, 191)',
+            'rgb(117,211,248)',
+            'rgb(0, 255, 0)',
+            'rgba(255,234,0)',
+            'rgb(255,0,0)'
+            // "rgba(0, 0, 255,0)",
+            // "rgb(0, 255, 0)",
+            // "rgb(255, 255, 0,0.2)",
+            // "rgb(250, 20, 0,0.5)"
+          ],
+          maxValue: 100,
+          minValue: 1,
+          zoom: 15,
+          // renderer: {
+          //   type: 'simple',
+          //   symbol: {
+          //     type: 'esriSMS',
+          //     url: 'assets/image/Anchor.png',
+          //     width: 10,
+          //     height: 10,
+          //     yoffset: 16
+          //   }
+          // }
+        }
+      };
+      map.addHeatMap(json);
     }
     private async loadImageAsync(url:string) {
       return new Promise(function(resolve, reject) {

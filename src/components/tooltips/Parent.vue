@@ -9,6 +9,7 @@
     import NormalTooltip from "@/components/tooltips/NormalTooltip";
     import AlarmTooltip from "@/components/tooltips/AlarmTooltip";
     import SuspiciousTooltip from "@/components/tooltips/SuspiciousTooltip";
+
     export default {
         name: "Parent.vue",
         components:{
@@ -31,7 +32,7 @@
             }
         },
         mounted() {
-            console.log(this.$refs)
+
         }
     }
 </script>

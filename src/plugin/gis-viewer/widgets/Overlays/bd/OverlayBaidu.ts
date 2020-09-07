@@ -397,11 +397,10 @@ export class OverlayBaidu {
     this.view.closeInfoWindow();
   }
   public async showToolTip(tooltip:Vue.Component):Promise<IResult>{
-    if(this.tooltip){
+    if(!tooltip && this.tooltip){
       await this.closeToolTip();
     }
     let overlays:any = this.view.getOverlays();
-    let tip:any;
 
     overlays.forEach((ptOverlay:any) => {
       ptOverlay.addEventListener('click',async (e:any) => {
@@ -413,17 +412,16 @@ export class OverlayBaidu {
           infoWindow = fields.infoWindow;
         }
         if(infoWindow){
-          if (tip) {
-            tip.remove();
-            tip = null;
+          if (this.tooltip) {
+            this.tooltip.remove();
+            this.tooltip = null;
           }
-          tip = new ToolTipBaiDu(
+          this.tooltip = new ToolTipBaiDu(
               this.view,
               tooltip,
               infoWindow,
               center
           );
-          this.tooltip = tip;
         }
       })
     })

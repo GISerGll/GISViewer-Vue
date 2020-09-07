@@ -304,10 +304,10 @@ export default class MapConfig {
         }
     };
     public gdConfig: any = {
-        // gaode_api:
-        //   'https://webapi.amap.com/maps?v=1.4.15&key=ec85d3648154874552835438ac6a02b2',
-      gaode_api:
-          'http://localhost:8080/gaode/gaode_js_api.js',
+        gaode_api:
+          'https://webapi.amap.com/maps?v=1.4.15&key=ec85d3648154874552835438ac6a02b2',
+      // gaode_api:
+      //     'http://localhost:8080/gaode/gaode_js_api.js',
         theme: 'vec', //dark,vec
         baseLayers: [{type: 'traffic', label: '路况', visible: false}],
 
