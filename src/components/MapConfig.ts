@@ -743,7 +743,7 @@ export default class MapConfig {
         ],
         maxValue: 1000,
         minValue: 1,
-        zoom: 15,
+        zoom: 13,
         renderer: {
           type: 'simple',
           symbol: {

@@ -29,6 +29,7 @@
       <button @click="btn_createElectFenceByEndPtsConnection">直线围栏</button>
       <button @click="btn_showCircleOutline">圆边界</button>
       <button @click="btn_showEditingLabel">编辑围栏</button>
+      <button @click="btn_addHeatMap">热力图</button>
 
 <!--      <button @click="btn_">删除</button><br>-->
 <!--      <button @click="btn_addHeatMap">添加热力图</button>-->
@@ -441,6 +442,49 @@ export default class PluginTest extends Vue {
             //编辑结束后自动删除
             endEditing:false,
         })
+    }
+    private async btn_addHeatMap(){
+      let map = this.$refs.gisViewer as any;
+      var points = [];
+      var x = 87.597;
+      var y = 43.824;
+      for (var i = 0; i < 5000; i++) {
+        var x1 = x + (Math.random() * 2 - 1) / 20;
+        var y1 = y + (Math.random() * 2 - 1) / 20;
+        var value = Math.floor(100 * Math.random() + 1);
+        var a = i % 2 == 0 ? '1' : '0';
+        points.push({
+          geometry: {x: x1, y: y1},
+          fields: {desc: '上海体育馆停车场', totalSpace: value, type: a}
+        });
+      }
+      var json = {
+        points: points,
+        // options: {
+        //   field: 'totalSpace',
+        //   radius: '20',
+        //   colors: [
+        //     'rgb(255, 255, 255)',
+        //     'rgba(206, 199, 25,0.5)',
+        //     'rgba(255, 140, 27,0.5)',
+        //     'rgba(246, 64, 64,0.5)'
+        //   ],
+        //   maxValue: 1000,
+        //   minValue: 1,
+        //   zoom: 13,
+        //   renderer: {
+        //     type: 'simple',
+        //     symbol: {
+        //       type: 'esriSMS',
+        //       url: 'assets/image/Anchor.png',
+        //       width: 64,
+        //       height: 66,
+        //       yoffset: 16
+        //     }
+        //   }
+        // }
+      };
+      map.addHeatMap(json);
     }
     private async loadImageAsync(url:string) {
         return new Promise(function(resolve, reject) {
