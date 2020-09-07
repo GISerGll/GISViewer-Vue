@@ -1,17 +1,28 @@
 .esri-popup__content {
+  border: 1px solid #2098a5;
   padding: 5px 15px 5px 15px;
-  min-width: auto;
-  background-color: #666666;
+  width: auto;
+  background-color: #02243f;
   overflow: hidden;
-  line-height: 35px;
+  line-height: 22px;
   text-align: center;
-  min-height: 35px;
+  min-height: 22px;
   max-width: 270px;
   text-align: left;
   line-height: 22px;
   color: white !important;
+  font-size: 15px !important;
   /* height: 30px; */
 }
 .esri-popup__pointer-direction {
-  background-color: #666666 !important;
+  background-color: #02243f !important;
+  border: 1px solid #2098a5;
+  z-index: 2;
+}
+
+.esri-popup--aligned-top-center .esri-popup__pointer-direction {
+  border-width: 0px 1px 1px 0px;
+}
+.esri-popup--aligned-bottom-center .esri-popup__pointer-direction {
+  border-width: 1px 0px 0px 1px;
 }

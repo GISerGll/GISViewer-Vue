@@ -34,6 +34,9 @@
 <!--      <button @click="btn_addHeatMap">添加热力图</button>-->
 <!--      <button @click="btn_deleteHeatMap">删除热力图</button>-->
     </div>
+    <div
+      style="width:100%;height:100%; position: absolute;pointer-events:none"
+    ></div>
     <gis-viewer
       ref="gisViewer"
       platform="arcgis2d"

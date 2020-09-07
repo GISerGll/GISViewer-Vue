@@ -196,6 +196,8 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
 <style scoped>
 @import './styles/map.css';
 @import './styles/cluter.css';
+@import './styles/dgeneapp.css';
+.my-map-div {
 #divArcGISMap2D {
   padding: 0;
   margin: 0;
@@ -217,5 +219,14 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   outline-offset: -9px;
   pointer-events: none;
   overflow: hidden;
+}
+.show-fusion {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+.hide-fusion {
+  display: none;
 }
 </style>

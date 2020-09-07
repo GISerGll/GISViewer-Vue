@@ -10,16 +10,19 @@ export class DgeneFusion {
   private view!: any;
   private showZoom: number = 10;
   private mouseEventFn: any;
+  private fusion_view_state: string = 'all';
+  private FlyCenter: any;
   private originView: any = {
     x: 0,
-    y: 300,
+    y: 2000,
     z: 45
   };
   private FlyView: any = {
-    x: 180,
-    y: 30,
-    z: 45
+    x: 211,
+    y: 190,
+    z: 342
   };
+  private rotateState: string = 'auto';
   private setting: any = {
     isLocal: true, // isLocal?apiBase = 'static/api':apiBase = 'project/api/'+id
     url: 'http://10.31.251.205/test/static/api/',
@@ -79,32 +82,42 @@ export class DgeneFusion {
   private hideDgene() {}
   public async showDgene(params: any) {
     let _this = this;
-
-    this.view.watch('zoom', (newValue: any, oldValue: any) => {
-      if (newValue >= this.showZoom && oldValue < newValue) {
-        _this.showFusion();
-      }
+    const [Point] = await loadModules(['esri/geometry/Point']);
+    let center = new Point({
+      x: -14071.811607336222,
+      y: -4342.546650737293,
+      spatialReference: this.view.spatialReference
     });
+    // this.view.watch('zoom', (newValue: any, oldValue: any) => {
+    //   if (newValue >= this.showZoom && oldValue < newValue) {
+    //     _this.showFusion();
+    //   }
+    // });
     this.stopMouseWheelEvent(true);
     this.view
       .goTo(
         {
-          center: this.view.center,
+          center: center,
           zoom: this.showZoom
         },
         {duration: 5000}
       )
       .then(() => {
         _this.stopMouseWheelEvent(false);
-        _this.fusion_view.camFlyTo(this.originView, 1);
+        _this.showFusion();
+        if (_this.fusion_view.camFlyTo) {
+          _this.fusion_view.camFlyTo(this.originView, 1);
+        }
       });
   }
   public stopMouseWheelEvent(param: boolean) {
     if (!param) {
       if (this.mouseEventFn) {
+        console.log('start mouseWheel');
         this.mouseEventFn.remove();
       }
     } else {
+      console.log('stop mouseWheel');
       this.mouseEventFn = this.view.on('mouse-wheel', (evt: any) => {
         if (evt && evt.stopPropagation) {
           //因此它支持W3C的stopPropagation()方法
@@ -121,13 +134,19 @@ export class DgeneFusion {
   public restoreDegeneFsion(params: any): Promise<IResult> {
     let _this = this;
     let pos = this.originView;
-
-    this.fusion_view.camFlyTo(pos, 3000);
+    this.stopMouseWheelEvent(false);
+    // if (this.fusion_view.camFlyTo) {
+    //   this.fusion_view.camFlyTo(pos, 3000);
+    // }
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         _this.hideFusion();
+        _this.view.goTo({
+          center: this.view.mapOptions.center,
+          zoom: this.view.mapOptions.zoom
+        });
         resolve({status: 0, message: 'restore map'});
-      }, 3300);
+      }, 300);
     });
   }
   public async addDgeneFusion(params: any): Promise<IResult> {
@@ -143,7 +162,35 @@ export class DgeneFusion {
     dgeneDiv.style.left = '0px';
     let divmap = document.getElementById(parentid) as any;
     divmap.appendChild(dgeneDiv);
-
+    window.onresize = () => {
+      $('#dgeneDiv').css({
+        width: window.screen.width + 'px',
+        height: window.screen.height + 'px'
+      });
+      _this.fusion_view.setCanvasSize(
+        window.screen.width,
+        window.screen.height
+      );
+    };
+    this.rotateState = 'stop';
+    window.ondblclick = () => {
+      if ($('#dgeneDiv').css('display') != 'none') {
+        if (_this.rotateState == 'stop') {
+          _this.rotateState = 'auto';
+          _this.fusion_view.autoRotate();
+        } else {
+          _this.rotateState = 'stop';
+          _this.fusion_view.stopAutoRotate();
+        }
+      }
+    };
+    this.view.watch('width,height', async (newValue: any) => {
+      $('#dgeneDiv').css({
+        width: _this.view.width + 'px',
+        height: _this.view.height + 'px'
+      });
+      _this.fusion_view.setCanvasSize(_this.view.width, _this.view.height);
+    });
     return new Promise((resolve, reject) => {
       _this.showDgeneFusion(params).then((e: IResult) => {
         _this.addVideo();
@@ -174,9 +221,9 @@ export class DgeneFusion {
   }
   public async showDgeneFusion(params: any): Promise<IResult> {
     await loadModules([
+      'libs/dgene/runtime.js',
       'libs/dgene/2.js',
-      'libs/dgene/app.js',
-      'libs/dgene/runtime.js'
+      'libs/dgene/app.js'
     ]);
     let setting = this.setting;
     let _this = this;
@@ -208,12 +255,17 @@ export class DgeneFusion {
               );
               let control = _this.fusion_view.getControl();
               _this.fusion_control = control;
-              resolve({status: 0, message: 'dgene fusion map onload success'});
+              resolve({
+                status: 0,
+                message: 'dgene fusion map onload success',
+                result: _this.fusion_view
+              });
             }
           }, 1000);
         },
         setting,
         (name: any) => {
+          _this.fusion_view.stopAutoRotate();
           _this.fusion_view.activeFuse(name);
         }
       );
@@ -221,38 +273,53 @@ export class DgeneFusion {
   }
   private hideFusion() {
     $('#dgeneDiv').fadeOut('slow');
-    $('#divMap').fadeIn(1000);
+    $('#' + this.view.container.id).fadeIn(1000);
   }
   private showFusion() {
     let _this = this;
+    this.rotateState = 'stop';
     this.fusion_view.camFlyTo(this.originView, 1);
     setTimeout(() => {
       let pos = _this.FlyView;
-
-      this.fusion_view.camFlyTo(pos, 5000);
-      console.log(this.fusion_view.getCameraPosition());
+      _this.fusion_view.camFlyTo(pos, 5000);
     }, 200);
-    $('#gisDiv').css({
-      'background-color': '#003452'
-    });
+
+    setTimeout(() => {
+      _this.rotateState = 'auto';
+      _this.fusion_view.autoRotate();
+      setTimeout(() => {
+        _this.rotateState = 'stop';
+        _this.fusion_view.stopAutoRotate();
+      }, 35000);
+    }, 5500);
+    // $('#gisDiv').css({
+    //   'background-color': '#003452'
+    // });
     $('#dgeneDiv').css({
       display: 'flex',
       position: 'fixed',
-      width: '100vw',
-      height: '100vh',
       'z-index': '90',
       top: '0px',
       left: '0px'
     });
     $('#dgeneDiv').fadeIn('slow');
-
-    $('#divMap').fadeOut(1000);
+    console.log(this.view.container.id);
+    $('#' + this.view.container.id).fadeOut(1000);
     this.fusion_control.addEventListener('change', (e: any) => {
       //console.log(_this.fusion_view.getCameraPosition());
-      if (_this.fusion_view.getCameraY() > 300) {
-        console.log('hide fu');
-        _this.hideFusion();
-      }
+      // if (_this.fusion_view.getCameraY() < 300) {
+      //   console.log('hide fu');
+      //   //_this.hideFusion();
+      //   if (_this.fusion_view_state == 'all') {
+      //     _this.fusion_view_state = 'in';
+      //     _this.fusion_view.hideOut();
+      //   }
+      // } else {
+      //   if (_this.fusion_view_state == 'in') {
+      //     _this.fusion_view_state = 'all';
+      //     _this.fusion_view.showOut();
+      //   }
+      // }
     });
   }
 }

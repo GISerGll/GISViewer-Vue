@@ -9,6 +9,8 @@ export default class HeatImageGL {
   private customLayer: any;
   private heat: any;
   private scale: number = 16000;
+  private factor: number = 8;
+  private imageCenter: any;
   private allImage: any;
   private heatData: any;
   private options: any;
@@ -47,6 +49,9 @@ export default class HeatImageGL {
     let points = params.points;
     let imageOpt = params.images;
     this.imageOpt = imageOpt;
+    this.scale = imageOpt.scale || this.scale;
+    this.factor = imageOpt.factor || this.factor;
+    this.imageCenter = imageOpt.center || imageOpt.geometry;
 
     let step = this.scale / this.view.scale;
 
@@ -62,6 +67,11 @@ export default class HeatImageGL {
     let parent = document.getElementsByClassName('esri-overlay-surface')[0];
     parent.appendChild(heatDiv);
     this.heat = heatDiv;
+    let _this = this;
+    this.view.watch('width,height', async (newValue: any) => {
+      heatDiv.style.width = _this.view.width + 'px';
+      heatDiv.style.height = _this.view.height + 'px';
+    });
 
     let heatmapInstance = h337.create({
       // only container is required, the rest will be defaults
@@ -126,13 +136,23 @@ export default class HeatImageGL {
       'libs/heatmap.min.js'
     ]).then(([BaseLayerView2D, Point, SpatialReference, Layer, h337]) => {
       let TileBorderLayerView2D = BaseLayerView2D.createSubclass({
+        attach: () => {
+          if (_that.imageCenter) {
+            let point = new Point({
+              x: _that.imageCenter.x,
+              y: _that.imageCenter.y,
+              spatialReference: _that.view.spatialReference
+            });
+            _that.view.goTo({center: point, scale: _that.scale / _that.factor});
+          }
+        },
         render: (renderParameters: any) => {
           var context = renderParameters.context;
           let step = _that.scale / _that.view.scale;
           let point = new Point({
             x: pt.x,
-            y: pt.y
-            //spatialReference: _that.view.spatialReference
+            y: pt.y,
+            spatialReference: _that.view.spatialReference
           });
           let screenPoint = _that.view.toScreen(point);
 
@@ -148,9 +168,11 @@ export default class HeatImageGL {
             blur: 0.75
           });
           let pdata = _that.heatData.map((dt: any) => {
+            let dx = Math.floor(dt.x * step + xoffset);
+            let dy = Math.floor(dt.y * step + yoffset);
             return {
-              x: Math.floor(dt.x * step + xoffset),
-              y: Math.floor(dt.y * step + yoffset),
+              x: dx,
+              y: dy,
               value: dt.value
             };
           });
@@ -160,11 +182,15 @@ export default class HeatImageGL {
             min: 0,
             data: pdata
           };
-          heatmapInstance.setData(resdata);
+          try {
+            heatmapInstance.setData(resdata);
+          } catch (e) {}
 
           let canvas = _that.heat.firstChild;
           let cts = canvas.getContext('2d');
-          cts.globalCompositeOperation = 'destination-atop';
+          if (pdata.length > 0) {
+            cts.globalCompositeOperation = 'destination-atop';
+          }
           cts.drawImage(
             _that.allImage,
             xoffset,

@@ -91,7 +91,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
         }
       })
     );
-    this.destroy();
+    //this.destroy();
     const basemap: __esri.Basemap = new Basemap({
       baseLayers
     });
@@ -185,6 +185,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
     });
     await view.when();
     this.view = view;
+    (this.view as any).mapOptions = mapConfig.options;
   }
   private destroy() {
     OverlayArcgis3D.destroy();
