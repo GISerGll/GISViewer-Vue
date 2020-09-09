@@ -36,6 +36,7 @@ export default class MapAppGaode implements IMapContainer {
 
   public async initialize(mapConfig: any, mapContainer: string) {
     let apiUrl = mapConfig.gaode_api || mapConfig.api_url;
+    let heatmapUrl = 'http://localhost:8080/gaode/heatmap.js'
     let plugins = [
       'AMap.DistrictSearch',
       'AMap.CustomLayer',
@@ -66,6 +67,7 @@ export default class MapAppGaode implements IMapContainer {
     }else{    //不匹配则将执行本地方法，实现<script>标签写入
       await this.loadOtherScripts([
         apiUrl,
+        heatmapUrl,
       ]).then(function(e: any) {
         console.log("Load Scripts");
       });
@@ -340,4 +342,5 @@ export default class MapAppGaode implements IMapContainer {
       });
     });
   }
+  public async arcgisLoadGDLayer(){}
 }

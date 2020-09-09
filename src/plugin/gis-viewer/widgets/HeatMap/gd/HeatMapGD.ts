@@ -68,7 +68,7 @@ export class HeatMapGD {
       radius = undefined;
     }
     if (AMap.HeatMap) {
-      this.heatmapOverlay = new AMap.Heatmap(this.view, {
+      this.heatmapOverlay = new AMap.HeatMap(this.view, {
         //radius: radius,
         opacity: [0, 1],
         gradient: gradient,
@@ -81,7 +81,7 @@ export class HeatMapGD {
         }
       });
     } else {
-      this.heatmapOverlay = new AMap.Heatmap(this.view, {
+      this.heatmapOverlay = new AMap.HeatMap(this.view, {
         //radius: radius,
         opacity: [0, 1],
         gradient: gradient,

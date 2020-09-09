@@ -32,6 +32,7 @@ import HeatImage2D from './widgets/HeatMap/arcgis/HeatImage2D';
 import HeatImageGL from './widgets/HeatMap/arcgis/HeatImageGL';
 import HeatImage3D from './widgets/HeatMap/arcgis/HeatImage3D';
 import {GeometrySearch} from './widgets/GeometrySearch/arcgis/GeometrySearch';
+import LayerOperationArcGIS from "@/plugin/gis-viewer/widgets/LayerOperation/arcgis/LayerOperationArcgis";
 
 export default class MapAppArcGIS3D implements IMapContainer {
   public view!: __esri.SceneView;
@@ -537,4 +538,5 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async restoreDegeneFsion(): Promise<IResult> {
     return {status: 0, message: ''};
   }
+    public async arcgisLoadGDLayer(){}
 }

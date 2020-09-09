@@ -470,7 +470,7 @@
           ],
           maxValue: 100,
           minValue: 1,
-          zoom: 15,
+          zoom: 19,
           // renderer: {
           //   type: 'simple',
           //   symbol: {

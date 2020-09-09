@@ -298,6 +298,10 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async restoreDegeneFsion(): Promise<IResult> {
     return await this.mapContainer.restoreDegeneFsion();
   }
+
+  public async arcgisLoadGDLayer(){
+      await this.mapContainer.arcgisLoadGDLayer();
+  }
 }
 </script>
 

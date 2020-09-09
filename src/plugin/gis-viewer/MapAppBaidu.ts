@@ -276,4 +276,5 @@ export default class MapAppBaidu implements IMapContainer {
   public async restoreDegeneFsion(): Promise<IResult> {
     return {status: 0, message: ''};
   }
+    public async arcgisLoadGDLayer(){}
 }

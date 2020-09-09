@@ -29,8 +29,8 @@
       <button @click="btn_createElectFenceByEndPtsConnection">直线围栏</button>
       <button @click="btn_showCircleOutline">圆边界</button>
       <button @click="btn_showEditingLabel">编辑围栏</button>
-      <button @click="btn_addHeatMap">热力图</button>
-
+      <button @click="btn_addHeatMap">热力图</button><br>
+      <button @click="btn_addGDLayer">加载高德地图</button>
 <!--      <button @click="btn_">删除</button><br>-->
 <!--      <button @click="btn_addHeatMap">添加热力图</button>-->
 <!--      <button @click="btn_deleteHeatMap">删除热力图</button>-->
@@ -62,7 +62,7 @@ export default class PluginTest extends Vue {
     private async btn_showLayer() {
         let map = this.$refs.gisViewer as any;
         const result = await map.showLayer({
-            label:"xzqh"
+            label:"GDLayer"
         })
       console.log(result);
 
@@ -138,13 +138,13 @@ export default class PluginTest extends Vue {
             overlays: [
                 {
                     id: 'test001',
-                    geometry: {x: 87.597, y: 43.814},
-                    fields: {name: '测试2', featureid: '0002'}
+                    geometry: {x: 104.07604340359372, y: 30.660031729032898},
+                    fields: {name: '雄飞中心ArcGIS', featureid: '0002'}
                 },
                 {
                     id: 'test002',
-                    geometry: {x: 87.587, y: 43.814},
-                    fields: {name: '测试3', featureid: '0003'}
+                    geometry: {x: 104.075976, y: 30.660087},
+                    fields: {name: '雄飞中心GD', featureid: '0003'}
                 },
                 {
                     id: 'test003',
@@ -486,6 +486,11 @@ export default class PluginTest extends Vue {
       };
       map.addHeatMap(json);
     }
+    private async btn_addGDLayer(){
+        let map = this.$refs.gisViewer as any;
+        map.arcgisLoadGDLayer();
+    }
+
     private async loadImageAsync(url:string) {
         return new Promise(function(resolve, reject) {
             const image = new Image();

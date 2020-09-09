@@ -202,6 +202,7 @@ export interface IMapContainer {
   showEditingLabel:(param:IEditFenceLabel) => Promise<IResult>;
   addDgeneFusion: (params: any) => Promise<IResult>;
   restoreDegeneFsion: () => Promise<IResult>;
+  arcgisLoadGDLayer: () => void;
 }
 export interface IPopUpTemplate {
   title?: string;

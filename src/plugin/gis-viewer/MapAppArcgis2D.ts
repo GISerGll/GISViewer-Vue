@@ -39,6 +39,7 @@ import {GeometrySearchGD} from './widgets/GeometrySearch/gd/GeometrySearchGD';
 import {GeometrySearch} from './widgets/GeometrySearch/arcgis/GeometrySearch';
 import {DgeneFusion} from './widgets/DgeneFusion/arcgis/DgeneFusion';
 import {Vue} from 'vue-property-decorator';
+import LayerOperationArcGIS from "@/plugin/gis-viewer/widgets/LayerOperation/arcgis/LayerOperationArcgis";
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
@@ -81,7 +82,7 @@ export default class MapAppArcGIS2D {
       'esri/layers/TileLayer',
       'esri/layers/WebTileLayer',
       'esri/core/Collection',
-      'esri/config'
+      'esri/config',
     ]) as Promise<MapModules>);
     esriConfig.fontsUrl = '/font/';
     const baseLayers: __esri.Collection = new Collection();
@@ -603,12 +604,16 @@ export default class MapAppArcGIS2D {
         const dgene = DgeneFusion.getInstance(this.view);
         return await dgene.restoreDegeneFsion();
     }
-  public async showDgene(params: any): Promise<IResult> {
-    let dgene = DgeneFusion.getInstance(this.view);
-    return await dgene.showDgene(params);
-  }
-  public hideDgene() {
-    let dgene = DgeneFusion.getInstance(this.view);
-    dgene.hideDgene();
-  }
+    public async showDgene(params: any): Promise<IResult> {
+        let dgene = DgeneFusion.getInstance(this.view);
+        return await dgene.showDgene(params);
+    }
+    public hideDgene() {
+        let dgene = DgeneFusion.getInstance(this.view);
+        dgene.hideDgene();
+    }
+    public async arcgisLoadGDLayer(){
+        const gdLayer = LayerOperationArcGIS.getInstance(this.view);
+        await gdLayer.arcgisLoadGDLayer();
+    }
 }

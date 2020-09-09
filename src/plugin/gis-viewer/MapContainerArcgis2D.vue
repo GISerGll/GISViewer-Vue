@@ -190,6 +190,9 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public closeToolTip() :Promise<IResult> {
     return this.mapApp.closeToolTip();
   }
+    public async arcgisLoadGDLayer(){
+        await this.mapApp.arcgisLoadGDLayer();
+    }
 }
 </script>
 
