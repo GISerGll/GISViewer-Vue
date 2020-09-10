@@ -5,7 +5,8 @@
       <button @click="btn_setMapCenter">居中</button>
       <button @click="btn_setMapCenterAndLevel">放大居中</button>
         <button @click="btn_findFeature">定位居中</button><br>
-      <button @click="btn_showLayer">显示图层</button>
+      <button @click="btn_showLayer1">显示GD图层1</button>
+      <button @click="btn_showLayer2">显示GD图层2</button>
       <button @click="btn_hideLayer">隐藏图层</button>
       <button @click="btn_switchLayer">切换底图</button><br>
       <button @click="btn_addOverlays_pt">添加点</button>
@@ -59,13 +60,19 @@ import Parent from "@/components/tooltips/Parent.vue";
 export default class PluginTest extends Vue {
     private arcgisConfig = new MapConfig();
     private mapConfig = this.arcgisConfig.mapConfig;
-    private async btn_showLayer() {
+    private async btn_showLayer1() {
         let map = this.$refs.gisViewer as any;
         const result = await map.showLayer({
-            label:"GDLayer"
+            label:"GDLayer1"
         })
       console.log(result);
-
+    }
+    private async btn_showLayer2() {
+        let map = this.$refs.gisViewer as any;
+        const result = await map.showLayer({
+            label:"GDLayer2"
+        })
+        console.log(result);
     }
     private async btn_switchLayer() {
         let map = this.$refs.gisViewer as any;
@@ -82,7 +89,10 @@ export default class PluginTest extends Vue {
     private async btn_hideLayer() {
         let map = this.$refs.gisViewer as any;
         await map.hideLayer({
-            label:"xzqh"
+            label:"GDLayer1"
+        })
+        await map.hideLayer({
+            label:"GDLayer2"
         })
     }
     private btn_setMapCenter(){

@@ -376,6 +376,10 @@ export default class MapAppArcGIS2D {
                 urlTemplate: layerConfig.url,
                 subDomains: layerConfig.subDomains || undefined
               });
+              layer.label = layerConfig.label;
+              if(layerConfig.visible === false){
+                  layer.visible = false;
+              }
               break;
             case 'json':
               const drawlayer = DrawLayer.getInstance(view);
@@ -450,7 +454,9 @@ export default class MapAppArcGIS2D {
   }
   public async hideLayer(params: ILayerConfig) :Promise<IResult>{
     let hideResult = false;
+      debugger;
     this.view.map.allLayers.forEach((baselayer:any) => {
+
       if (params.label && baselayer.label === params.label) {
         if (baselayer.visible && baselayer.isResolved()) {
           baselayer.visible = false;
