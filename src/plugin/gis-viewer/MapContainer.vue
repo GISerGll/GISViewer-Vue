@@ -104,24 +104,23 @@ export default class MapContainer extends Vue implements IMapContainer {
         return this.containerArcgis2D;
     }
   }
-  async mounted() {
-    if((this.mapConfig as any).hasOwnProperty('arcgis_api')){
-      if ((this.mapConfig as any).arcgis_api.indexOf('arcgis') > -1) {
-        (window as any).dojoConfig = {
-          async: true,
-          tlmSiblingOfDojo: false,
-          baseUrl: (this.mapConfig as any).arcgis_api + '/dojo/',
-          packages: [
-            {
-              name: 'libs',
-              location: 'libs'
-            }
-          ],
-          has: {
-            'esri-promise-compatibility': 1
+  async created() {
+    //console.log(this.mapConfig);
+    if ((this.mapConfig as any).arcgis_api.indexOf('arcgis') > -1) {
+      (window as any).dojoConfig = {
+        async: true,
+        tlmSiblingOfDojo: false,
+        baseUrl: (this.mapConfig as any).arcgis_api + '/dojo/',
+        packages: [
+          {
+            name: 'libs',
+            location: 'libs'
           }
-        };
-      }
+        ],
+        has: {
+          'esri-promise-compatibility': 1
+        }
+      };
     }
   }
   @Emit('map-loaded')
@@ -262,6 +261,12 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public hideMigrateChart() {
     this.mapContainer.hideMigrateChart();
+  }
+  public showBarChart(params: any) {
+    this.mapContainer.showBarChart(params);
+  }
+  public hideBarChart() {
+    this.mapContainer.hideBarChart();
   }
   public async showCircleOutline(param:ICircleOutline):Promise<IResult> {
     return await this.mapContainer.showCircleOutline(param);

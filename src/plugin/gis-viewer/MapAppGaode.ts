@@ -92,6 +92,7 @@ export default class MapAppGaode implements IMapContainer {
       });
     });
   }
+
   private getQueryString(url: string, name: string): string {
     let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)'); //构造一个含有目标参数的正则表达式对象
     let search = url.split('?')[1];
@@ -139,6 +140,7 @@ export default class MapAppGaode implements IMapContainer {
     overlay.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
     return await overlay.addOverlays(params);
   }
+
   public async findFeature(params: IFindParameter): Promise<IResult> {
     const overlay = OverlayGaode.getInstance(this.view);
     return await overlay.findFeature(params);
@@ -149,6 +151,7 @@ export default class MapAppGaode implements IMapContainer {
     cluster.showGisDeviceInfo = this.showGisDeviceInfo;
     await cluster.addOverlaysCluster(params);
   }
+
   public async addHeatMap(params: IHeatParameter) {
     const heatmap = HeatMapGD.getInstance(this.view);
     await heatmap.addHeatMap(params);
@@ -157,14 +160,17 @@ export default class MapAppGaode implements IMapContainer {
     const overlay = OverlayGaode.getInstance(this.view);
     return await overlay.deleteOverlays(params);
   }
+
   public async deleteOverlaysCluster(params: IOverlayDelete) {
     const cluster = ClusterGD.getInstance(this.view);
     await cluster.deleteOverlaysCluster(params);
   }
+
   public async deleteAllOverlays() {
     const overlay = OverlayGaode.getInstance(this.view);
     await overlay.deleteAllOverlays();
   }
+
   public async deleteAllOverlaysCluster() {
     const cluster = ClusterGD.getInstance(this.view);
     await cluster.deleteAllOverlaysCluster();
@@ -179,6 +185,7 @@ export default class MapAppGaode implements IMapContainer {
     let center = new AMap.LngLat(x, y);
     this.view.setCenter(center);
   }
+
   public async setMapCenterAndLevel(params: ICenterLevel) {
     let x = params.x;
     let y = params.y;
@@ -286,6 +293,8 @@ export default class MapAppGaode implements IMapContainer {
   public clearDrawLayer(params: ILayerConfig) {}
   public showMigrateChart(params: any) {}
   public hideMigrateChart() {}
+  public showBarChart(params: any) {}
+  public hideBarChart() {}
   public async startTrackPlayback() :Promise<any>{}
   public async startRealTrackPlayback() :Promise<any>{}
   public pausePlayback(){}

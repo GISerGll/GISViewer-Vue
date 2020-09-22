@@ -22,7 +22,7 @@ import {
   IGeometrySearchParameter
 } from '@/types/map';
 @Component({
-  name: 'MapContainerBaidu'
+  name: 'MapAppBaidu'
 })
 export default class MapContainerBaidu extends Vue implements IMapContainer {
   private mapApp!: MapApp;
@@ -130,6 +130,8 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
   public deleteHeatImage() {}
   public showMigrateChart(params: any) {}
   public hideMigrateChart() {}
+  public showBarChart(params: any) {}
+  public hideBarChart() {}
   public showCircleOutline(params:any):any{}
   public createPlaceFence(params:any):any{}
   public createLineFence(params:any):any{}

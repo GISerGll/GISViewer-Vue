@@ -167,6 +167,12 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async showEditingLabel(param:IEditFenceLabel):Promise<IResult> {
     return await this.mapApp.showEditingLabel(param);
   }
+  public showBarChart(params: any) {
+    this.mapApp.showBarChart(params);
+  }
+  public hideBarChart() {
+    this.mapApp.hideBarChart();
+  }
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {

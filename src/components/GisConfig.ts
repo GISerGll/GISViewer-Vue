@@ -5,8 +5,15 @@ export let GisConfig = {
   //arcgis_api: 'http://128.64.130.247:8219/baidumap/jsapi/api.js',
   //arcgis_api: "http://128.64.151.245:8019/baidumap/jsapi/api.js",
   //arcgis_api: "http://localhost:8090/baidu/BDAPI.js",
-  theme: 'custom', //dark,vec
+  theme: 'dark', //dark,vec
   baseLayers: [
+    // {
+    //   label: '发布段0000',
+    //   url:
+    //     'http://10.31.152.48:6080/arcgis/rest/services/ShangHaiHarbour/ShangHai_xzqh_simple/MapServer',
+    //   type: 'dynamic',
+    //   visible: true
+    // }
     // {
     //   label: '深色',
     //   url: 'http://114.215.146.210:25003/v3/tile?z={level}&x={col}&y={row}',
@@ -16,13 +23,19 @@ export let GisConfig = {
     // {
     //   label: '深色',
     //   type: 'tiled',
-    //   url: 'https://10.31.214.244/server/rest/services/bjm_cd/MapServer',
+    //   url: 'https://10.89.1.99/arcgis/rest/services/bj_xxb/MapServer',
     //   visible: true
     // },
     // {
-    //   label: '标注',
+    //   label: 'f12',
+    //   url: 'https://10.89.1.99/arcgis/rest/services/dlbj_cd/MapServer',
     //   type: 'tiled',
-    //   url: 'https://10.31.214.244/server/rest/services/dlbj_cd/MapServer',
+    //   visible: true
+    // },
+    // {
+    //   label: 'f13',
+    //   url: 'https://10.89.1.99/arcgis/rest/services/bx/MapServer',
+    //   type: 'tiled',
     //   visible: true
     // }
     // {
@@ -41,6 +54,35 @@ export let GisConfig = {
     }
   ],
   operationallayers: [
+    // {
+    //   label: 'fbd1333',
+    //   url: 'https://10.89.1.99/arcgis/rest/services/sssb_dpt/MapServer',
+    //   type: 'dynamic',
+    //   visible: false
+    // }
+    // {
+    //   label: '发布段0000',
+    //   url:
+    //     'http://10.31.214.201:6080/arcgis/rest/services/YJZH/ShangHai_HeatMap/MapServer/1',
+    //   type: 'chengdi',
+    //   visible: true,
+    //   isCD: true,
+    //   outFields: ['*'],
+    //   renderer: {
+    //     type: 'heatmap',
+    //     colorStops: [
+    //       {ratio: 0, color: 'rgba(255, 255, 255, 0)'},
+    //       {ratio: 0.2, color: 'rgba(255, 255, 255, 1)'},
+    //       {ratio: 0.5, color: 'rgba(255, 140, 0, 1)'},
+    //       {ratio: 0.8, color: 'rgba(255, 140, 0, 1)'},
+    //       {ratio: 1, color: 'rgba(255, 0, 0, 1)'}
+    //     ],
+    //     field: 'ID',
+    //     blurRadius: 11,
+    //     maxPixelIntensity: 3000,
+    //     minPixelIntensity: 1
+    //   }
+    // }
     {
       label: 'fbd1333',
       url: './config/fbd/pcs.json',
@@ -128,7 +170,7 @@ export let GisConfig = {
     // {
     //   label: '发布段0000',
     //   url:
-    //     'http://172.30.30.1:6080/arcgis/rest/services/ShangHaiHarbour/shanghai_xzqh_simple/MapServer/0',
+    //     'http://10.31.152.48:6080/arcgis/rest/services/ShangHaiHarbour/ShangHai_xzqh_simple/MapServer/0',
     //   type: 'feature',
     //   visible: false,
     //   labelsVisible: true,
@@ -194,19 +236,19 @@ export let GisConfig = {
     //   },
     //   labelingInfo: [
     //     {
-    //       //labelExpressionInfo: {expression: '$feature.Name'},
-    //       labelExpression: '[Name]',
-    //       useCodedValues: true,
+    //       labelExpressionInfo: {
+    //         expression: '$feature.FEATURETYP+",测试中文112,"'
+    //       },
+    //       //labelExpression: '1212',
+    //       useCodedValues: false,
     //       labelPlacement: 'always-horizontal',
     //       symbol: {
-    //         type: 'text',
-    //         rightToLeft: false,
-    //         color: [255, 255, 0, 0.85],
-    //         verticalAlignment: 'baseline',
-    //         horizontalAlignment: 'left',
+    //         type: 'text', // autocasts as new TextSymbol()
+    //         color: 'white',
     //         font: {
-    //           size: 100,
-    //           weight: 'bold'
+    //           // autocast as new Font()
+    //           size: 12,
+    //           weight: 'normal'
     //         }
     //       }
     //     }
@@ -282,9 +324,9 @@ export let GisConfig = {
   //gisServer: 'http://128.64.151.245:8019',
   options: {
     //for arcgis-2d
-    //center: [100, 0.5],
+    //center: [0, 0],
     center: [121.24, 31.235],
-    zoom: 11,
+    zoom: 13,
     //viewingMode: 'global',
     // ground: {opacity: 1},
     // alphaCompositingEnabled: true,
@@ -298,8 +340,7 @@ export let GisConfig = {
     // },
     //viewMode: '3D',
     constraints: {
-      rotationEnabled: false,
-      maxzoom: 16
+      rotationEnabled: false
     }
     //mapStyle: 'amap://styles/darkblue' //设置地图的显示样式
     //for arcgis-3d

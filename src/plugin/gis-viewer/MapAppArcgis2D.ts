@@ -1,4 +1,5 @@
 import {setDefaultOptions, loadCss, loadModules} from 'esri-loader';
+import {Vue, Component, Emit, Prop, PropSync} from 'vue-property-decorator';
 import {
   ILayerConfig,
   IOverlayParameter,
@@ -12,8 +13,8 @@ import {
   IDrawOverlayParameter,
   ITrackPlaybackParameter,
   IOverlayClusterParameter,
-  IHeatImageParameter,
   routeParameter,
+  IHeatImageParameter,
   IElectronicFenceParameter,
   ICircleOutline,
   IMonitorAreaParameter,
@@ -32,6 +33,7 @@ import {TextSymbol} from 'esri/symbols';
 import {Cluster} from './widgets/Cluster/arcgis/Cluster';
 import {DrawLayer} from './widgets/DrawLayer/arcgis/DrawLayer';
 import {MigrateChart} from './widgets/MigrateChart/arcgis/MigrateChart';
+import {SubwayLine} from './widgets/MigrateChart/arcgis/SubwayLine';
 import {HeatImage} from './widgets/HeatMap/arcgis/HeatImage';
 import HeatImage2D from './widgets/HeatMap/arcgis/HeatImage2D';
 import HeatImageGL from './widgets/HeatMap/arcgis/HeatImageGL';
@@ -40,11 +42,16 @@ import {GeometrySearch} from './widgets/GeometrySearch/arcgis/GeometrySearch';
 import {DgeneFusion} from './widgets/DgeneFusion/arcgis/DgeneFusion';
 import {Vue} from 'vue-property-decorator';
 import LayerOperationArcGIS from "@/plugin/gis-viewer/widgets/LayerOperation/arcgis/LayerOperationArcgis";
+import {ChengDiLayer} from './widgets/ChengDi/ChengDiLayer';
+import AnimateLine from './widgets/MigrateChart/AnimateLine';
+import {Bar3DChart} from './widgets/MigrateChart/arcgis/Bar3DChart';
+import {Utils} from './Utils';
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
   public showGisDeviceInfo: any;
   public mapClick: any;
+  public showFlow: boolean = false;
 
   public async initialize(mapConfig: any, mapContainer: string): Promise<void> {
     const apiUrl =
@@ -58,12 +65,16 @@ export default class MapAppArcGIS2D {
       : 'css/main.css';
     loadCss(`${apiUrl}/esri/${cssFile}`);
 
+    if (mapConfig.theme == 'custom') {
+      this.loadCustomCss();
+    }
     type MapModules = [
       typeof import('esri/views/MapView'),
       typeof import('esri/Basemap'),
       typeof import('esri/Map'),
       typeof import('esri/layers/TileLayer'),
       typeof import('esri/layers/WebTileLayer'),
+      typeof import('esri/layers/MapImageLayer'),
       typeof import('esri/core/Collection'),
       typeof import('esri/config')
     ];
@@ -73,6 +84,7 @@ export default class MapAppArcGIS2D {
       Map,
       TileLayer,
       WebTileLayer,
+      MapImageLayer,
       Collection,
       esriConfig
     ] = await (loadModules([
@@ -81,11 +93,12 @@ export default class MapAppArcGIS2D {
       'esri/Map',
       'esri/layers/TileLayer',
       'esri/layers/WebTileLayer',
+      'esri/layers/MapImageLayer',
       'esri/core/Collection',
       'esri/config',
     ]) as Promise<MapModules>);
-    esriConfig.fontsUrl = '/font/';
-    const baseLayers: __esri.Collection = new Collection();
+    esriConfig.fontsUrl = apiUrl + '/font/';
+    let baseLayers: __esri.Collection = new Collection();
     baseLayers.addMany(
       mapConfig.baseLayers.map((layerConfig: ILayerConfig) => {
         if (layerConfig.type === 'tiled') {
@@ -99,11 +112,17 @@ export default class MapAppArcGIS2D {
             urlTemplate: layerConfig.url,
             subDomains: layerConfig.subDomains || undefined
           });
+        } else if (layerConfig.type === 'dynamic') {
+          delete layerConfig.type;
+          if ((layerConfig as any).showFlow) {
+            this.showFlow = true;
+          }
+          return new MapImageLayer(layerConfig);
         }
       })
     );
-    this.destroy();
-    const basemap: __esri.Basemap = new Basemap({
+    //this.destroy();
+    let basemap: __esri.Basemap = new Basemap({
       baseLayers
     });
 
@@ -121,99 +140,145 @@ export default class MapAppArcGIS2D {
     view.ui.remove('attribution');
     view.ui.remove('zoom');
     view.ui.remove('compass');
-
-    await view.when(()=>{
-      this.view = view;
-
-      view.on('click', async (event) => {
-        if (event.mapPoint) {
-          let mp = event.mapPoint;
-          this.mapClick({
-            x: mp.longitude,
-            y: mp.latitude,
-            lat: mp.x,
-            lnt: mp.y,
-            wkid: mp.spatialReference.wkid
-          });
-        } else {
-          this.mapClick(event);
+    view.popup.watch('visible', async (newValue) => {
+      if (newValue) {
+        let content = view.popup.content;
+        if (
+          content == 'Null' ||
+          content == '' ||
+          content == null ||
+          content.toString().indexOf('Null') > -1
+        ) {
+          view.popup.close();
         }
-        const response = await view.hitTest(event);
-        if (response.results.length > 0) {
-          response.results.forEach((result) => {
-            const graphic = result.graphic;
-            if(!graphic.attributes){
-              return ;
+      }
+    });
+    view.on('click', async (event) => {
+      this.hideBarChart();
+      if (event.mapPoint) {
+        let mp = event.mapPoint;
+        this.mapClick({
+          x: mp.longitude,
+          y: mp.latitude,
+          lat: mp.x,
+          lnt: mp.y,
+          wkid: mp.spatialReference.wkid
+        });
+      } else {
+        this.mapClick(event);
+      }
+      const response = await view.hitTest(event);
+      if (response.results.length > 0) {
+        // response.results.forEach((result) => {
+        //   //}
+        // });
+        let result = response.results[0];
+        const graphic = result.graphic;
+        let {type, id} = graphic.attributes;
+        let label = graphic.layer ? (graphic.layer as any).label : '';
+        if (
+          graphic.layer &&
+          (graphic.layer.type == 'feature' || graphic.layer.type == 'graphics')
+        ) {
+          id =
+            graphic.attributes['DEVICEID'] ||
+            graphic.attributes['FEATUREID'] ||
+            graphic.attributes['SECTIONID'] ||
+            graphic.attributes['id'] ||
+            graphic.attributes['ID'] ||
+            undefined;
+          type =
+            graphic.attributes['DEVICETYPE'] ||
+            graphic.attributes['FEATURETYPE'] ||
+            graphic.attributes['FEATURETYP'] ||
+            graphic.attributes['type'] ||
+            graphic.attributes['TYPE'] ||
+            label ||
+            undefined;
+        }
+        //if (id) {
+        this.showGisDeviceInfo(type, id, graphic.toJSON());
+      } else {
+        this.doIdentifyTask(event.mapPoint).then((results: any) => {
+          if (results.length > 0) {
+            let res = results.filter((item: any) => {
+              if (item != undefined) {
+                return true;
+              } else {
+                return false;
+              }
+            })[0];
+            if (!res) {
+              return;
             }
-            let {type, id} = graphic.attributes;
-            let label = graphic.layer ? (graphic.layer as any).label : '';
-            if (
-              graphic.layer &&
-              (graphic.layer.type == 'feature' ||
-                graphic.layer.type == 'graphics')
-            ) {
-              id =
-                graphic.attributes['DEVICEID'] ||
-                graphic.attributes['FEATUREID'] ||
-                graphic.attributes['SECTIONID'] ||
-                graphic.attributes['id'] ||
-                graphic.attributes['ID'] ||
-                undefined;
-              type =
-                graphic.attributes['DEVICETYPE'] ||
-                graphic.attributes['FEATURETYPE'] ||
-                graphic.attributes['FEATURETYP'] ||
-                graphic.attributes['type'] ||
-                graphic.attributes['TYPE'] ||
-                label ||
-                undefined;
-            }
-            //if (id) {
-            this.showGisDeviceInfo(type, id, graphic.toJSON());
-            //}
-          });
-        } else {
-          this.doIdentifyTask(event.mapPoint).then((results: any) => {
-            if (results.length > 0) {
-              let result = results[0];
-              let type = result.layerName;
-              let layerid = result.layerId;
-              let id =
-                result.feature.attributes['DEVICEID'] ||
-                result.feature.attributes['FEATUREID'] ||
-                result.feature.attributes['SECTIONID'] ||
-                result.feature.attributes[result.displayFieldName];
-              this.showGisDeviceInfo(type, id, result.feature.attributes);
-              let selectLayer = this.getLayerByName(type);
-              if (selectLayer.popupTemplates) {
-                let popup = selectLayer.popupTemplates[layerid];
-                if (popup) {
-                  this.view.popup.open({
-                    title: popup.title,
-                    content: this.getContent(
-                      result.feature.attributes,
-                      popup.content
-                    ),
-                    location: event.mapPoint
-                  });
-                }
+            let layername = res.layerName;
+            let layerid = res.layerId;
+            let id =
+              res.feature.attributes['DEVICEID'] ||
+              res.feature.attributes['FEATUREID'] ||
+              res.feature.attributes['SECTIONID'] ||
+              res.feature.attributes[res.displayFieldName];
+            this.showGisDeviceInfo(layername, id, res.feature.attributes);
+            let selectLayer = this.getLayerByName(layername, layerid);
+            if (selectLayer.popupTemplates) {
+              if (selectLayer.showBar) {
+                this.view.popup.alignment = 'bottom-center';
+                //console.log(res.feature);
+                this.showBarChart({
+                  points: [
+                    {
+                      geometry: {
+                        x: event.mapPoint.x,
+                        y: event.mapPoint.y,
+                        spatialReference: this.view.spatialReference
+                      },
+                      fields: {
+                        inflow:
+                          res.feature.attributes['IN_FLX_NR'] ||
+                          res.feature.attributes['VOLUME_YESTERDAY'],
+                        outflow:
+                          res.feature.attributes['OUT_FLX_NR'] ||
+                          res.feature.attributes['VOLUME_TODAY']
+                      }
+                    }
+                  ],
+                  name: layername
+                });
+              } else {
+                this.view.popup.alignment = 'auto';
+              }
+              let popup = selectLayer.popupTemplates[layerid];
+              if (popup) {
+                this.view.popup.open({
+                  title: popup.title,
+                  content: this.getContent(
+                    res.feature.attributes,
+                    popup.content
+                  ),
+                  location: event.mapPoint
+                });
               }
             }
-          });
-        }
-      });
-
-      if (mapConfig.operationallayers) {
-        this.createLayer(view, mapConfig.operationallayers);
+          }
+        });
       }
-    },()=>{
-
     });
-
+    await view.when();
+    if (mapConfig.operationallayers) {
+      this.createLayer(view, mapConfig.operationallayers);
+    }
+    this.view = view;
+    (this.view as any).mapOptions = mapConfig.options;
     (this.view.popup as any).visibleElements = {
       featureNavigation: false,
       closeButton: false
     };
+    if (this.showFlow) {
+      this.showSubwayFlow();
+    }
+  }
+  private loadCustomCss() {
+    require('./styles/custom.css');
   }
   private destroy() {
     OverlayArcgis2D.destroy();
@@ -224,6 +289,7 @@ export default class MapAppArcGIS2D {
     DrawLayer.destroy();
     HeatImage.destroy();
     GeometrySearch.destroy();
+    DgeneFusion.destroy();
   }
   //使toolTip中支持{字段}的形式
   private getContent(attr: any, content: string): string {
@@ -256,13 +322,13 @@ export default class MapAppArcGIS2D {
     }
     return layerids.reverse();
   }
-  private getLayerByName(layername: string): any {
+  private getLayerByName(layername: string, id: string): any {
     let selLayer;
     let layers = this.view.map.allLayers.toArray().forEach((layer: any) => {
       if (layer.type == 'imagery' || layer.type == 'map-image') {
-        let sublayers = (layer as __esri.MapImageLayer).sublayers;
+        let sublayers = (layer as __esri.MapImageLayer).allSublayers;
         sublayers.forEach((sublayer) => {
-          if (sublayer.title == layername) {
+          if (sublayer.title == layername && sublayer.id.toString() == id) {
             selLayer = layer;
           }
         });
@@ -308,8 +374,11 @@ export default class MapAppArcGIS2D {
         // 执行查询对象
         identify.execute(identifyParams).then((data: any) => {
           let results = data.results;
-          if (results.length < 1) return [];
-          resolve(results[0]);
+          if (results.length < 1) {
+            resolve(undefined);
+          } else {
+            resolve(results[0]);
+          }
         });
       });
     });
@@ -363,7 +432,6 @@ export default class MapAppArcGIS2D {
           switch (type) {
             case 'feature':
               layer = new FeatureLayer(layerConfig);
-              layer.labelingInfo = layerConfig.labelingInfo;
               break;
             case 'dynamic':
               layer = new MapImageLayer(layerConfig);
@@ -393,6 +461,10 @@ export default class MapAppArcGIS2D {
           return layer !== undefined;
         })
     );
+  }
+  public async showSubwayFlow() {
+    const flow = SubwayLine.getInstance(this.view);
+    flow.showSubwayFlow();
   }
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     const overlay = OverlayArcgis2D.getInstance(this.view);
@@ -550,13 +622,17 @@ export default class MapAppArcGIS2D {
     const chart = MigrateChart.getInstance(this.view);
     chart.hideMigrateChart();
   }
+  public showBarChart(params: any) {
+    const chart = Bar3DChart.getInstance(this.view);
+    chart.showBarChart(params);
+  }
+  public hideBarChart() {
+    const chart = Bar3DChart.getInstance(this.view);
+    chart.hideBarChart();
+  }
   public addHeatImage(params: IHeatImageParameter) {
-    // const heat = HeatImage.getInstance(this.view);
-    // heat.addHeatImage(params);
     const heat = HeatImageGL.getInstance(this.view);
     heat.addHeatImage(params);
-    // const heat2 = HeatImage2D.getInstance(this.view);
-    // heat2.startup();
   }
   public deleteHeatImage() {
     const heat = HeatImage.getInstance(this.view);

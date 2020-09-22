@@ -1,3 +1,4 @@
+import {loadScript, ILoadScriptOptions} from 'esri-loader';
 import {Vue} from "vue-property-decorator";
 import {
   IMapContainer,
@@ -187,7 +188,6 @@ export default class MapAppBaidu implements IMapContainer {
         (params.type && baselayer.type === params.type)
       ) {
         if (!baselayer.visible) {
-          console.log(111);
           this.view.addTileLayer(baselayer.layer);
           baselayer.visible = true;
         }
@@ -255,6 +255,8 @@ export default class MapAppBaidu implements IMapContainer {
   public createPlaceFence():any{}
   public createLineFence(params:any):any{}
   public createElectFenceByEndPtsConnection(params:any):any{}
+  public showBarChart(params: any) {}
+  public hideBarChart() {}
   public addHeatImage(params: IHeatImageParameter) {}
   public deleteHeatImage() {}
 

@@ -32,6 +32,8 @@ import HeatImage2D from './widgets/HeatMap/arcgis/HeatImage2D';
 import HeatImageGL from './widgets/HeatMap/arcgis/HeatImageGL';
 import HeatImage3D from './widgets/HeatMap/arcgis/HeatImage3D';
 import {GeometrySearch} from './widgets/GeometrySearch/arcgis/GeometrySearch';
+import {Bar3DChart} from './widgets/MigrateChart/arcgis/Bar3DChart';
+import {Utils} from './Utils';
 import LayerOperationArcGIS from "@/plugin/gis-viewer/widgets/LayerOperation/arcgis/LayerOperationArcgis";
 
 export default class MapAppArcGIS3D implements IMapContainer {
@@ -40,6 +42,10 @@ export default class MapAppArcGIS3D implements IMapContainer {
   private mapToolTip: any;
   public mapClick: any;
 
+  public async initialize(gisConfig: any, mapContainer: string): Promise<void> {
+    let mapConfig = Utils.copyObject(gisConfig);
+    const apiUrl =
+      mapConfig.arcgis_api || mapConfig.apiUrl || 'https://js.arcgis.com/4.14/';
   public async initialize(mapConfig: any, mapContainer: string): Promise<void> {
     const apiUrl = mapConfig.arcgis_api || 'https://js.arcgis.com/4.15/';
 
@@ -53,7 +59,9 @@ export default class MapAppArcGIS3D implements IMapContainer {
       ? `themes/${mapConfig.theme}/main.css`
       : 'css/main.css';
     loadCss(`${apiUrl}/esri/${cssFile}`);
-
+    if (mapConfig.theme == 'custom') {
+      this.loadCustomCss();
+    }
     type MapModules = [
       typeof import('esri/views/SceneView'),
       typeof import('esri/Basemap'),
@@ -158,22 +166,32 @@ export default class MapAppArcGIS3D implements IMapContainer {
       } else {
         this.doIdentifyTask(event.mapPoint).then((results: any) => {
           if (results.length > 0) {
-            let result = results[0];
-            let type = result.layerName;
-            let layerid = result.layerId;
+            let res = results.filter((item: any) => {
+              if (item != undefined) {
+                return true;
+              } else {
+                return false;
+              }
+            })[0];
+            if (!res) {
+              return;
+            }
+            let layername = res.layerName;
+            let layerid = res.layerId;
             let id =
-              result.feature.attributes['DEVICEID'] ||
-              result.feature.attributes['FEATUREID'] ||
-              result.feature.attributes[result.displayFieldName];
-            this.showGisDeviceInfo(type, id, result.feature.attributes);
-            let selectLayer = this.getLayerByName(type);
+              res.feature.attributes['DEVICEID'] ||
+              res.feature.attributes['FEATUREID'] ||
+              res.feature.attributes['SECTIONID'] ||
+              res.feature.attributes[res.displayFieldName];
+            this.showGisDeviceInfo(layername, id, res.feature.attributes);
+            let selectLayer = this.getLayerByName(layername, layerid);
             if (selectLayer.popupTemplates) {
               let popup = selectLayer.popupTemplates[layerid];
               if (popup) {
                 this.view.popup.open({
                   title: popup.title,
                   content: this.getContent(
-                    result.feature.attributes,
+                    res.feature.attributes,
                     popup.content
                   ),
                   location: event.mapPoint
@@ -187,6 +205,9 @@ export default class MapAppArcGIS3D implements IMapContainer {
     await view.when();
     this.view = view;
     (this.view as any).mapOptions = mapConfig.options;
+  }
+  private loadCustomCss() {
+    require('./styles/custom.css');
   }
   private destroy() {
     OverlayArcgis3D.destroy();
@@ -229,13 +250,16 @@ export default class MapAppArcGIS3D implements IMapContainer {
     }
     return layerids.reverse();
   }
-  private getLayerByName(layername: string): any {
+  private getLayerByName(layername: string, id: string | number): any {
     let selLayer;
     let layers = this.view.map.allLayers.toArray().forEach((layer: any) => {
       if (layer.type == 'imagery' || layer.type == 'map-image') {
-        let sublayers = (layer as __esri.MapImageLayer).sublayers;
+        let sublayers = (layer as __esri.MapImageLayer).allSublayers;
         sublayers.forEach((sublayer) => {
-          if (sublayer.title == layername) {
+          if (
+            sublayer.title == layername &&
+            sublayer.id.toString() == id.toString()
+          ) {
             selLayer = layer;
           }
         });
@@ -281,8 +305,11 @@ export default class MapAppArcGIS3D implements IMapContainer {
         // 执行查询对象
         identify.execute(identifyParams).then((data: any) => {
           let results = data.results;
-          if (results.length < 1) return [];
-          resolve(results[0]);
+          if (results.length < 1) {
+            resolve(undefined);
+          } else {
+            resolve(results[0]);
+          }
         });
       });
     });
@@ -517,6 +544,19 @@ export default class MapAppArcGIS3D implements IMapContainer {
     heat.deleteHeatImage();
   }
 
+  public showBarChart(params: any) {
+    const chart = Bar3DChart.getInstance(this.view);
+    chart.showBarChart(params);
+  }
+  public hideBarChart() {
+    const chart = Bar3DChart.getInstance(this.view);
+    chart.hideBarChart();
+  }
+  public addHeatImage(params: IHeatImageParameter) {
+    const heatmap2 = HeatImage3D.getInstance(this.view);
+    return heatmap2.startup(params);
+  }
+  public deleteHeatImage() {}
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {

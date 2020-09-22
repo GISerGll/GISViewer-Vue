@@ -29,6 +29,7 @@ import {
 export default class MapContainerGd extends Vue implements IMapContainer {
   private mapApp!: MapApp;
 
+  private mapId: string = 'divAMap' + (Math.random() * 10000).toFixed(0);
   //地图配置
   @Prop({type: Object}) readonly mapConfig!: Object;
 
@@ -86,13 +87,17 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public async hideLayer(params: ILayerConfig) :Promise<IResult>{
     return await this.mapApp.hideLayer(params);
   }
+
   public setMapCenter(params: IPointGeometry) {
     this.mapApp.setMapCenter(params);
   }
+
   public setMapCenterAndLevel(params: ICenterLevel) {
     this.mapApp.setMapCenterAndLevel(params);
   }
+
   public showJurisdiction() {}
+
   public hideJurisdiction() {}
   public showDistrictMask(param: IDistrictParameter) {
     this.mapApp.showDistrictMask(param);
@@ -159,6 +164,9 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public createLineFence(params:any):any{}
   public createElectFenceByEndPtsConnection(params:any):any{}
   public showEditingLabel(params:any):any{}
+  public showBarChart(params: any) {}
+  public hideBarChart() {}
+
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {

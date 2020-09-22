@@ -124,11 +124,11 @@ export interface IOverlayParameter {
   toolTipContent?: string; //悬浮窗内容
   defaultVisible?: boolean;
   iswgs?: boolean;
-  zooms: [number, number];
   custom: {content: string; zooms: [number, number]; visible: true};
 }
 export interface IOverlayClusterParameter {
-  points: Array<IOverlay>;
+  points?: Array<IOverlay>;
+  overlays?: Array<IOverlay>;
   type?: string;
   zoom: number;
   distance: number;
@@ -136,6 +136,7 @@ export interface IOverlayClusterParameter {
   clusterSymbol?: IPointSymbol;
   defaultVisible: boolean;
   defaultTooltip: string;
+  subType: string;
 }
 
 export interface IDrawOverlayParameter {
@@ -204,6 +205,8 @@ export interface IMapContainer {
   showEditingLabel:(param:IEditFenceLabel) => Promise<IResult>;
   addDgeneFusion: (params: any) => Promise<IResult>;
   restoreDegeneFsion: () => Promise<IResult>;
+  showBarChart: (params: any) => void;
+  hideBarChart: () => void;
   arcgisLoadGDLayer: () => void;
 }
 export interface IPopUpTemplate {

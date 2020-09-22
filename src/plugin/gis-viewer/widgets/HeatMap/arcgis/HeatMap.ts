@@ -43,65 +43,17 @@ export class HeatMap {
     this.clear();
     type MapModules = [
       typeof import('esri/Graphic'),
-      typeof import('esri/layers/FeatureLayer')
+      typeof import('esri/layers/FeatureLayer'),
+      typeof import('esri/renderers/HeatmapRenderer')
     ];
-    const [Graphic, FeatureLayer] = await (loadModules([
+    const [Graphic, FeatureLayer, HeatmapRenderer] = await (loadModules([
       'esri/Graphic',
       'esri/layers/FeatureLayer',
+      'esri/renderers/HeatmapRenderer'
     ]) as Promise<MapModules>);
 
     let points = params.points;
-
-    // let defaultOptions = {
-    //   field: 'totalSpace',
-    //   radius: '1',
-    //   colors: [
-    //     { ratio: 0, color: "rgba(255,140,0,0)" },
-    //     { ratio: 0.4, color: 'rgba(63, 63, 191,0.8)' },
-    //     { ratio: 0.5, color: 'rgba(117,211,248,0.8)' },
-    //     { ratio: 0.6, color: 'rgba(0, 255, 0,0.8)' },
-    //     { ratio: 0.75, color: 'rgba(255,234,0,0.8)' },
-    //     { ratio: 0.9, color: "rgba(255,0,0,0.6)" }
-    //   ],
-    //   maxValue: 1000,
-    //   minValue: 1,
-    //   zoom: 19,
-    //   renderer: {
-    //     type: 'simple',
-    //     symbol: {
-    //       type: 'esriSMS',
-    //       url: 'assets/image/Anchor.png',
-    //       width: 64,
-    //       height: 66,
-    //       yoffset: 16
-    //     }
-    //   }
-    // }
-    let options = params.options || {
-      field: 'totalSpace',
-      radius: '1',
-      colors: [
-        { ratio: 0, color: "rgba(255,140,0,0)" },
-        { ratio: 0.4, color: 'rgba(63, 63, 191,0.8)' },
-        { ratio: 0.5, color: 'rgba(117,211,248,0.8)' },
-        { ratio: 0.6, color: 'rgba(0, 255, 0,0.8)' },
-        { ratio: 0.75, color: 'rgba(255,234,0,0.8)' },
-        { ratio: 0.9, color: "rgba(255,0,0,0.6)" }
-      ],
-      maxValue: 1000,
-      minValue: 1,
-      zoom: 19,
-      renderer: {
-        type: 'simple',
-        symbol: {
-          type: 'esriSMS',
-          url: 'assets/image/Anchor.png',
-          width: 64,
-          height: 66,
-          yoffset: 16
-        }
-      }
-    };
+    let options = params.options;
     let graphics: any[] = [];
     let fields: any[] = [
       {
@@ -113,12 +65,9 @@ export class HeatMap {
     let fieldName = points[0].fields;
     for (let str in fieldName) {
       let fieldtype = 'string';
-      if(options && options.field){
-        if (str == options.field) {
-          fieldtype = 'double';
-        }
+      if (str == options.field) {
+        fieldtype = 'double';
       }
-
       fields.push({name: str, alias: str, type: fieldtype});
     }
     graphics = points.map((point: IHeatPoint) => {
@@ -138,15 +87,20 @@ export class HeatMap {
       geometryType: 'point'
     });
     let layer = this.heatlayer;
-    let maxzoom = options.zoom || 0;
-
+    let maxzoom = options.zoom || 100;
+    let colors = params.options.colors || [
+      'rgb(255, 255, 255)',
+      'rgb(255, 140, 0)',
+      'rgb(255, 140, 0)',
+      'rgb(255, 0, 0)'
+    ];
     let simpleRenderer = this.getRender(options.renderer);
     let heatmapRenderer = {
       type: 'heatmap',
-      field: options.field || undefined,
-      colorStops: options.colors,
+      field: options.field,
+      colorStops: this.getHeatColor(colors),
       minPixelIntensity: 0,
-      maxPixelIntensity: options.maxValue || 100
+      maxPixelIntensity: options.maxValue
     } as any;
     layer.renderer =
       this.view.zoom > maxzoom ? simpleRenderer : heatmapRenderer;
@@ -154,17 +108,35 @@ export class HeatMap {
     this.view.watch('zoom', (newValue: number) => {
       layer.renderer = newValue > maxzoom ? simpleRenderer : heatmapRenderer;
     });
-
-    console.log(layer);
   }
   private getRender(renderer: any): any {
     let newrender = renderer;
-    if (newrender.symbol) {
+    if (newrender && newrender.symbol) {
       newrender.symbol.type = newrender.symbol.type
         .replace('esriPMS', 'picture-marker')
         .replace('esriSMS', 'simple-marker');
     }
     return newrender;
   }
-
+  public getHeatColor(colors: string[] | undefined): any[] {
+    let obj: any = [
+      {ratio: 0, color: 'rgba(255, 255, 255, 0)'},
+      {ratio: 0.2, color: 'rgba(255, 255, 255, 1)'},
+      {ratio: 0.5, color: 'rgba(255, 140, 0, 1)'},
+      {ratio: 0.8, color: 'rgba(255, 140, 0, 1)'},
+      {ratio: 1, color: 'rgba(255, 0, 0, 1)'}
+    ]; //默认值
+    if (colors && colors.length >= 4) {
+      //"rgba(30,144,255,0)","rgba(30,144,255)","rgb(0, 255, 0)","rgb(255, 255, 0)", "rgb(254,89,0)"
+      let steps = [0.2, 0.5, 0.8, 1];
+      let colorStops: any[] = [{ratio: 0, color: 'rgba(255, 255, 255, 0)'}];
+      steps.forEach((element: number, index: number) => {
+        colorStops.push({ratio: element, color: colors[index]});
+      });
+      console.log(colorStops);
+      return colorStops;
+    }
+    return obj;
+  }
+  public async addOverlays(params: IHeatParameter) {}
 }
