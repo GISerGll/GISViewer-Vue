@@ -14,7 +14,8 @@ import {
   IStreetParameter,
   routeParameter,
   IHeatImageParameter,
-  IGeometrySearchParameter
+  IGeometrySearchParameter,
+  ICustomTip
 } from '@/types/map';
 import {OverlayGaode} from '@/plugin/gis-viewer/widgets/Overlays/gd/OverlayGaode';
 import {JurisdictionPoliceGD} from './widgets/JurisdictionPolice/gd/JurisdictionPoliceGD';
@@ -353,4 +354,7 @@ export default class MapAppGaode implements IMapContainer {
     });
   }
   public async arcgisLoadGDLayer(){}
+  public showCustomTip(params: ICustomTip) {}
+  public showDgeneOutPoint(params: any) {}
+  public changeDgeneOut() {}
 }

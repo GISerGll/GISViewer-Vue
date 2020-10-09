@@ -20,7 +20,8 @@ import {
   IStreetParameter,
   routeParameter,
   IHeatImageParameter,
-  IGeometrySearchParameter
+  IGeometrySearchParameter,
+  ICustomTip
 } from '@/types/map';
 
 @Component({
@@ -187,6 +188,9 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public async restoreDegeneFsion(): Promise<IResult> {
     return {status: 0, message: ''};
   }
+  public showCustomTip(params: ICustomTip) {}
+  public showDgeneOutPoint(params: any) {}
+  public changeDgeneOut() {}
     public async arcgisLoadGDLayer(){}
 }
 </script>

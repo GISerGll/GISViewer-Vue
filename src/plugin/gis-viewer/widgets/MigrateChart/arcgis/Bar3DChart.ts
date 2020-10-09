@@ -182,7 +182,7 @@ export class Bar3DChart {
               value: [item[1], item[0], item[2]],
               label: {
                 textStyle: {
-                  color: index == 1 ? 'rgb(0,215,0)' : 'rgb(255,215,0)'
+                  color: index == 1 ? 'rgb(0,255,255)' : 'rgb(255,215,0)'
                 }
               }
             };
@@ -191,7 +191,6 @@ export class Bar3DChart {
           label: {
             show: true,
             formatter: (params: any) => {
-              console.log(params);
               if (params.dataIndex == 0) {
                 return (
                   (params.seriesName == 'line' ? '昨日:' : '进') +
@@ -267,8 +266,10 @@ export class Bar3DChart {
       div,
       'top'
     );
-    div.style.left = point.x + 10 + offset.xoffset + 'px';
-    div.style.top = point.y + offset.yoffset + 'px';
+    if (point) {
+      div.style.left = point.x + 10 + offset.xoffset + 'px';
+      div.style.top = point.y + offset.yoffset + 'px';
+    }
   }
   private addEvent() {
     let o: any = this;

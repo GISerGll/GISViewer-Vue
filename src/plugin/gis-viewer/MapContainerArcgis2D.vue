@@ -26,7 +26,8 @@ import {
   IMonitorAreaParameter,
   IEditFenceLabel,
   IHeatImageParameter,
-  IGeometrySearchParameter
+  IGeometrySearchParameter,
+  ICustomTip
 } from '@/types/map';
 
 @Component({
@@ -193,6 +194,15 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   }
   public async restoreDegeneFsion(): Promise<IResult> {
     return await this.mapApp.restoreDegeneFsion();
+  }
+  public showCustomTip(params: ICustomTip) {
+    this.mapApp.showCustomTip(params);
+  }
+  public showDgeneOutPoint(params: any) {
+    this.mapApp.showDgeneOutPoint(params);
+  }
+  public changeDgeneOut() {
+    this.mapApp.changeDgeneOut();
   }
   public closeToolTip() :Promise<IResult> {
     return this.mapApp.closeToolTip();

@@ -4,6 +4,8 @@ import {IResult} from '@/types/map';
 import Axios from 'axios';
 import {Utils} from '@/plugin/gis-viewer/Utils';
 import {reject} from 'esri/core/promiseUtils';
+import {Vue} from 'vue-property-decorator';
+import Loading from './Loading.vue';
 
 declare let Dgene: any;
 export class DgeneFusion {
@@ -19,23 +21,30 @@ export class DgeneFusion {
   private fusion_view_state: string = 'all';
   private FlyCenter: any;
   private videocode: string = 'HQ0912New';
+  private loadingVm: any;
+  private keyCodes: Array<string> = new Array<string>();
   private originView: any = {
     x: 0,
     y: 2000,
     z: 45
   };
   private FlyView: any = {
-    x: 211,
-    y: 190,
-    z: 342
+    x: -63,
+    y: 251,
+    z: 311
+  };
+  private FlyViewOut: any = {
+    x: 700,
+    y: 700,
+    z: 700
   };
   private rotateState: string = 'auto';
   private setting: any = {
     isLocal: true, // isLocal?apiBase = 'static/api':apiBase = 'project/api/'+id
-    url: 'http://10.31.251.205/test/static/api/',
+    url: 'http://10.31.251.205/20200930/static/api/',
     api: {
       // http://fusion.dgene.com/admin/project/v2/11
-      apiBase: 'http://10.31.251.205/test/static/api/',
+      apiBase: 'http://10.31.251.205/20200930/static/api/',
       // apiBase: '/v2/11',
       file: '/file',
       scene: '/scene',
@@ -117,7 +126,7 @@ export class DgeneFusion {
       )
       .then(() => {
         _this.stopMouseWheelEvent(false);
-        _this.showFusion();
+        _this.showFusion(params);
         if (_this.fusion_view.camFlyTo) {
           _this.fusion_view.camFlyTo(this.originView, 1);
         }
@@ -174,26 +183,42 @@ export class DgeneFusion {
     dgeneDiv.style.height = this.view.height + 'px';
     dgeneDiv.setAttribute('id', 'dgeneDiv');
     dgeneDiv.style.position = 'absolute';
-    dgeneDiv.style.display = 'none';
+    dgeneDiv.style.visibility = 'hidden';
     dgeneDiv.style.top = '0px';
     dgeneDiv.style.left = '0px';
     let divmap = document.getElementById(parentid) as any;
     divmap.appendChild(dgeneDiv);
     window.onresize = () => {
-      $('#dgeneDiv').css({
-        width: window.screen.width + 'px',
-        height: window.screen.height + 'px'
-      });
-      _this.fusion_view.setCanvasSize(
-        window.screen.width,
-        window.screen.height
-      );
+      // $('#dgeneDiv').css({
+      //   width: window.screen.width + 'px',
+      //   height: window.screen.height + 'px'
+      // });
+      // _this.fusion_view.setCanvasSize(
+      //   window.screen.width,
+      //   window.screen.height
+      // );
     };
+    this.showLoading({content: '1%'});
     window.onkeydown = (event: any) => {
-      console.log(event.keyCode);
+      _this.fusion_view.stopAutoRotate();
+      _this.rotateState = 'stop';
+
+      setTimeout(() => {
+        _this.fusion_view.stopAutoRotate();
+        _this.rotateState = 'stop';
+      }, 2000);
       if (event.keyCode == 32) {
         if (_this.fusion_view) {
           _this.fusion_view.showMapSprite(); //showMapSprite hideMapSprite
+          _this.showDgeneOutPoint(_this.showOut);
+        }
+      } else {
+        //如果存在keycode的视频融合键位,隐藏撒点
+        if (
+          _this.keyCodes.length > 0 &&
+          _this.keyCodes.indexOf(event.keyCode.toString()) > -1
+        ) {
+          _this.fusion_view.hideMapSprite(); //showMapSprite hideMapSprite
         }
       }
     };
@@ -237,19 +262,19 @@ export class DgeneFusion {
           'test',
           {
             x: pos[0],
-            y: pos[1],
+            y: pos[1] + 10,
             z: pos[2]
           },
-          50
+          20
         );
       }
     });
-    Axios.get('./static/fusion.json').then((res: any) => {
+    Axios.get(this.setting.url + '/fusion.json').then((res: any) => {
       let videodata = res.data.data;
       if (videodata) {
         for (let data in videodata) {
           let vdata = (videodata as any)[data];
-
+          _this.keyCodes.push(vdata.keyCode.toString());
           if (vdata.isreal) {
             _this.out_video.push(data);
           } else {
@@ -259,10 +284,12 @@ export class DgeneFusion {
           let position = vdata.isreal
             ? vdata.realposition
             : vdata.camJson.position;
-
+          if (['HQ0912New197', 'HQ0912New196'].indexOf(data) > -1) {
+            size = 2;
+          }
           // console.log(data, position);
           if (showOutVideo || !vdata.isreal) {
-            console.log(data, position);
+            //console.log(data, position);
             this.fusion_view.loadMapSprite(
               data,
               {
@@ -288,6 +315,7 @@ export class DgeneFusion {
   }
   public async showDgeneFusion(params: any): Promise<IResult> {
     let dgene = params.url || 'dgene';
+    let showOut = params.showOut;
     await Utils.loadScripts(['libs/' + dgene + '/runtime.js']).then(
       async () => {
         await Utils.loadScripts(['libs/' + dgene + '/2.js']).then(async () => {
@@ -300,7 +328,12 @@ export class DgeneFusion {
     //   'libs/dgene2/2.js',
     //   'libs/dgene2/app.js'
     // ]);
+    let clickCallBack = params.onclick;
     let setting = this.setting;
+    if (params.settingUrl) {
+      setting.url = params.settingUrl;
+      setting.api.apiBase = params.settingUrl;
+    }
     let _this = this;
     let callback = params.callback;
     /* eslint-disable */
@@ -309,15 +342,18 @@ export class DgeneFusion {
     return new Promise((resolve, reject) => {
       _this.fusion_view = new Dgene(
         (item: any, loaded: number, total: number) => {
-          if (_this.showOut && !_this.loadOutState) {
-            _this.fusion_view.loadOutSideModel();
-            _this.loadOutState = true;
-          }
           if (Math.floor(Number(loaded / total) * 100) % 10 == 0) {
             console.log(
               `Dgene info: data loaded ${Math.floor(
                 (loaded / total) * 100
               ).toString()}%`
+            );
+          }
+          let processTotal = showOut ? 180 : 100;
+
+          if (loaded < processTotal) {
+            _this.loadingVm.changeLoading(
+              Math.floor((loaded / processTotal) * 100)
             );
           }
           if (callback) {
@@ -334,7 +370,7 @@ export class DgeneFusion {
             }
             let control = _this.fusion_view.getControl();
             _this.fusion_control = control;
-
+            _this.loadingVm.changeLoading(100);
             resolve({
               status: 0,
               message: 'dgene fusion map onload success',
@@ -345,34 +381,86 @@ export class DgeneFusion {
         setting,
         (name: any) => {
           _this.fusion_view.stopAutoRotate();
-          console.log(name);
+          //console.log(name);
+
           if (_this.out_video.indexOf(name) > -1) {
             if (_this.fusion_view) {
               _this.fusion_view.hideMapSprite(); //showMapSprite hideMapSprite
             }
             _this.fusion_view.showVideoDom(name);
+            if (['HQ0912New197', 'HQ0912New196'].indexOf(name) > -1) {
+              if (document.getElementById(name)) {
+                (document.getElementById(name) as any).style.display = 'block';
+              }
+            }
           } else if (_this.in_video.indexOf(name) > -1) {
             if (_this.fusion_view) {
               _this.fusion_view.hideMapSprite(); //showMapSprite hideMapSprite
             }
             _this.fusion_view.activeFuse(name);
           }
+        },
+        () => {
+          if (_this.showOut && !_this.loadOutState) {
+            _this.fusion_view.loadOutSideModel();
+            _this.loadOutState = true;
+            //_this.fusion_view.addSprite();
+          }
+        },
+        (obj: any) => {
+          console.log(obj);
         }
       );
     });
   }
   private hideFusion() {
-    $('#dgeneDiv').fadeOut('slow');
+    $('#dgeneDiv').css('visibility', 'hidden');
     $('#' + this.view.container.id).fadeIn(1000);
   }
-  private showFusion() {
+  private showLoading(props: any) {
+    if (!this.loadingVm) {
+      let vm = new Vue({
+        // 为什么不使用 template 要使用render 因为现在是webpack里面没有编译器 只能使用render
+        render: (h) => h(Loading, {props}) // render 生成虚拟dom  {props: props}
+      }).$mount(); // $mount 生成真实dom, 挂载dom 挂载在哪里, 不传参的时候只生成不挂载，需要手动挂载
+      this.view.container.children[0].children[0].appendChild(vm.$el);
+      this.loadingVm = vm.$children[0];
+    }
+  }
+  private showDgeneOutPoint(show: boolean) {
+    if (this.fusion_view) {
+      this.out_video.forEach((item: string) => {
+        if (['HQ0912New197', 'HQ0912New196'].indexOf(item) < 0) {
+          this.fusion_view.getScene().getObjectByName(item).visible = show;
+        }
+      });
+    }
+  }
+  private showFusion(params: any) {
     let _this = this;
     this.rotateState = 'stop';
+
+    let carmeraCallback = params.callback;
+    this.fusion_view.showMapSprite();
     this.fusion_view.camFlyTo(this.originView, 1);
+    let pos = this.showOut ? _this.FlyViewOut : _this.FlyView;
     setTimeout(() => {
-      let pos = _this.FlyView;
-      _this.fusion_view.camFlyTo(pos, 5000);
-    }, 200);
+      _this.fusion_view.camFlyTo(pos, 3000);
+    }, 10);
+    // setTimeout(() => {
+    //   _this.fusion_view.newHideOut1({
+    //     duration1: 0,
+    //     duration2: 0,
+    //     duration3: 1000,
+    //     firstPos: {x: 0, y: 0, z: 0},
+    //     firstTar: {x: 0, y: 0, z: 0},
+    //     nextPos: _this.FlyView,
+    //     nextTar: {x: 0, y: 0, z: 0},
+    //     downHeight: -6000
+    //   });
+    //   _this.showDgeneOutPoint(false);
+    //   _this.showOut = false;
+    // }, 2000);
 
     setTimeout(() => {
       _this.rotateState = 'auto';
@@ -390,16 +478,68 @@ export class DgeneFusion {
       position: 'fixed',
       'z-index': '90'
     });
-    $('#dgeneDiv').fadeIn('slow');
+    $('#dgeneDiv').css('visibility', 'visible');
     $('#' + this.view.container.id).fadeOut(1000);
     this.fusion_control.addEventListener('change', (e: any) => {
-      // console.log(_this.fusion_view.getCameraPosition());
+      let dir = _this.fusion_view.getCameraPosition();
+      //console.log(dir);
+      let theta = Math.atan2(-dir.x, -dir.z);
+      theta = (180 * theta) / Math.PI + 180;
+      //var theta = Math.atan2(-dir.x, -dir.z);
+      if (carmeraCallback) {
+        carmeraCallback(theta);
+      }
       if (_this.fusion_view.getCameraY() < 60) {
         _this.fusion_view.setCamNear(0.1, 20000);
       } else {
         _this.fusion_view.setCamNear(50, 20000);
       }
     });
+  }
+  private changeDgeneOut() {
+    let dir = this.fusion_view.getCameraPosition();
+    this.fusion_view.showMapSprite();
+    if (this.showOut) {
+      //当前显示外面,切换到隐藏外面
+      this.fusion_view.newHideOut1({
+        duration1: 500,
+        duration2: 1000,
+        duration3: 1500,
+        firstPos: dir,
+        firstTar: {x: 0, y: 0, z: 0},
+        nextPos: {
+          x: -63.93155359536513,
+          y: 259.3165187210438,
+          z: 312.28570642332915
+        },
+        nextTar: {
+          x: -63.93155359536513,
+          y: 259.3165187210438,
+          z: 312.28570642332915
+        },
+        downHeight: -6000
+      });
+    } else {
+      this.fusion_view.newShowOut3({
+        duration1: 200,
+        duration2: 1000,
+        duration3: 1500,
+        firstPos: dir,
+        firstTar: {x: 0, y: 0, z: 0},
+        nextPos: {x: 700, y: 700, z: 700},
+        nextTar: {x: 0, y: 0, z: 0},
+        firstHeight: 6000,
+        downHeight: 0
+      });
+    }
+    this.showOut = !this.showOut;
+    if (this.showOut) {
+      setTimeout(() => {
+        this.showDgeneOutPoint(this.showOut);
+      }, 2000);
+    } else {
+      this.showDgeneOutPoint(this.showOut);
+    }
   }
   private getVideoStatus(): Promise<any> {
     let _this = this;
@@ -423,6 +563,7 @@ export class DgeneFusion {
           }
         }
       });
+      _this.showDgeneOutPoint(_this.showOut);
       setTimeout(() => {
         _this.refreshVideoState();
       }, 60 * 1000);

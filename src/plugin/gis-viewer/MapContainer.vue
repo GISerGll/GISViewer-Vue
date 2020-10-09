@@ -63,6 +63,7 @@ import {
   IMonitorAreaParameter,
   routeParameter,
   IHeatImageParameter,
+  ICustomTip,
   IEditFenceLabel,
   IGeometrySearchParameter
 } from '@/types/map';
@@ -104,24 +105,26 @@ export default class MapContainer extends Vue implements IMapContainer {
         return this.containerArcgis2D;
     }
   }
-  async mounted() {
-    if((this.mapConfig as any).hasOwnProperty('arcgis_api')){
-      if ((this.mapConfig as any).arcgis_api.indexOf('arcgis') > -1) {
-        (window as any).dojoConfig = {
-          async: true,
-          tlmSiblingOfDojo: false,
-          baseUrl: (this.mapConfig as any).arcgis_api + '/dojo/',
-          packages: [
-            {
-              name: 'libs',
-              location: 'libs'
-            }
-          ],
-          has: {
-            'esri-promise-compatibility': 1
+  async created() {
+    //console.log(this.mapConfig);
+    if (
+      (this.mapConfig as any).arcgis_api &&
+      (this.mapConfig as any).arcgis_api.indexOf('arcgis') > -1
+    ) {
+      (window as any).dojoConfig = {
+        async: true,
+        tlmSiblingOfDojo: false,
+        baseUrl: (this.mapConfig as any).arcgis_api + '/dojo/',
+        packages: [
+          {
+            name: 'libs',
+            location: 'libs'
           }
-        };
-      }
+        ],
+        has: {
+          'esri-promise-compatibility': 1
+        }
+      };
     }
   }
   @Emit('map-loaded')
@@ -310,6 +313,15 @@ export default class MapContainer extends Vue implements IMapContainer {
 
   public async arcgisLoadGDLayer(){
       await this.mapContainer.arcgisLoadGDLayer();
+  }
+  public showCustomTip(params: ICustomTip) {
+    this.mapContainer.showCustomTip(params);
+  }
+  public showDgeneOutPoint(params: any) {
+    this.mapContainer.showDgeneOutPoint(params);
+  }
+  public changeDgeneOut() {
+    this.mapContainer.changeDgeneOut();
   }
 }
 </script>

@@ -213,6 +213,9 @@ export interface IMapContainer {
   restoreDegeneFsion: () => Promise<IResult>;
   showBarChart: (params: any) => void;
   hideBarChart: () => void;
+  showCustomTip: (params: ICustomTip) => void;
+  showDgeneOutPoint: (params: any) => void;
+  changeDgeneOut: () => void;
   arcgisLoadGDLayer: () => void;
 }
 export interface IPopUpTemplate {
@@ -224,15 +227,15 @@ export interface IHeatParameter {
   options: IHeatOptions;
 }
 export interface IHeatImageParameter {
-  points: Array<IHeatPoint>;
-  options: IHeatOptions;
-  images: {
+  points?: Array<IHeatPoint>;
+  options?: IHeatOptions;
+  images?: {
     url: string;
     width: number;
     heigth: number;
     center: {x: number; y: number}; //图片中心位置
     factor: number; //图片显示倍率
-    scale: number; //图片显示比例
+    scale?: number; //图片显示比例
     geometry: {x: number; y: number};
   };
 }
@@ -253,6 +256,7 @@ export interface IFindParameter {
   ids: Array<string>;
   level?: number;
   centerResult?: boolean;
+  layerids?: Array<string>;
 }
 export interface IOverlayDelete {
   types?: Array<string>;
@@ -312,6 +316,10 @@ export interface IGeometrySearchParameter {
   showGeometry?: boolean; //是否显示搜素区域
   clickHandle?: any; //点击回调方法
   repeat?: boolean; //是否重复点击画圆
+}
+export interface ICustomTip {
+  prop: any;
+  geometry: IPointGeometry;
 }
 export interface IElectronicFenceParameter {
   pointsGeometry:number[][],

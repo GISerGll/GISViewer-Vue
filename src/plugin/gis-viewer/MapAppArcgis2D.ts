@@ -19,7 +19,8 @@ import {
   ICircleOutline,
   IMonitorAreaParameter,
   IEditFenceLabel,
-  IGeometrySearchParameter
+  IGeometrySearchParameter,
+  ICustomTip
 } from '@/types/map';
 
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
@@ -46,20 +47,23 @@ import {ChengDiLayer} from './widgets/ChengDi/ChengDiLayer';
 import AnimateLine from './widgets/MigrateChart/AnimateLine';
 import {Bar3DChart} from './widgets/MigrateChart/arcgis/Bar3DChart';
 import {Utils} from './Utils';
+import ToolTip from './widgets/Overlays/arcgis/ToolTip';
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
   public showGisDeviceInfo: any;
   public mapClick: any;
   public showFlow: boolean = false;
+  private tolerance: number = 3;
 
-  public async initialize(mapConfig: any, mapContainer: string): Promise<void> {
+  public async initialize(gisConfig: any, mapContainer: string): Promise<void> {
+    //路由跳转是delete mapConfig属性导致报错
+    let mapConfig = Utils.copyObject(gisConfig);
     const apiUrl =
       mapConfig.arcgis_api || mapConfig.apiUrl || 'https://js.arcgis.com/4.15/';
     setDefaultOptions({
       url: `${apiUrl}/init.js`
     });
-
     const cssFile: string = mapConfig.theme
       ? `themes/${mapConfig.theme}/main.css`
       : 'css/main.css';
@@ -95,7 +99,7 @@ export default class MapAppArcGIS2D {
       'esri/layers/WebTileLayer',
       'esri/layers/MapImageLayer',
       'esri/core/Collection',
-      'esri/config',
+      'esri/config'
     ]) as Promise<MapModules>);
     esriConfig.fontsUrl = apiUrl + '/font/';
     let baseLayers: __esri.Collection = new Collection();
@@ -198,6 +202,7 @@ export default class MapAppArcGIS2D {
         }
         //if (id) {
         this.showGisDeviceInfo(type, id, graphic.toJSON());
+        this.showSubBar(graphic.layer, event.mapPoint, graphic);
       } else {
         this.doIdentifyTask(event.mapPoint).then((results: any) => {
           if (results.length > 0) {
@@ -218,35 +223,10 @@ export default class MapAppArcGIS2D {
               res.feature.attributes['FEATUREID'] ||
               res.feature.attributes['SECTIONID'] ||
               res.feature.attributes[res.displayFieldName];
-            this.showGisDeviceInfo(layername, id, res.feature.attributes);
+            this.showGisDeviceInfo(layername, id, res.feature);
             let selectLayer = this.getLayerByName(layername, layerid);
             if (selectLayer.popupTemplates) {
-              if (selectLayer.showBar) {
-                this.view.popup.alignment = 'bottom-center';
-                //console.log(res.feature);
-                this.showBarChart({
-                  points: [
-                    {
-                      geometry: {
-                        x: event.mapPoint.x,
-                        y: event.mapPoint.y,
-                        spatialReference: this.view.spatialReference
-                      },
-                      fields: {
-                        inflow:
-                          res.feature.attributes['IN_FLX_NR'] ||
-                          res.feature.attributes['VOLUME_YESTERDAY'],
-                        outflow:
-                          res.feature.attributes['OUT_FLX_NR'] ||
-                          res.feature.attributes['VOLUME_TODAY']
-                      }
-                    }
-                  ],
-                  name: layername
-                });
-              } else {
-                this.view.popup.alignment = 'auto';
-              }
+              this.showSubBar(selectLayer, event.mapPoint, res.feature);
               let popup = selectLayer.popupTemplates[layerid];
               if (popup) {
                 this.view.popup.open({
@@ -259,6 +239,8 @@ export default class MapAppArcGIS2D {
                 });
               }
             }
+          } else {
+            ToolTip.clear(this.view, undefined, 'custom-popup');
           }
         });
       }
@@ -269,6 +251,9 @@ export default class MapAppArcGIS2D {
     }
     this.view = view;
     (this.view as any).mapOptions = mapConfig.options;
+    if (mapConfig.options && mapConfig.options.tolerance) {
+      this.tolerance = mapConfig.options && mapConfig.options.tolerance;
+    }
     (this.view.popup as any).visibleElements = {
       featureNavigation: false,
       closeButton: false
@@ -277,20 +262,40 @@ export default class MapAppArcGIS2D {
       this.showSubwayFlow();
     }
   }
+  private showSubBar(layer: any, point: any, feature: any) {
+    if (layer && layer.showBar) {
+      this.view.popup.alignment = 'bottom-center';
+      //console.log(res.feature);
+      this.showBarChart({
+        points: [
+          {
+            geometry: {
+              x: point.x,
+              y: point.y,
+              spatialReference: this.view.spatialReference
+            },
+            fields: {
+              inflow:
+                feature.attributes['IN_FLX_NR'] ||
+                feature.attributes['VOLUME_YESTERDAY'] ||
+                feature.attributes['YJZH.STAT_METROLINEFLOW.VOLUME_YESTERDAY'],
+              outflow:
+                feature.attributes['OUT_FLX_NR'] ||
+                feature.attributes['VOLUME_TODAY'] ||
+                feature.attributes['YJZH.STAT_METROLINEFLOW.VOLUME_TODAY']
+            }
+          }
+        ],
+        name: '地铁线路图'
+      });
+    } else {
+      this.view.popup.alignment = 'auto';
+    }
+  }
   private loadCustomCss() {
     require('./styles/custom.css');
   }
-  private destroy() {
-    OverlayArcgis2D.destroy();
-    Cluster.destroy();
-    HeatMap.destroy();
-    FindFeature.destroy();
-    MigrateChart.destroy();
-    DrawLayer.destroy();
-    HeatImage.destroy();
-    GeometrySearch.destroy();
-    DgeneFusion.destroy();
-  }
+  private destroy() {}
   //使toolTip中支持{字段}的形式
   private getContent(attr: any, content: string): string {
     let tipContent = content;
@@ -363,12 +368,13 @@ export default class MapAppArcGIS2D {
         let identify = new IdentifyTask(layer.url); //创建属性查询对象
 
         let identifyParams = new IdentifyParameters(); //创建属性查询参数
-        identifyParams.tolerance = 3;
+        identifyParams.tolerance = this.tolerance;
         identifyParams.layerIds = that.getLayerIds(layer);
         identifyParams.layerOption = 'visible'; //"top"|"visible"|"all"
         identifyParams.width = that.view.width;
         identifyParams.height = that.view.height;
         identifyParams.geometry = clickpoint;
+        identifyParams.returnGeometry = true;
         identifyParams.mapExtent = that.view.extent;
 
         // 执行查询对象
@@ -446,8 +452,12 @@ export default class MapAppArcGIS2D {
               });
               layer.label = layerConfig.label;
               if(layerConfig.visible === false){
-                  layer.visible = false;
+                    layer.visible = false;
               }
+              break;
+            case 'chengdi':
+              const cd = ChengDiLayer.getInstance(view);
+              cd.addChengDiLayer(layerConfig);
               break;
             case 'json':
               const drawlayer = DrawLayer.getInstance(view);
@@ -634,7 +644,7 @@ export default class MapAppArcGIS2D {
     heat.addHeatImage(params);
   }
   public deleteHeatImage() {
-    const heat = HeatImage.getInstance(this.view);
+    const heat = HeatImageGL.getInstance(this.view);
     heat.deleteHeatImage();
   }
   public async startGeometrySearch(
@@ -697,4 +707,36 @@ export default class MapAppArcGIS2D {
         const gdLayer = LayerOperationArcGIS.getInstance(this.view);
         await gdLayer.arcgisLoadGDLayer();
     }
+  public async addDgeneFusion(params: any): Promise<IResult> {
+    const dgene = DgeneFusion.getInstance(this.view);
+    return await dgene.addDgeneFusion(params);
+  }
+  public async restoreDegeneFsion(): Promise<IResult> {
+    const dgene = DgeneFusion.getInstance(this.view);
+    return await dgene.restoreDegeneFsion();
+  }
+  public async showDgene(params: any): Promise<IResult> {
+    let dgene = DgeneFusion.getInstance(this.view);
+    return await dgene.showDgene(params);
+  }
+  public hideDgene() {
+    let dgene = DgeneFusion.getInstance(this.view);
+    dgene.hideDgene();
+  }
+  public showCustomTip(params: ICustomTip) {
+    let className: string = 'custom-popup';
+    ToolTip.clear(this.view, undefined, className);
+    if (params && params.geometry) {
+      params.prop.className = className;
+      let ctip = new ToolTip(this.view, params.prop, params.geometry);
+    }
+  }
+  public showDgeneOutPoint(params: any) {
+    let dgene = DgeneFusion.getInstance(this.view);
+    dgene.showDgeneOutPoint(params);
+  }
+  public changeDgeneOut() {
+    let dgene = DgeneFusion.getInstance(this.view);
+    dgene.changeDgeneOut();
+  }
 }

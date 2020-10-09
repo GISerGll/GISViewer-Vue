@@ -47,7 +47,10 @@
         "HQ_dong03",
         "HQ_SD06",
         "HQ_zhong01",
-        "tianhuaban_02"
+        "tianhuaban_02",
+        "HQ_diban_zhong",
+        "HQ_diban_xi",
+        "HQ_diban_dong"
       ],
       "isGlobalView": true,
       "isInside": false,
@@ -107,7 +110,10 @@
         "HQ_bei03",
         "HQ_dong03",
         "HQ_zhong01",
-        "tianhuaban_02"
+        "tianhuaban_02",
+        "HQ_diban_zhong",
+        "HQ_diban_xi",
+        "HQ_diban_dong"
       ],
       "isGlobalView": true,
       "isInside": false,
@@ -125,7 +131,7 @@
     },
     "HQ0912New125": {
       "index": "HQ0912New125",
-      "keyCode": "81",
+      "keyCode": "67",
       "camJson": {
         "fov": 14.760160448241978,
         "position": {
@@ -169,11 +175,14 @@
         "HQ_zhong01",
         "HQ_bei03",
         "HQ_dong03",
-        "tianhuaban_02"
+        "tianhuaban_02",
+        "HQ_diban_zhong",
+        "HQ_diban_xi",
+        "HQ_diban_dong"
       ],
       "isGlobalView": true,
       "isInside": false,
-      "isreal": true,
+      "isreal": false,
       "realposition": {
         "x": -37.22919385534843,
         "y": 203.6771713935575,
@@ -231,7 +240,10 @@
         "HQ_bei03",
         "HQ_dong03",
         "HQ_nan01",
-        "HQ_nan02"
+        "HQ_nan02",
+        "HQ_diban_zhong",
+        "HQ_diban_xi",
+        "HQ_diban_dong"
       ],
       "isGlobalView": true,
       "isInside": false,
@@ -294,7 +306,10 @@
         "HQ_nan03",
         "HQ_SD04",
         "HQ_zhong01",
-        "tianhuaban_02"
+        "tianhuaban_02",
+        "HQ_diban_zhong",
+        "HQ_diban_xi",
+        "HQ_diban_dong"
       ],
       "isGlobalView": true,
       "isInside": false,
@@ -355,7 +370,10 @@
         "HQ_dong03",
         "HQ_SD01",
         "HQ_zhong01",
-        "tianhuaban_02"
+        "tianhuaban_02",
+        "HQ_diban_zhong",
+        "HQ_diban_xi",
+        "HQ_diban_dong"
       ],
       "isGlobalView": true,
       "isInside": false,
@@ -1104,11 +1122,11 @@
         "z": 0
       }
     },
-    "HQtest147": {
-      "index": "HQtest147",
-      "keyCode": "72",
+    "HQ0912New152": {
+      "index": "HQ0912New152",
+      "keyCode": "56",
       "camJson": {
-        "fov": 25,
+        "fov": null,
         "position": {
           "x": 0,
           "y": 0,
@@ -1123,29 +1141,103 @@
       },
       "flv": {
         "type": "flv",
-        "src": "http://10.31.214.206:8081/live?app=rtmp&stream=6301",
-        "url": "http://10.31.214.206:8081/live?app=rtmp&stream=6301"
+        "src": "http://10.31.214.206:8081/live?app=rtmp&stream=6325",
+        "url": "static/video/ltehbus66l42nxxgcita64euf27pu9s7.mp4"
       },
       "modelIndex": null,
       "isGlobalView": true,
       "isInside": false,
       "isreal": true,
       "realposition": {
-        "x": -300,
-        "y": 40,
-        "z": 770
+        "x": -270,
+        "y": 85.05381,
+        "z": 162.780731
       },
       "realtar": {
-        "x": 20,
+        "x": -10,
         "y": 40,
-        "z": 160
+        "z": 35
       }
     },
-    "HQtest148": {
-      "index": "HQtest148",
+    "HQ0912New153": {
+      "index": "HQ0912New153",
+      "keyCode": "52",
+      "camJson": {
+        "fov": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "poseMat4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "lookAt": {
+          "x": null,
+          "y": null,
+          "z": null
+        }
+      },
+      "flv": {
+        "type": "flv",
+        "src": "http://10.31.214.206:8081/live?app=rtmp&stream=6369",
+        "url": "static/video/ltehbus66l42nxxgcita64euf27pu9s7.mp4"
+      },
+      "modelIndex": null,
+      "isGlobalView": true,
+      "isInside": false,
+      "isreal": true,
+      "realposition": {
+        "x": 131.977112,
+        "y": 85.053818,
+        "z": -163.264099
+      },
+      "realtar": {
+        "x": -500,
+        "y": 50,
+        "z": 130
+      }
+    },
+    "HQ0912New154": {
+      "index": "HQ0912New154",
+      "keyCode": "50",
+      "camJson": {
+        "fov": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "poseMat4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "lookAt": {
+          "x": null,
+          "y": null,
+          "z": null
+        }
+      },
+      "flv": {
+        "type": "flv",
+        "src": "http://10.31.214.206:8081/live?app=rtmp&stream=507137",
+        "url": "static/video/ltehbus66l42nxxgcita64euf27pu9s7.mp4"
+      },
+      "modelIndex": null,
+      "isGlobalView": true,
+      "isInside": false,
+      "isreal": true,
+      "realposition": {
+        "x": -516.981628,
+        "y": 41.275383,
+        "z": 230.594482
+      },
+      "realtar": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    "HQ0912New155": {
+      "index": "HQ0912New155",
       "keyCode": "77",
       "camJson": {
-        "fov": 25,
+        "fov": null,
         "position": {
           "x": 0,
           "y": 0,
@@ -1167,16 +1259,99 @@
       "isGlobalView": true,
       "isInside": false,
       "isreal": true,
-      "realposition": {
-        "x": -459.218994,
-        "y": 18.522802,
-        "z": -45.75568
+      "realposition": {"x": -382.62, "y": 54.23, "z": 56.19},
+      "realtar": {"x": -126.81, "y": 0, "z": 572.27}
+    },
+    "HQ0912New156": {
+      "index": "HQ0912New156",
+      "keyCode": "72",
+      "camJson": {
+        "fov": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "poseMat4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "lookAt": {
+          "x": null,
+          "y": null,
+          "z": null
+        }
       },
-      "realtar": {
-        "x": 0,
-        "y": 0,
-        "z": 600
-      }
+      "flv": {
+        "type": "flv",
+        "src": "http://10.31.214.206:8081/live?app=rtmp&stream=6301",
+        "url": "http://10.31.214.206:8081/live?app=rtmp&stream=6301"
+      },
+      "modelIndex": null,
+      "isGlobalView": true,
+      "isInside": false,
+      "isreal": true,
+      "realposition": {"x": -244.89, "y": 58.09, "z": 736.95},
+      "realtar": {"x": 40, "y": 30, "z": 240}
+    },
+    "HQ0912New196": {
+      "index": "HQ0912New196",
+      "keyCode": "72",
+      "camJson": {
+        "fov": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "poseMat4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "lookAt": {
+          "x": null,
+          "y": null,
+          "z": null
+        }
+      },
+      "flv": {
+        "type": "flv",
+        "src": "http://10.31.214.206:8081/live?app=rtmp&stream=309021",
+        "url": "http://10.31.214.206:8081/live?app=rtmp&stream=309021"
+      },
+      "modelIndex": null,
+      "isGlobalView": true,
+      "isInside": false,
+      "isreal": true,
+      "realposition": {
+        "x": -135.707,
+        "y": 2,
+        "z": -70.98
+      },
+      "realtar": {"x": -135, "y": 0, "z": -80}
+    },
+    "HQ0912New197": {
+      "index": "HQ0912New197",
+      "keyCode": "72",
+      "camJson": {
+        "fov": null,
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "poseMat4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "lookAt": {
+          "x": null,
+          "y": null,
+          "z": null
+        }
+      },
+      "flv": {
+        "type": "flv",
+        "src": "http://10.31.214.206:8081/live?app=rtmp&stream=309018",
+        "url": "http://10.31.214.206:8081/live?app=rtmp&stream=309018"
+      },
+      "modelIndex": null,
+      "isGlobalView": true,
+      "isInside": false,
+      "isreal": true,
+      "realposition": {"x": -2.12, "y": 2, "z": -76.97},
+      "realtar": {"x": 0, "y": 0, "z": -70}
     }
   }
 }

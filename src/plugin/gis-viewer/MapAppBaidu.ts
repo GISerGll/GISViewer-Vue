@@ -15,7 +15,8 @@ import {
   IStreetParameter,
   routeParameter,
   IHeatImageParameter,
-  IGeometrySearchParameter
+  IGeometrySearchParameter,
+  ICustomTip
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -181,7 +182,6 @@ export default class MapAppBaidu implements IMapContainer {
   }
 
   public showLayer(params: ILayerConfig):any {
-    debugger;
     this.baseLayers.forEach((baselayer) => {
       if (
         (params.label && baselayer.label === params.label) ||
@@ -260,6 +260,7 @@ export default class MapAppBaidu implements IMapContainer {
   public addHeatImage2D(params: IHeatImageParameter) {}
   public addHeatImage3D(params: IHeatImageParameter) {}
   public deleteHeatImage() {}
+
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
@@ -278,4 +279,7 @@ export default class MapAppBaidu implements IMapContainer {
     return {status: 0, message: ''};
   }
     public async arcgisLoadGDLayer(){}
+  public showCustomTip(params: ICustomTip) {}
+  public showDgeneOutPoint(params: any) {}
+  public changeDgeneOut() {}
 }

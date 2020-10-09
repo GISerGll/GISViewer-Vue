@@ -15,7 +15,8 @@ import {
   IStreetParameter,
   routeParameter,
   IHeatImageParameter,
-  IGeometrySearchParameter
+  IGeometrySearchParameter,
+  ICustomTip
 } from '@/types/map';
 import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
 import {RasterStretchRenderer} from 'esri/rasterRenderers';
@@ -42,12 +43,10 @@ export default class MapAppArcGIS3D implements IMapContainer {
   private mapToolTip: any;
   public mapClick: any;
 
-  public async initialize(mapConfig: any, mapContainer: string): Promise<void> {
-    const apiUrl = mapConfig.arcgis_api || 'https://js.arcgis.com/4.15/';
-
-    // await loadModules(['esri/config']).then(([esriConfig]) => {
-    //   esriConfig.workers.loaderConfig.baseUrl = apiUrl + '/dojo';
-    // });
+  public async initialize(gisConfig: any, mapContainer: string): Promise<void> {
+    let mapConfig = Utils.copyObject(gisConfig);
+    const apiUrl =
+      mapConfig.arcgis_api || mapConfig.apiUrl || 'https://js.arcgis.com/4.15/';
 
     setDefaultOptions({url: `${apiUrl}/init.js`});
 
@@ -205,16 +204,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
   private loadCustomCss() {
     require('./styles/custom.css');
   }
-  private destroy() {
-    OverlayArcgis3D.destroy();
-    Cluster.destroy();
-    HeatMap3D.destroy();
-    FindFeature.destroy();
-    DrawLayer.destroy();
-    MigrateChart.destroy();
-    HeatImage.destroy();
-    GeometrySearch.destroy();
-  }
+  private destroy() {}
   //使toolTip中支持{字段}的形式
   private getContent(attr: any, content: string): string {
     let tipContent = content;
@@ -550,6 +540,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
     const heatmap2 = HeatImage3D.getInstance(this.view);
     return heatmap2.startup(params);
   }
+  public deleteHeatImage() {}
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
@@ -571,5 +562,11 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async restoreDegeneFsion(): Promise<IResult> {
     return {status: 0, message: ''};
   }
+  public showCustomTip(params: ICustomTip) {
+    ToolTip.clear(this.view, params.prop.className);
+    let ctip = new ToolTip(this.view, params.prop, params.geometry);
+  }
+  public showDgeneOutPoint(params: any) {}
+  public changeDgeneOut() {}
     public async arcgisLoadGDLayer(){}
 }
