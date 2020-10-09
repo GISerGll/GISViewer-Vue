@@ -122,7 +122,11 @@ export default class PluginTest extends Vue {
     }
     private async btn_addOverlays_pt() {
         let map = this.$refs.gisViewer as any;
-        const img= await this.loadImageAsync("assets/image/Anchor.png");
+        // const img= await this.loadImageAsync("assets/image/Anchor.png");
+        const img = {
+            width:12,
+            height:12
+        }
         const obj =  await map.addOverlays({
             type: 'police',
             defaultSymbol: {
@@ -149,26 +153,26 @@ export default class PluginTest extends Vue {
                 {
                     id: 'test001',
                     geometry: {x: 104.07604340359372, y: 30.660031729032898},
-                    fields: {name: '雄飞中心ArcGIS', featureid: '0002'}
+                    fields: {name: '雄飞中心ArcGIS', featureid: '0002',istip:true}
                 },
                 {
                     id: 'test002',
-                    geometry: {x: 104.075976, y: 30.660087},
-                    fields: {name: '雄飞中心GD', featureid: '0003'}
-                },
-                {
-                    id: 'test003',
                     geometry: {x: 87.577, y: 43.814},
-                    fields: {name: '测试4', featureid: '0001'}
+                    fields: {name: '测试4', featureid: '0001',istip:true}
                 }
             ],
-            showPopup: false,
-            autoPopup: false,
+            custom:{
+                zoom:15,
+                content:'<div>12345<div>'
+            },
+            // showPopup: true,
+
+            autoPopup: true,
             defaultInfoTemplate: {
                 title: '1212',
                 content: '<div>name:{name}<br/><button>{name}</button></div>'
             },
-            defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
+            // defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
         });
         console.log(obj)
     }
@@ -517,7 +521,6 @@ export default class PluginTest extends Vue {
         });
     }
     private async mapLoaded() {
-        console.log('Map Loaded.');
         let map = this.$refs.gisViewer as any;
         const result = await map.addOverlays({
             type: 'police',
@@ -547,17 +550,17 @@ export default class PluginTest extends Vue {
                     id: 'test001',
                     geometry: {x: 87.597, y: 43.824},
                     fields: {
-                        name: '测试2',
-                        featureid: '0002',
-                        infoWindow: { type:"normal" ,value1:"这是一个信息弹窗",value2:"随意测试一下"}}
+                        tooltipWindow: { type:"normal" ,value1:"这是一个信息弹窗",value2:"随意测试一下"},
+                        popupWindow: { type:"normal" ,value1:"这是一个信息弹窗",value2:"随意测试一下" }
+                    }
                 },
                 {
                     id: 'test002',
                     geometry: {x: 87.587, y: 43.824},
                     fields: {
-                        name: '测试3',
-                        featureid: '0003',
-                        infoWindow: { type:"alarm" ,value1:"这是一个警告弹窗",value2:"随意测试一下"}}
+                        popupWindow: { type:"alarm" ,value1:"这是一个警告弹窗",value2:"随意测试一下"},
+                        tooltipWindow: {},
+                    }
                 },
                 {
                     id: 'test003',
@@ -565,19 +568,21 @@ export default class PluginTest extends Vue {
                     fields: {
                         name: '测试4',
                         featureid: '0001',
-                        infoWindow: { type:"suspicious",value1:"这是一个正常弹窗",value2:"这是一个正常弹窗"}}
+                        popupWindow: { type:"suspicious",value1:"这是一个正常弹窗",value2:"这是一个正常弹窗"}
+                    }
                 }
             ],
-            showPopup: false,
-            autoPopup: false,
-            defaultInfoTemplate: {
+            autoPopup:false,
+            tooltipComponent:Parent,
+            popupComponent:Parent,
+            custom: {
                 title: '1212',
                 content: '<div>name:{name}<br/><button>{name}</button></div>'
             },
             defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
         });
 
-        await map.showToolTip(Parent);
+        // await map.showToolTip(Parent);
     }
     private showGisDeviceInfo(type: string, id: string, detail: any) {
         console.log(type, id, detail);
@@ -613,6 +618,10 @@ export default class PluginTest extends Vue {
   -moz-border-radius: 5px;
   border-radius: 5px;
   font-size: 12px;
+}
+.TextDiv {
+  border: 1.5px solid #666666;
+  background: #666666;
 }
 
 .fa-close{

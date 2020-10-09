@@ -1,5 +1,5 @@
 <template>
-  <div id="divAMap" />
+  <div :id="mapId" class="my-map-div" />
 </template>
 <script lang="ts">
 import {Vue, Component, Emit, Prop} from 'vue-property-decorator';
@@ -27,13 +27,14 @@ import {
 export default class MapContainerBaidu extends Vue implements IMapContainer {
   private mapApp!: MapApp;
 
+  private mapId: string = 'divBMap' + (Math.random() * 10000).toFixed(0);
   //地图配置
   @Prop({type: Object}) readonly mapConfig!: Object;
 
   @Emit('map-loaded')
   async mounted() {
     this.mapApp = new MapApp();
-    await this.mapApp.initialize(this.mapConfig, 'divAMap');
+    await this.mapApp.initialize(this.mapConfig, this.mapId);
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
   }
   @Emit('map-click')
@@ -126,7 +127,8 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
     return {status: 0, message: ''};
   }
   public clearDrawLayer(params: ILayerConfig) {}
-  public addHeatImage(params: IHeatImageParameter) {}
+  public addHeatImage2D(params: IHeatImageParameter) {}
+    public addHeatImage3D(params: IHeatImageParameter) {}
   public deleteHeatImage() {}
   public showMigrateChart(params: any) {}
   public hideMigrateChart() {}
@@ -158,11 +160,10 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
 </script>
 
 <style scoped>
-  @import 'styles/main.css';
-  #divAMap {
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    height: 100%;
-  }
+.my-map-div {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
 </style>

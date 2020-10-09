@@ -104,23 +104,24 @@ export default class MapContainer extends Vue implements IMapContainer {
         return this.containerArcgis2D;
     }
   }
-  async created() {
-    //console.log(this.mapConfig);
-    if ((this.mapConfig as any).arcgis_api.indexOf('arcgis') > -1) {
-      (window as any).dojoConfig = {
-        async: true,
-        tlmSiblingOfDojo: false,
-        baseUrl: (this.mapConfig as any).arcgis_api + '/dojo/',
-        packages: [
-          {
-            name: 'libs',
-            location: 'libs'
+  async mounted() {
+    if((this.mapConfig as any).hasOwnProperty('arcgis_api')){
+      if ((this.mapConfig as any).arcgis_api.indexOf('arcgis') > -1) {
+        (window as any).dojoConfig = {
+          async: true,
+          tlmSiblingOfDojo: false,
+          baseUrl: (this.mapConfig as any).arcgis_api + '/dojo/',
+          packages: [
+            {
+              name: 'libs',
+              location: 'libs'
+            }
+          ],
+          has: {
+            'esri-promise-compatibility': 1
           }
-        ],
-        has: {
-          'esri-promise-compatibility': 1
-        }
-      };
+        };
+      }
     }
   }
   @Emit('map-loaded')
@@ -250,8 +251,11 @@ export default class MapContainer extends Vue implements IMapContainer {
   public clearDrawLayer(params: ILayerConfig) {
     this.mapContainer.clearDrawLayer(params);
   }
-  public addHeatImage(params: IHeatImageParameter) {
-    this.mapContainer.addHeatImage(params);
+  public addHeatImage2D(params: IHeatImageParameter) {
+    this.mapContainer.addHeatImage2D(params);
+  }
+  public addHeatImage3D(params: IHeatImageParameter) {
+        this.mapContainer.addHeatImage3D(params);
   }
   public deleteHeatImage() {
     this.mapContainer.deleteHeatImage();

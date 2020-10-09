@@ -3,7 +3,7 @@ import Parent from "@/components/tooltips/Parent.vue";
 export default class MapConfig {
     public constructor() {}
     public mapConfig: any = {
-        arcgis_api: 'http://localhost:8080/arcgis_js_api/library/4.15',
+        gaode_api: 'http://localhost:8080/arcgis_js_api/library/4.15',
         //arcgis_api:
         //  'https://webapi.amap.com/maps?v=1.4.15&key=29dd04daa39aa33a7e2cdffa37ebec4d',
         //arcgis_api: 'http://128.64.130.247:8219/baidumap/jsapi/api.js',

@@ -313,7 +313,8 @@ export default class MapAppGaode implements IMapContainer {
   public createPlaceFence():any{}
   public createLineFence(params:any):any{}
   public createElectFenceByEndPtsConnection(params:any):any{}
-  public addHeatImage(params: IHeatImageParameter) {}
+  public addHeatImage2D(params: IHeatImageParameter) {}
+  public addHeatImage3D(params: IHeatImageParameter) {}
   public deleteHeatImage() {}
   public async startGeometrySearch(
     params: IGeometrySearchParameter

@@ -8,17 +8,27 @@ import {
   IPolygonSymbol
 } from '@/types/map';
 import {loadModules} from 'esri-loader';
-import ToolTip from './ToolTip2D';
+import ToolTip2D from './ToolTip2D';
+import ToolTip from './ToolTip';
 import HighFeauture from './HighFeauture3D';
 import HighFeauture2D from './HighFeauture2D';
 import {Vue} from 'vue-property-decorator';
+import {type} from 'jquery';
+import {Utils} from '@/plugin/gis-viewer/Utils';
 
 export class OverlayArcgis2D {
   private static intances: Map<string, any>;
 
+  private overlayGroups: Map<string, __esri.GraphicsLayer> = new Map<
+    string,
+    __esri.GraphicsLayer
+  >();
   private overlayLayer!: __esri.GraphicsLayer;
   private view!: __esri.MapView;
   private tooltip:any;
+  private popupTypes: Map<string, any> = new Map<string, any>();
+    private tooltipTypes:Map<string, any> = new Map<string, any>();
+  private popup:any;
 
   private static primitive2D = [
     'circle',
@@ -35,29 +45,38 @@ export class OverlayArcgis2D {
 
   public static getInstance(view: __esri.MapView) {
     let id = view.container.id;
+    //init instance
     if (!OverlayArcgis2D.intances) {
       OverlayArcgis2D.intances = new Map();
     }
-    let intance = OverlayArcgis2D.intances.get(id);
-    if (!intance) {
-      intance = new OverlayArcgis2D(view);
-      OverlayArcgis2D.intances.set(id, intance);
+    let instance = OverlayArcgis2D.intances.get(id);
+    if (!instance) {
+      instance = new OverlayArcgis2D(view);
+      OverlayArcgis2D.intances.set(id, instance);
     }
-    return intance;
+    return instance;
   }
   public static destroy() {
     (OverlayArcgis2D.intances as any) = null;
   }
-  private async createOverlayLayer() {
+  private async getOverlayLayer(type: string) {
+    let group = this.overlayGroups.get(type);
+    if (!group) {
+      group = await this.createOverlayLayer(type);
+    }
+    return group;
+  }
+  private async createOverlayLayer(
+    type: string
+  ): Promise<__esri.GraphicsLayer> {
     type MapModules = [typeof import('esri/layers/GraphicsLayer')];
     const [GraphicsLayer] = await (loadModules([
       'esri/layers/GraphicsLayer'
     ]) as Promise<MapModules>);
-
-    this.overlayLayer = new GraphicsLayer({
-        id:"overlayArcgis2D"
-    });
-    this.view.map.add(this.overlayLayer);
+    let overlayLayer: __esri.GraphicsLayer = new GraphicsLayer();
+    this.view.map.add(overlayLayer);
+    this.overlayGroups.set(type, overlayLayer);
+    return overlayLayer;
   }
 
   public static makeSymbol(symbol: any): Object | undefined {
@@ -72,6 +91,38 @@ export class OverlayArcgis2D {
       return undefined;
     }
   }
+
+  private MoveToolTip(type: string, content: string) {
+        const view = this.view;
+        const moveLayer = this.overlayGroups.get(type);
+        let parent = this;
+        let tip!: any;
+        view.on('pointer-move', function(event) {
+            view.hitTest(event).then((response) => {
+                if (response.results.length > 0) {
+                    response.results.forEach((result) => {
+                        if (result.graphic.layer === moveLayer) {
+                            if (!tip) {
+                                tip = new ToolTip(
+                                    view,
+                                    {
+                                        title: '',
+                                        content: parent.getToolTipContent(result.graphic, content)
+                                    },
+                                    result.graphic
+                                );
+                            }
+                        }
+                    });
+                } else {
+                    if (tip) {
+                        tip.remove();
+                        tip = null;
+                    }
+                }
+            });
+        });
+    }
 
   private static makeMarkerSymbol(symbol: IPointSymbol | undefined): Object | undefined{
     if (!symbol || symbol.type.toLowerCase() !== 'point-2d') return undefined;
@@ -135,8 +186,9 @@ export class OverlayArcgis2D {
       opacity: symbol.opacity,
     }
   }
-  /**根据graphic的属性生成弹出框*/
+  /**根据graphic的属性生成弹出框**/
   private getInfoWindowContent(graphic: any): any {
+      debugger;
     let content = '';
     //键值对
     for (let fieldName in graphic.attributes) {
@@ -201,32 +253,77 @@ export class OverlayArcgis2D {
   }
 
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
-    if (!this.overlayLayer) {
-      await this.createOverlayLayer();
-    }
+    let overlayLayer = (await this.getOverlayLayer(
+      params.type || 'default'
+    )) as __esri.GraphicsLayer;
 
-    const [Graphic, geometryJsonUtils, PopupTemplate] = await loadModules([
+    const [
+      Graphic,
+      geometryJsonUtils,
+      PopupTemplate,
+      SpatialReference,
+      WebMercatorUtils
+    ] = await loadModules([
       'esri/Graphic',
       'esri/geometry/support/jsonUtils',
-      'esri/PopupTemplate'
+      'esri/PopupTemplate',
+      'esri/geometry/SpatialReference',
+      'esri/geometry/support/webMercatorUtils'
     ]);
 
     const defaultSymbol = OverlayArcgis2D.makeSymbol(params.defaultSymbol);
-    const showPopup = params.showPopup;
+
     const defaultInfoTemplate = params.defaultInfoTemplate;
-    const autoPopup = params.autoPopup;
+
     const defaultButtons = params.defaultButtons;
     const defaultVisible = params.defaultVisible !== false;
+    const iswgs = params.iswgs !== false;
+    const zooms = params.defaultZooms || [0, 0];
+    if (params.defaultZooms) {
+      overlayLayer.minScale = Utils.getScale(this.view, zooms[0]);
+      overlayLayer.maxScale = Utils.getScale(this.view, zooms[1]);
+    }
+
+      let showPopup = params.showPopup;
+      let showToolTip = params.showTooltip;
+      let moveToolTip = params.moveTooltip;
+      let movePopup = params.movePopup;
+      let autoPopup = params.autoPopup;
+      let autoToolTip = params.autoTooltip;
+
+      let tooltipComponent = params.tooltipComponent;
+      let popupComponent = params.popupComponent;
+
+      let popupAndTooltip = {
+          showPopup,
+          showToolTip,
+          moveToolTip,
+          movePopup,
+          autoPopup,
+          autoToolTip
+      };
+
+      let componentsObj = {
+          tooltipComponent,
+          popupComponent
+      }
+
 
     let addCount = 0;
     for (let i = 0; i < params.overlays.length; i++) {
       const overlay = params.overlays[i];
-      const overlaySymbol = OverlayArcgis2D.makeSymbol(overlay.symbol);
-
-      const geometry = geometryJsonUtils.fromJSON(overlay.geometry);
+      if ((overlay.geometry as any).x) {
+        (overlay.geometry as any).x = Number((overlay.geometry as any).x);
+        (overlay.geometry as any).y = Number((overlay.geometry as any).y);
+      }
+      if (!iswgs) {
+        (overlay.geometry as any).spatialReference = this.view.spatialReference;
+      }
+      let geometry = geometryJsonUtils.fromJSON(overlay.geometry);
       if (overlay.symbol && !overlay.symbol.type) {
         overlay.symbol.type = geometry.type;
       }
+      const overlaySymbol = OverlayArcgis2D.makeSymbol(overlay.symbol);
       //TODO: 加入更详细的参数是否合法判断
       if (!defaultSymbol && !overlaySymbol) {
         continue;
@@ -236,48 +333,39 @@ export class OverlayArcgis2D {
       fields.id = overlay.id;
       const buttons = overlay.buttons;
 
-      const graphic = new Graphic({
+      let graphic = new Graphic({
         geometry,
         symbol: overlaySymbol || defaultSymbol,
         attributes: fields || {}
       });
+
       graphic.visible = defaultVisible;
-      graphic.type = params.type;
+      graphic.type = params.type
       graphic.id = overlay.id;
       graphic.buttons = buttons || defaultButtons;
-      if (showPopup) {
-        if (defaultInfoTemplate === undefined) {
-          graphic.popupTemplate = new PopupTemplate({
-            content: this.getInfoWindowContent(graphic)
-          });
-        } else {
-          graphic.popupTemplate = {
-            title: defaultInfoTemplate.title,
-            content: this.getPopUpHtml(graphic, defaultInfoTemplate.content)
-          };
-        }
-        if (autoPopup) {
-          this.view.popup.open({
-            title: '',
-            content: this.getInfoWindowContent(graphic),
-            location: geometry
-          });
-          this.view.popup.dockOptions = {
-            buttonEnabled: false,
-            breakpoint: {width: 400, height: 30}
-          };
-        }
-      }
 
-      this.overlayLayer.add(graphic);
+      if(defaultInfoTemplate){
+          graphic.popupTemplate = {
+              title: defaultInfoTemplate.title,
+              content: this.getPopUpHtml(graphic, defaultInfoTemplate.content)
+          };
+      }
+      overlayLayer.add(graphic);
       addCount++;
     }
+
+      //处理弹窗逻辑,弹窗优先级popup->tooltip,动作优先级show->move->auto
+      //冲突关系：同类冲突，例如autpPopup和movePopup冲突，autoTooltip和moveTooltip冲突
+      //示意：假如同时存在autoPopup和showPopup为true，认为两者冲突，则autoPopup为false
+      await this.processPopupAndTooltip(popupAndTooltip,componentsObj);
+    
     return {
       status: 0,
       message: 'ok',
       result: `成功添加${params.overlays.length}中的${addCount}个覆盖物`
     };
   }
+
   public async deleteOverlays(params: IOverlayDelete,overlayLayer?:__esri.GraphicsLayer): Promise<IResult> {
     let types = params.types || [];
     let ids = params.ids || [];
@@ -312,7 +400,9 @@ export class OverlayArcgis2D {
     };
   }
   public async deleteAllOverlays(): Promise<IResult> {
-    this.overlayLayer.removeAll();
+    this.overlayGroups.forEach((overlay, key) => {
+      overlay.removeAll();
+    });
     return {
       status: 0,
       message: 'ok'
@@ -364,58 +454,413 @@ export class OverlayArcgis2D {
       }
     }
   }
-  public async showToolTip(tooltip:Vue.Component) :Promise<IResult>{
-    if(!tooltip && this.tooltip){
-      await this.closeToolTip();
-    }
-    const view = this.view;
 
-    view.on('click', async (event) =>{
-      const response = await view.hitTest(event);
-        if (response.results.length > 0) {
-          response.results.forEach((result) => {
-            if(result.graphic.geometry.type === "point"){
-              if(result.graphic.attributes && result.graphic.attributes.hasOwnProperty("infoWindow")){
-                let content = result.graphic.attributes.infoWindow;
-                if (this.tooltip) {
-                  this.tooltip.remove();
-                  this.tooltip = null;
+    private async showPopup(popup:Vue.Component) :Promise<IResult>{
+        if(!popup && (this.popup)){
+            await this.closePopup();
+        }
+        const view:__esri.MapView = this.view;
+
+        view.on('click', async (event) =>{
+            const response = await view.hitTest(event);
+            if (response.results.length > 0) {
+                response.results.forEach((result) => {
+                    if(result.graphic.attributes && result.graphic.attributes.hasOwnProperty("popupWindow")){
+                        let content = result.graphic.attributes.popupWindow;
+                        if (this.popup) {
+                            this.popup.remove();
+                            this.popup = null;
+                        }
+                        this.popup = new ToolTip2D(
+                            view,
+                            popup,
+                            content,
+                            result.graphic
+                        );
+                    }
+                });
+            } else {
+                if (this.popup) {
+                    this.popup.remove();
+                    this.popup = null;
                 }
-                this.tooltip = new ToolTip(
-                  view,
-                  tooltip,
-                  content,
-                  result.graphic
-                );
-              }
             }
-          });
-        } else {
-          if (this.tooltip) {
+        });
+
+
+        return {
+            status:0,
+            message:'ok',
+            result:'方法调用成功，但无法保证可以正确显示弹窗'
+        }
+    }
+
+    private async showTooltip(tooltip:Vue.Component) :Promise<IResult>{
+        if(!tooltip && (this.tooltip)){
+            await this.closePopup();
+        }
+        const view = this.view;
+
+        view.on('click', async (event) =>{
+            const response = await view.hitTest(event);
+            if (response.results.length > 0) {
+                response.results.forEach((result) => {
+                    if(result.graphic.geometry.type === "point"){
+                        if(result.graphic.attributes && result.graphic.attributes.hasOwnProperty("tooltipWindow")){
+                            let content = result.graphic.attributes.popupWindow;
+                            if (this.tooltip) {
+                                this.tooltip.remove();
+                                this.tooltip = null;
+                            }
+                            this.tooltip = new ToolTip2D(
+                                view,
+                                tooltip,
+                                content,
+                                result.graphic
+                            );
+                        }
+                    }
+                });
+            } else {
+                if (this.tooltip) {
+                    this.tooltip.remove();
+                    this.tooltip = null;
+                }
+            }
+        });
+
+
+        return {
+            status:0,
+            message:'ok',
+            result:'方法调用成功，但无法保证可以正确显示弹窗'
+        }
+    }
+
+    private async movePopup(popup:Vue.Component){
+        if(!popup && (this.popup)){
+            await this.closePopup();
+        }
+        const view = this.view;
+
+        view.on('click', async (event) =>{
+            const response = await view.hitTest(event);
+            if (response.results.length > 0) {
+                response.results.forEach((result) => {
+                    if(result.graphic.geometry.type === "point"){
+                        if(result.graphic.attributes && result.graphic.attributes.hasOwnProperty("popupWindow")){
+                            let content = result.graphic.attributes.popupWindow;
+                            if (this.popup) {
+                                this.popup.remove();
+                                this.popup = null;
+                            }
+                            this.popup = new ToolTip2D(
+                                view,
+                                popup,
+                                content,
+                                result.graphic
+                            );
+                        }
+                    }
+                });
+            } else {
+                if (this.popup) {
+                    this.popup.remove();
+                    this.popup = null;
+                }
+            }
+        });
+
+
+        return {
+            status:0,
+            message:'ok',
+            result:'方法调用成功，但无法保证可以正确显示弹窗'
+        }
+    }
+
+    private async moveToolTip(tooltip:Vue.Component){
+        if(!tooltip && (this.tooltip)){
+            await this.closePopup();
+        }
+        const view = this.view;
+
+        view.on('pointer-move', async (event) =>{
+            const response = await view.hitTest(event);
+            if (response.results.length > 0) {
+                response.results.forEach((result) => {
+                    if(result.graphic.geometry.type === "point"){
+                        if(result.graphic.attributes && result.graphic.attributes.hasOwnProperty("tooltipWindow")){
+                            let content = result.graphic.attributes.popupWindow;
+                            if (this.tooltip) {
+                                this.tooltip.remove();
+                                this.tooltip = null;
+                            }
+                            this.tooltip = new ToolTip2D(
+                                view,
+                                tooltip,
+                                content,
+                                result.graphic
+                            );
+                        }
+                    }
+                });
+            } else {
+                if (this.tooltip) {
+                    this.tooltip.remove();
+                    this.tooltip = null;
+                }
+            }
+        });
+
+
+        return {
+            status:0,
+            message:'ok',
+            result:'方法调用成功，但无法保证可以正确显示弹窗'
+        }
+    }
+
+    private async autoPopup(popup:Vue.Component,type?:string) :Promise<IResult>{
+        const view = this.view;
+
+        if(type){
+            let popupLayer = await this.getOverlayLayer(type);
+
+            if(!popupLayer){                   //输入type就必须存在该图层
+                return {
+                    status:0,
+                    message:`there is no such layer of ${type}`
+                }
+            }else {
+                let popupOfType:ToolTip2D[] = this.popupTypes.get(type);   //首先检查该图层是否已经显示Popup
+                if(popupOfType){
+                    this.popupTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
+                    for(let popup of popupOfType){
+                        popup.remove();
+                    }
+                }
+
+                let graphics = popupLayer.graphics;
+                if(!graphics.length){
+                    return {
+                        status:0,
+                        message:`no graphic in the graphicLayer of ${type}!`
+                    }
+                }
+                let popupCount = 0;
+                let popups:ToolTip2D[] = [];
+                graphics.forEach((graphic)=>{
+                    let content = graphic.attributes.popupWindow;
+
+                    let _popup = new ToolTip2D(
+                        view,
+                        popup,
+                        content,
+                        graphic
+                    );
+                    popupCount++;
+                    popups.push(_popup);
+                })
+                this.popupTypes.set(type,popups);
+
+                return {
+                    status:0,
+                    message:`finish autoPopup`,
+                    result:`the layer of ${type} with ${popupCount}popups!`
+                }
+            }
+        }else {
+            debugger;
+            this.tooltipTypes.clear();
+            console.log(this.overlayGroups);
+
+            let popups:ToolTip2D[] = [];
+
+            for(let key of this.overlayGroups.keys()){
+                let graphicLayer = this.overlayGroups.get(key);
+
+                if(!graphicLayer){
+                    break;
+                }
+                let graphics = graphicLayer.graphics;
+                graphics.forEach((graphic)=>{
+                    if(graphic.geometry.type === 'point'){
+                        if(graphic.attributes.hasOwnProperty('popupWindow')){
+                            let content = graphic.attributes.popupWindow;
+
+                            let _popup = new ToolTip2D(
+                                view,
+                                popup,
+                                content,
+                                graphic
+                            );
+                            popups.push(_popup);
+                        }
+                    }
+                })
+
+                this.popupTypes.set(key,popups);
+            }
+
+            return {
+                status:0,
+                message:"all overlays have popups now!"
+            }
+        }
+    }
+
+    private async autoTooltip(tooltip:Vue.Component,type?:string){
+        const view = this.view;
+
+        if(type){
+            let tooltipLayer = await this.getOverlayLayer(type);
+
+            if(!tooltipLayer){                   //输入type就必须存在该图层
+                return {
+                    status:0,
+                    message:`there is no such layer of ${type}`
+                }
+            }else {
+                let tooltipOfType:ToolTip2D[] = this.tooltipTypes.get(type);   //首先检查该图层是否已经显示Popup
+                if(tooltipOfType){
+                    this.tooltipTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
+                    for(let tooltip of tooltipOfType){
+                        tooltip.remove();
+                    }
+                }
+
+                let graphics = tooltipLayer.graphics;
+                if(!graphics.length){
+                    return {
+                        status:0,
+                        message:`no graphic in the graphicLayer of ${type}!`
+                    }
+                }
+                let tooltipCount = 0;
+                let tooltips:ToolTip2D[] = [];
+                graphics.forEach((graphic)=>{
+                    let content = graphic.attributes.popupWindow;
+
+                    let _tooltip = new ToolTip2D(
+                        view,
+                        tooltip,
+                        content,
+                        graphic
+                    );
+                    tooltipCount++;
+                    tooltips.push(_tooltip);
+                })
+                this.popupTypes.set(type,tooltips);
+
+                return {
+                    status:0,
+                    message:`finish autoPopup`,
+                    result:`the layer of ${type} with ${tooltipCount}popups!`
+                }
+            }
+        }else {
+            this.tooltipTypes.clear();
+
+            let tooltips:ToolTip2D[] = [];
+
+            for(let key of this.overlayGroups.keys()){
+                let graphicLayer = this.overlayGroups.get(key);
+
+                if(!graphicLayer){
+                    break;
+                }
+                let graphics = graphicLayer.graphics;
+                graphics.forEach((graphic)=>{
+                    if(graphic.geometry.type === 'point'){
+                        if(graphic.attributes.hasOwnProperty('popupWindow')){
+                            let content = graphic.attributes.popupWindow;
+
+                            let _tooltip = new ToolTip2D(
+                                view,
+                                tooltip,
+                                content,
+                                graphic
+                            );
+                            tooltips.push(_tooltip);
+                        }
+                    }
+                })
+
+                this.popupTypes.set(key,tooltips);
+            }
+
+            return {
+                status:0,
+                message:"all overlays have popups now!"
+            }
+        }
+    }
+
+    public async closePopup() :Promise<IResult>{
+        let close = false;
+        if(this.tooltip){
             this.tooltip.remove();
             this.tooltip = null;
-          }
+            close = true;
         }
-    });
 
-    return {
-      status:0,
-      message:'ok',
-      result:'方法调用成功，但无法保证可以正确显示弹窗'
-    }
-  }
-  public async closeToolTip() :Promise<IResult>{
-    let close = false;
-    if(this.tooltip){
-      this.tooltip.remove();
-      this.tooltip = null;
-      close = true;
+        return {
+            status:0,
+            message:'ok',
+            result:close ? '成功关闭VUE弹窗': '未存在VUE弹窗'
+        }
     }
 
-    return {
-      status:0,
-      message:'ok',
-      result:close ? '成功关闭VUE弹窗': '未存在VUE弹窗'
+    private async processPopupAndTooltip(popAndTip:any,componentsObj:any){
+        let showPopup = popAndTip.showPopup;
+        let showTooltip = popAndTip.showToolTip;
+        let moveTooltip = popAndTip.moveToolTip;
+        let movePopup = popAndTip.movePopup;
+        let autoPopup = popAndTip.autoPopup;
+        let autoTooltip = popAndTip.autoToolTip;
+
+        const tooltipComponent = componentsObj.tooltipComponent;
+        const popupComponent = componentsObj.popupComponent;
+
+        if(showPopup){
+            autoPopup = false;
+            movePopup = false;
+        }else if(movePopup){
+            autoPopup = false;
+        }else {
+            if(autoPopup){
+                console.log('autoPopup')
+            }
+        }
+
+        if(showTooltip){
+            autoTooltip = false;
+            moveTooltip = false;
+        }else if(moveTooltip){
+            autoTooltip = false;
+        }else {
+            if(autoTooltip){
+                console.log('autoTooltip')
+            }
+        }
+
+        if(showPopup && popupComponent){
+            await this.showPopup(popupComponent);
+        }else if(movePopup && popupComponent){
+            await this.movePopup(popupComponent);
+        }else if(autoPopup && popupComponent){
+            await this.autoPopup(popupComponent);
+        }else {
+            console.log('no overlays popup');
+        }
+
+        if(showTooltip && tooltipComponent){
+            await this.showTooltip(tooltipComponent);
+        }else if(moveTooltip && tooltipComponent){
+            await this.moveToolTip(tooltipComponent);
+        }else if(autoTooltip && tooltipComponent){
+            await this.autoTooltip(tooltipComponent);
+        }
     }
-  }
 }

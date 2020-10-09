@@ -42,10 +42,6 @@ export default class MapAppArcGIS3D implements IMapContainer {
   private mapToolTip: any;
   public mapClick: any;
 
-  public async initialize(gisConfig: any, mapContainer: string): Promise<void> {
-    let mapConfig = Utils.copyObject(gisConfig);
-    const apiUrl =
-      mapConfig.arcgis_api || mapConfig.apiUrl || 'https://js.arcgis.com/4.14/';
   public async initialize(mapConfig: any, mapContainer: string): Promise<void> {
     const apiUrl = mapConfig.arcgis_api || 'https://js.arcgis.com/4.15/';
 
@@ -533,9 +529,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public createPlaceFence():any{}
   public createLineFence(params:any):any{}
   public createElectFenceByEndPtsConnection(params:any):any{}
-  public addHeatImage(params: IHeatImageParameter) {
-    // const heat = HeatImage.getInstance(this.view);
-    // heat.addHeatImage(params);
+  public addHeatImage2D(params: IHeatImageParameter) {
     const heat = HeatImage2D.getInstance(this.view);
     heat.startup();
   }
@@ -552,11 +546,10 @@ export default class MapAppArcGIS3D implements IMapContainer {
     const chart = Bar3DChart.getInstance(this.view);
     chart.hideBarChart();
   }
-  public addHeatImage(params: IHeatImageParameter) {
+  public addHeatImage3D(params: IHeatImageParameter) {
     const heatmap2 = HeatImage3D.getInstance(this.view);
     return heatmap2.startup(params);
   }
-  public deleteHeatImage() {}
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {

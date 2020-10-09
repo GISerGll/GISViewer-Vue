@@ -111,20 +111,25 @@ export interface IOverlay {
 }
 
 export interface IOverlayParameter {
-  defaultType?: string;
-  type?: string;
-  defaultSymbol?: IPointSymbol | IPolylineSymbol;
-  defaultZooms?: [number, number];
-  overlays: Array<IOverlay>;
-  autoPopup?: boolean;
-  showPopup?: boolean; //是否显示popup
-  defaultInfoTemplate?: IPopUpTemplate;
-  defaultButtons?: Object[];
-  showToolTip?: boolean; //鼠标移到该点位是，是否显示悬浮窗
-  toolTipContent?: string; //悬浮窗内容
-  defaultVisible?: boolean;
-  iswgs?: boolean;
-  custom: {content: string; zooms: [number, number]; visible: true};
+    defaultType?: string;
+    type?: string;
+    defaultSymbol?: IPointSymbol | IPolylineSymbol;
+    defaultZooms?: [number, number];
+    overlays: Array<IOverlay>;
+    autoPopup?: boolean;  //自动显示弹窗
+    autoTooltip?:boolean; //自动显示小提示
+    showPopup?: boolean;  //点击显示弹窗
+    showTooltip?: boolean; //点击显示小提示
+    movePopup?:boolean;   //移到点位显示弹窗
+    moveTooltip?:boolean; //移动点位显示小提示
+    defaultInfoTemplate?: IPopUpTemplate;
+    defaultButtons?: Object[];
+    toolTipContent?: string; //悬浮窗内容
+    defaultVisible?: boolean;
+    tooltipComponent?: Vue.Component
+    popupComponent?: Vue.Component
+    iswgs?: boolean;
+    custom: {content: string; zooms: [number, number]; visible: true};
 }
 export interface IOverlayClusterParameter {
   points?: Array<IOverlay>;
@@ -191,7 +196,8 @@ export interface IMapContainer {
   clearDrawLayer: (params: ILayerConfig) => void;
   showMigrateChart: (params: any) => void;
   hideMigrateChart: () => void;
-  addHeatImage: (params: IHeatImageParameter) => void;
+  addHeatImage2D: (params: IHeatImageParameter) => void;
+  addHeatImage3D: (params: IHeatImageParameter) => void;
   deleteHeatImage: () => void;
   startGeometrySearch: (params: IGeometrySearchParameter) => Promise<IResult>;
   clearGeometrySearch: () => void;

@@ -1,5 +1,5 @@
 <template>
-  <div id="divAMap" />
+  <div :id="mapId" class="my-map-div" />
 </template>
 
 <script lang="ts">
@@ -36,7 +36,7 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   @Emit('map-loaded')
   async mounted() {
     this.mapApp = new MapApp();
-    await this.mapApp.initialize(this.mapConfig, 'divAMap');
+    await this.mapApp.initialize(this.mapConfig, this.mapId);
 
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
     this.mapApp.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
@@ -142,7 +142,8 @@ export default class MapContainerGd extends Vue implements IMapContainer {
     return {status: 0, message: ''};
   }
   public clearDrawLayer(params: ILayerConfig) {}
-  public addHeatImage(params: IHeatImageParameter) {}
+  public addHeatImage2D(params: IHeatImageParameter) {}
+    public addHeatImage3D(params: IHeatImageParameter) {}
   public deleteHeatImage() {}
   public showMigrateChart(params: any) {}
   public hideMigrateChart() {}
@@ -192,7 +193,7 @@ export default class MapContainerGd extends Vue implements IMapContainer {
 
 <style scoped>
 @import 'styles/main.css';
-#divAMap {
+.my-map-div {
   padding: 0;
   margin: 0;
   width: 100%;

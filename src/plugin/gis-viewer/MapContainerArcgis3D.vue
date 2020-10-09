@@ -1,5 +1,5 @@
 <template>
-  <div id="divArcGISMap3D" />
+  <div :id="mapId" class="my-map-div" />
 </template>
 
 <script lang="ts">
@@ -29,15 +29,14 @@ import {
 export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   private mapApp!: MapApp;
 
-  // @Prop({type: String, default: 'divArcGISMap3D'}) mapId: string =
-  //   'divArcGISMap3D' + (Math.random() * 10000).toFixed(0);
+  private mapId: string = 'divArcGISMap3D' + (Math.random() * 10000).toFixed(0);
   //地图配置
   @Prop({type: Object}) readonly mapConfig!: Object;
 
   @Emit('map-loaded')
   async mounted() {
     this.mapApp = new MapApp();
-    await this.mapApp.initialize(this.mapConfig, 'divArcGISMap3D');
+    await this.mapApp.initialize(this.mapConfig, this.mapId);
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
     this.mapApp.mapClick = this.mapClick;
   }
@@ -126,8 +125,11 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public clearDrawLayer(params: any) {
     this.mapApp.clearDrawLayer(params);
   }
-  public addHeatImage(params: IHeatImageParameter) {
-    this.mapApp.addHeatImage(params);
+  public addHeatImage2D(params: IHeatImageParameter) {
+    this.mapApp.addHeatImage2D(params);
+  }
+  public addHeatImage3D(params: IHeatImageParameter) {
+      this.mapApp.addHeatImage3D(params);
   }
   public deleteHeatImage() {
     this.mapApp.deleteHeatImage();
@@ -172,8 +174,7 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
 </script>
 
 <style scoped>
-/* @import './styles/map.css'; */
-#divArcGISMap3D {
+.my-map-div {
   padding: 0;
   margin: 0;
   width: 100%;

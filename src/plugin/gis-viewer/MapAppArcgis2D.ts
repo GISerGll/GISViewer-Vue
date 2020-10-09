@@ -1,5 +1,5 @@
 import {setDefaultOptions, loadCss, loadModules} from 'esri-loader';
-import {Vue, Component, Emit, Prop, PropSync} from 'vue-property-decorator';
+import {Component, Emit, Prop, PropSync} from 'vue-property-decorator';
 import {
   ILayerConfig,
   IOverlayParameter,
@@ -526,7 +526,6 @@ export default class MapAppArcGIS2D {
   }
   public async hideLayer(params: ILayerConfig) :Promise<IResult>{
     let hideResult = false;
-      debugger;
     this.view.map.allLayers.forEach((baselayer:any) => {
 
       if (params.label && baselayer.label === params.label) {
@@ -630,7 +629,7 @@ export default class MapAppArcGIS2D {
     const chart = Bar3DChart.getInstance(this.view);
     chart.hideBarChart();
   }
-  public addHeatImage(params: IHeatImageParameter) {
+  public addHeatImage2D(params: IHeatImageParameter) {
     const heat = HeatImageGL.getInstance(this.view);
     heat.addHeatImage(params);
   }

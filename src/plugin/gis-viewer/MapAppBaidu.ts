@@ -257,16 +257,15 @@ export default class MapAppBaidu implements IMapContainer {
   public createElectFenceByEndPtsConnection(params:any):any{}
   public showBarChart(params: any) {}
   public hideBarChart() {}
-  public addHeatImage(params: IHeatImageParameter) {}
+  public addHeatImage2D(params: IHeatImageParameter) {}
+  public addHeatImage3D(params: IHeatImageParameter) {}
   public deleteHeatImage() {}
-
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
     return {status: 0, message: ''};
   }
   public clearGeometrySearch() {}
-
   public async showDgene(params: any): Promise<IResult> {
     return {status: 0, message: ''};
   }

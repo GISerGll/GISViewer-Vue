@@ -12,15 +12,19 @@
 
 <script lang="ts">
 import {Vue, Component, Emit, Prop, Ref} from 'vue-property-decorator';
+import MapApp from "@/plugin/gis-viewer/MapAppArcgis2D";
 
 @Component
 export default class MapToolTip extends Vue {
   @Prop({type: String}) content!: String;
   @Prop({type: String}) title!: String;
   @Prop({type: String}) id!: String;
-  @Prop({type: Boolean, default: false}) istip!: Boolean;
+  @Prop({type: Boolean, default: true}) istip!: Boolean;
   @Prop({type: Boolean, default: true}) visible!: Boolean;
   @Ref() tp!: Object;
+  mounted() {
+      console.log(this);
+  }
 }
 </script>
 
