@@ -21,6 +21,8 @@ import {
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
 import {JurisdictionPolice} from './widgets/JurisdictionPolice/bd/JurisdictionPolice';
+import {Utils} from '@/plugin/gis-viewer/Utils';
+
 declare let BMap: any;
 
 export default class MapAppBaidu implements IMapContainer {
@@ -29,51 +31,55 @@ export default class MapAppBaidu implements IMapContainer {
   public showGisDeviceInfo: any;
   public mapClick: any;
 
-  public async initialize(mapConfig: any, mapContainer: string): Promise<void> {
-    const apiUrl = mapConfig.baidu_api; //"http://localhost:8090/baidu/BDAPI.js";
-    let view: any;
+  public async initialize(mapConfig: any, mapContainer: string): Promise<any> {
+      const apiUrl = mapConfig.baidu_api; //"http://localhost:8090/baidu/BDAPI.js";
+      let view: any;
+      const apiRoot = mapConfig.baidu_api.substring(0, apiUrl.lastIndexOf('/'));
+      await Utils.loadScripts([
+          apiUrl,
+          // apiRoot + '/library/Heatmap/Heatmap_min.js',
+          // apiRoot + '/library/TextIconOverlay/TextIconOverlay_min.js',
+          // apiRoot + '/library/MarkerClusterer/MarkerClusterer_min.js'
+      ])
 
-    const apiRoot = apiUrl.substring(0, apiUrl.lastIndexOf('/'));
+      view = new BMap.Map(mapContainer);
 
-    await this.loadOtherScripts([
-      apiUrl,
-      // apiRoot + '/library/Heatmap/Heatmap_min.js',
-      // apiRoot + '/library/TextIconOverlay/TextIconOverlay_min.js',
-      // apiRoot + '/library/MarkerClusterer/MarkerClusterer_min.js'
-    ]).then(function(e: any) {
-      console.log("Load Scripts");
-    });
+      let mapLoadPromise = new Promise(resolve => {
+          view.addEventListener("load",(results:any)=>{
+              resolve(results);
+          });
+      })
 
-    view = new BMap.Map(mapContainer,{
-      enableMapClick:false
-    });
-    let gisUrl = mapConfig.gisServer
-      ? mapConfig.gisServer
-      : this.getIpPort(apiUrl);
-    if (mapConfig.theme === 'dark') {
-      view.setMapStyle({style: 'midnight'});
-    }
-    if (mapConfig.baseLayers) {
-      mapConfig.baseLayers.forEach((element: any) => {
-        this.createLayer(view, element);
-      });
-    }
-    let zoom = 12;
-    let center = new BMap.Point(121.31, 31.2);
-    if (mapConfig.options.zoom) {
-      zoom = mapConfig.options.zoom;
-    }
-    if (mapConfig.options.center) {
-      center = new BMap.Point(
-        mapConfig.options.center[0],
-        mapConfig.options.center[1]
-      );
-    }
-    view.centerAndZoom(center, zoom);
+      let gisUrl = mapConfig.gisServer
+          ? mapConfig.gisServer
+          : this.getIpPort(apiUrl);
+      if (mapConfig.theme === 'dark') {
+          view.setMapStyle({style: 'midnight'});
+      }
+      if (mapConfig.baseLayers) {
+          mapConfig.baseLayers.forEach((element: any) => {
+              this.createLayer(view, element);
+          });
+      }
+      let zoom = 12;
+      let center = new BMap.Point(87.597, 43.824);
+      if (mapConfig.options.zoom) {
+          zoom = mapConfig.options.zoom;
+      }
+      if (mapConfig.options.center) {
+          center = new BMap.Point(
+              mapConfig.options.center[0],
+              mapConfig.options.center[1]
+          );
+      }
 
-    view.enableScrollWheelZoom();
-    this.view = view;
-    this.view.gisServer = gisUrl;
+      view.centerAndZoom(center, zoom);
+      view.enableScrollWheelZoom();
+
+      this.view = view;
+      this.view.gisServer = gisUrl;
+
+      return mapLoadPromise;
   }
   private async loadOtherScripts(scriptUrls: string[]): Promise<any> {
     let promises = scriptUrls.map((url) => {
