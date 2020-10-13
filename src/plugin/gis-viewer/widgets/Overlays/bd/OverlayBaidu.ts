@@ -172,16 +172,13 @@ export class OverlayBaidu {
     this.showGisDeviceInfo(type, id);
   }
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
-    //if (!this.overlayLayer) {
-    //await this.createOverlayLayer();
-    //}
     const _this = this;
     const defaultSymbol = this.makeSymbol(params.defaultSymbol);
 
     const showPopup = params.showPopup;
     const defaultInfoTemplate = params.defaultInfoTemplate;
     const autoPopup = params.autoPopup;
-    const showToolTip = params.showToolTip;
+    const showToolTip = params.showTooltip;
     const defaultType = params.type;
     const toolTipContent = params.toolTipContent;
     const defaultButtons = params.defaultButtons;

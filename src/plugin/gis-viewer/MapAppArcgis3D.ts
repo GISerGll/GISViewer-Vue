@@ -540,7 +540,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
     const heatmap2 = HeatImage3D.getInstance(this.view);
     return heatmap2.startup(params);
   }
-  public deleteHeatImage() {}
+
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {

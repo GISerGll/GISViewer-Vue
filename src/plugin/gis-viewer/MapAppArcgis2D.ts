@@ -687,22 +687,6 @@ export default class MapAppArcGIS2D {
     const electronicFence = ElectronicFence.getInstance(this.view);
     return await electronicFence.showEditingLabel(param);
   }
-    public async addDgeneFusion(params: any): Promise<IResult> {
-        const dgene = DgeneFusion.getInstance(this.view);
-        return await dgene.addDgeneFusion(params);
-    }
-    public async restoreDegeneFsion(): Promise<IResult> {
-        const dgene = DgeneFusion.getInstance(this.view);
-        return await dgene.restoreDegeneFsion();
-    }
-    public async showDgene(params: any): Promise<IResult> {
-        let dgene = DgeneFusion.getInstance(this.view);
-        return await dgene.showDgene(params);
-    }
-    public hideDgene() {
-        let dgene = DgeneFusion.getInstance(this.view);
-        dgene.hideDgene();
-    }
     public async arcgisLoadGDLayer(){
         const gdLayer = LayerOperationArcGIS.getInstance(this.view);
         await gdLayer.arcgisLoadGDLayer();

@@ -34,7 +34,7 @@ export default class MapAppBaidu implements IMapContainer {
   public async initialize(mapConfig: any, mapContainer: string): Promise<any> {
       const apiUrl = mapConfig.baidu_api; //"http://localhost:8090/baidu/BDAPI.js";
       let view: any;
-      const apiRoot = mapConfig.baidu_api.substring(0, apiUrl.lastIndexOf('/'));
+      // const apiRoot = mapConfig.baidu_api.substring(0, apiUrl.lastIndexOf('/'));
       await Utils.loadScripts([
           apiUrl,
           // apiRoot + '/library/Heatmap/Heatmap_min.js',

@@ -273,7 +273,7 @@ export class OverlayArcgis3D {
     const showPopup = params.showPopup;
     const defaultInfoTemplate = params.defaultInfoTemplate;
     const autoPopup = params.autoPopup;
-    const showToolTip = params.showToolTip;
+    const showToolTip = params.showTooltip;
     const toolTipContent = params.toolTipContent;
     const defaultButtons = params.defaultButtons;
     const defaultVisible = params.defaultVisible !== false;
