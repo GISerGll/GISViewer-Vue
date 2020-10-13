@@ -2,21 +2,44 @@ export let GisConfig = {
   arcgis_api: 'http://localhost:8090/arcgis_js_api/library/4.14',
   theme: 'dark', //dark,vec
   baseLayers: [
-    // {
-    //   label: '深色',
-    //   type: 'tiled',
-    //   url:
-    //     'https://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',
-    //   visible: true
-    // }
     {
       label: '深色',
-      type: 'webtiled',
-      url: 'http://114.215.146.210:25003/v3/tile?z={level}&x={col}&y={row}',
+      type: 'tiled',
+      url:
+        'https://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',
       visible: true
     }
+    // {
+    //   label: '深色',
+    //   type: 'webtiled',
+    //   url: 'http://114.215.146.210:25003/v3/tile?z={level}&x={col}&y={row}',
+    //   visible: true
+    // }
   ],
-  operationallayers: [],
+  operationallayers: [
+    {
+      label: '接驳线',
+      type: 'dynamic',
+      url:
+        'http://172.30.30.1:6080/arcgis/rest/services/ShangHaiHarbour/ShangHai_jieboxian/MapServer',
+      refreshInterval: 1,
+      visible: true,
+      outFields: ['*']
+    },
+    {
+      label: '接驳线1',
+      type: 'feature',
+      url:
+        'http://172.30.30.1:6080/arcgis/rest/services/ShangHaiHarbour/ShangHai_jieboxian/MapServer/1',
+      refreshInterval: 1,
+      visible: false,
+      outFields: ['*'],
+      popupTemplate: {
+        title: '',
+        content: '{FEATURENAME}'
+      }
+    }
+  ],
   options: {
     center: [121.24, 31.235],
     zoom: 12,
