@@ -35,17 +35,16 @@ export default class MapAppBaidu implements IMapContainer {
       const apiUrl = mapConfig.baidu_api; //"http://localhost:8090/baidu/BDAPI.js";
       let view: any;
       // const apiRoot = mapConfig.baidu_api.substring(0, apiUrl.lastIndexOf('/'));
+      const mapV = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/mapv.js';
       await Utils.loadScripts([
           apiUrl,
-          // apiRoot + '/library/Heatmap/Heatmap_min.js',
-          // apiRoot + '/library/TextIconOverlay/TextIconOverlay_min.js',
-          // apiRoot + '/library/MarkerClusterer/MarkerClusterer_min.js'
+          mapV
       ])
 
       view = new BMap.Map(mapContainer);
 
       let mapLoadPromise = new Promise(resolve => {
-          view.addEventListener("load",(results:any)=>{
+          view.addEventListener("tilesloaded",(results:any)=>{
               resolve(results);
           });
       })
@@ -56,13 +55,14 @@ export default class MapAppBaidu implements IMapContainer {
       if (mapConfig.theme === 'dark') {
           view.setMapStyle({style: 'midnight'});
       }
+
       if (mapConfig.baseLayers) {
           mapConfig.baseLayers.forEach((element: any) => {
               this.createLayer(view, element);
           });
       }
       let zoom = 12;
-      let center = new BMap.Point(87.597, 43.824);
+      let center = new BMap.Point(102.267713, 27.881396);
       if (mapConfig.options.zoom) {
           zoom = mapConfig.options.zoom;
       }
@@ -73,13 +73,23 @@ export default class MapAppBaidu implements IMapContainer {
           );
       }
 
+      console.log(`center:(${center.lng},${center.lat}),zoom:${zoom}`);
       view.centerAndZoom(center, zoom);
+      view.addTileLayer(new BMap.PanoramaCoverageLayer());
       view.enableScrollWheelZoom();
+
+      await mapLoadPromise.then(async ()=>{
+          console.log('map Loaded!');
+          await view.removeEventListener("tilesLoaded");
+          await view.addEventListener('click',(e:any)=>{
+              if(e.overlay){
+                  this.showGisDeviceInfo(e.overlay.id,e.overlay.type);
+              }
+          });
+      })
 
       this.view = view;
       this.view.gisServer = gisUrl;
-
-      return mapLoadPromise;
   }
   private async loadOtherScripts(scriptUrls: string[]): Promise<any> {
     let promises = scriptUrls.map((url) => {
@@ -125,6 +135,10 @@ export default class MapAppBaidu implements IMapContainer {
           visible: layer.visible !== false
         });
         break;
+        default:
+
+            break;
+
     }
   }
   public setMapStyle(param: string) {
