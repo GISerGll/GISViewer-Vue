@@ -453,8 +453,9 @@
         image.src = url;
       });
     }
+
+
     private async mapLoaded() {
-      console.log('Map Loaded.');
       let map = this.$refs.gisViewer as any;
       const result = await map.addOverlays({
         type: 'police',
@@ -482,7 +483,7 @@
         overlays: [
           {
             id: 'test001',
-            geometry: {x: 87.597, y: 43.824},
+            geometry: {x: 102.267713, y: 27.881396},
             fields: {
               name: '测试2',
               featureid: '0002',
@@ -490,7 +491,7 @@
           },
           {
             id: 'test002',
-            geometry: {x: 87.587, y: 43.824},
+            geometry: {x: 102.367713, y: 27.881396},
             fields: {
               name: '测试3',
               featureid: '0003',
@@ -498,14 +499,14 @@
           },
           {
             id: 'test003',
-            geometry: {x: 87.577, y: 43.824},
+            geometry: {x: 102.367713, y: 27.981396},
             fields: {
               name: '测试4',
               featureid: '0001',
               infoWindow: { type:"suspicious",value1:"这是一个正常弹窗",value2:"这是一个正常弹窗"}}
           }
         ],
-        showPopup: false,
+        showPopup: true,
         autoPopup: false,
         defaultInfoTemplate: {
           title: '1212',
@@ -514,7 +515,7 @@
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       });
 
-      await map.showToolTip(Parent);
+      // await map.showToolTip(Parent);
     }
     private showGisDeviceInfo(type: string, id: string, detail: any) {
       console.log(type, id, detail);

@@ -75,7 +75,6 @@ export default class MapAppBaidu implements IMapContainer {
 
       console.log(`center:(${center.lng},${center.lat}),zoom:${zoom}`);
       view.centerAndZoom(center, zoom);
-      view.addTileLayer(new BMap.PanoramaCoverageLayer());
       view.enableScrollWheelZoom();
 
       await mapLoadPromise.then(async ()=>{
