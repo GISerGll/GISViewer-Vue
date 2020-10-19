@@ -541,9 +541,6 @@ export default class MapAppArcGIS2D {
     const findfeature = FindFeature.getInstance(this.view);
     findfeature.startHighlightOverlays(geometry);
   }
-  public async showLayer(params: ILayerConfig) {
-    console.log(params);
-    this.view.map.allLayers.forEach((baselayer: ILayerConfig) => {
   public async showToolTip(param:Vue.Component) :Promise<IResult>{
     const tooltip = OverlayArcgis2D.getInstance(this.view);
     return await tooltip.showToolTip(param);
