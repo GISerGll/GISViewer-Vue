@@ -1,6 +1,16 @@
 import axios from 'axios';
 import {GdConfig} from './GdConfig';
 //import {GisConfig} from './GisConfig';
+//import {GisConfig} from './project/JinBoHui/config_video';
+//import {GisConfig} from './project/JinBoHui/config_yy';
+//import {GisConfig} from './project/JinBoHui/config_zh';
+//import {GisConfig} from './project/JinBoHui/config_bus';
+//import {GisConfig} from './project/JinBoHui/config_gz';
+//import {GisConfig} from './project/JinBoHui/config_jbh';
+//import {GisConfig} from './project/JinBoHui/config_jbx';
+//import {GisConfig} from './project/JinBoHui/config_sub';
+//import {GisConfig} from './project/JinBoHui/config_toll';
+//import {GisConfig} from './project/config_jbh';
 import {GisConfig} from './project/config';
 //import {GisConfig} from './project/configsub';
 //import {GisConfig} from './project/configyj';
@@ -51,7 +61,7 @@ export default class MapConfig {
     // });
     // map.showStreet();
     //map.showJurisdiction();
-    // map.deleteAllOverlays();
+    map.deleteAllOverlays();
     // map.deleteOverlays({types: ['police']});
     let overStr = '';
     let points = {
@@ -61,91 +71,59 @@ export default class MapConfig {
         //symbol for 2d
         type: 'point',
         // primitive: "square",
-        url: 'assets/image/Anchor.png',
-        size: [50, 50],
+        url: 'assets/image/a.png',
+        size: [20, 20],
         anchor: 'center'
-        // color: "red",
-        // outline: {
-        //   color: "white",
-        //   size: 4
-        // },
-        // anchor: "top"
-        //symbol for 3d
-        //type: "point-3d",
-        //primitive: "cube",
-        //color: "red",
-        //size: 20000,
-        //anchor: "bottom",
       },
-      // overlays: [
-      //   {
-      //     id: 'test001',
-      //     geometry: {x: 148.448924, y: 31.157101},
-      //     fields: {name: '测试2', featureid: '0002'}
-      //   },
-      //   {
-      //     id: 'test002',
-      //     geometry: {x: 121.418924, y: 31.157101},
-      //     fields: {name: '测试3', featureid: '0003'}
-      //   },
-      //   {
-      //     id: '1111',
-      //     geometry: {
-      //       paths: [
-      //         [
-      //           [121.31, 31.01],
-      //           [121.2, 31.22],
-      //           [121.1, 31.33],
-      //           [121.45, 30.89]
-      //         ]
-      //       ]
-      //     },
-      //     symbol: {color: 'red'},
-      //     fields: {name: '测试222', featureid: '0003'}
-      //   },
-      //   {
-      //     id: 'test003',
-      //     geometry: {x: 121.418924, y: 31.257101},
-      //     fields: {name: '测试4', featureid: '0001'}
-      //   }
-      // ],
       overlays: [
         {
-          id: 'test001',
-          geometry: {x: -13834.446598916875, y: -4445.604986187298},
-          fields: {name: '测试2', featureid: '0002'}
-        },
-        {
-          id: 'test002',
-          geometry: {x: -13834.446598916875, y: -4445.604986187298},
-          fields: {name: '测试3', featureid: '0003'}
+          id: 'test003',
+          geometry: {x: 121.45, y: 31.23},
+          fields: {name: '测试4', featureid: '0001'}
         }
-      ],
-      showPopup: false,
-      autoPopup: false,
-      iswgs: false,
-      defaultInfoTemplate: {
-        title: '1212',
-        content: '<div class="accc">name:{name}</div>'
-      },
-      // showToolTip: true,
-      // toolTipContent: '{featureid}',
-      // toolTipOption: {
-      //   content: '{featureid}',
-      //   xoffset: 0,
-      //   yoffset: 10
-      // },
-      custom: {
-        content: "<div style='background:red'>333333</div>"
-      },
-      defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
+      ]
     };
-    //const result = await map.addOverlays(points);
+
+    const result = await map.addOverlays(points);
+    map.setMapCenterAndLevel({
+      x: 121.45,
+      y: 31.23,
+      level: 15
+    });
   }
   public btn_test1(map: any) {
+    map.deleteAllOverlays();
+    let overStr = '';
+    let points = {
+      type: 'police',
+      defaultVisible: true,
+      defaultSymbol: {
+        //symbol for 2d
+        type: 'point',
+        // primitive: "square",
+        url: 'assets/image/a.png',
+        size: [20, 20],
+        anchor: 'center'
+      },
+      overlays: [
+        {
+          id: 'test003',
+          geometry: {x: 121.45, y: 31.23},
+          fields: {name: '测试4', featureid: '0001'}
+        }
+      ]
+    };
+
+    const result = map.addOverlays(points);
+    map.setMapCenterAndLevel({
+      x: 121.45,
+      y: 31.23,
+      level: 15
+    });
     // if (this.model_view) {
     //   this.model_view.setCanvasSize(1920, 1080);
     // }
+    //map.addHeatImage();
     //map.showMigrateChart();
 
     //const result = map.addOverlays(points);
@@ -179,7 +157,7 @@ export default class MapConfig {
     //   };
     //   const result = map.addOverlaysCluster(res.data);
     // });
-    //map.addHeatImage();
+
     //map.showMigrateChart('001');
     // map.addDrawLayer({
     //   layerUrls: './config/fbd/morph_ksl.json',
@@ -322,22 +300,40 @@ export default class MapConfig {
         showDir: true
       }
     ]);
-    // axios.get('config/point1.json').then((res: any) => {
-    //   map.addOverlays(res.data);
-    // });
-    axios.get('config/as.json').then((res: any) => {
+    axios.get('config/tt.json').then((res: any) => {
       map.addOverlaysCluster(res.data);
     });
+    // axios.get('config/tt.json').then((res: any) => {
+    //   res.data.type = 'ccv';
+    //   var points = [];
+    //   var x = 121.43;
+    //   var y = 31.15;
+    //   for (var i = 0; i < 1000; i++) {
+    //     var x1 = x + (Math.random() * 2 - 1) / 20;
+    //     var y1 = y + (Math.random() * 2 - 1) / 20;
+    //     var value = Math.floor(1000000 * Math.random() + 1);
+    //     var a = i % 2 == 0 ? '1' : '0';
+    //     points.push({
+    //       geometry: {x: x1.toString(), y: y1.toString()},
+    //       fields: {
+    //         desc: '上海体育馆停车场',
+    //         value: 5,
+    //         type: a
+    //       }
+    //     });
+    //   }
+    //   res.data.zoom = 2;
+    //   res.data.overlays = points;
+    //   map.addOverlaysCluster(res.data);
+    // });
     //axios.get("config/Jurisdiction/bsga_v2.geo.json").then((res: any) => {
     //map.addOverlaysCluster(res.data);
     //  console.log(res.data);
     //});
     //map.hideLayer({label: '匝道灯'});
     // map.findFeature({
-    //   layerName: 'police',
-    //   level: 16,
-    //   ids: ['test003'],
-    //   centerResult: true
+    //   layerName: '接驳线',
+    //   ids: ['TCC2'] //GJYJ001,GJ5-002,BS1,TCC2
     // });
     // map.hideLayer({type: 'traffic'});
     // map.showRoad({ids: [1]});
@@ -386,7 +382,7 @@ export default class MapConfig {
     //     minValue: 0
     //   }
     // };
-    // map.addHeatMap(json);
+    //map.addHeatMap(json);
     // let points2 = {
     //   type: 'police',
     //   defaultVisible: true,
@@ -441,6 +437,7 @@ export default class MapConfig {
     // //   showMask: true
     // // });
     // map.locateStreet({id: '10003'});
+    //map.deleteOverlaysCluster({types: ['police']});
     //map.deleteAllOverlaysCluster();
     // map.findFeature({
     //   layerName: 'sxj1',
@@ -449,17 +446,15 @@ export default class MapConfig {
     //   centerResult: true
     // });
     //map.restoreDegeneFsion();
-    // map
-    //   .startGeometrySearch({
-    //     radius: 5000,
-    //     showResult: true,
-    //     clickHandle: (e: any) => {
-    //       console.log(e);
-    //     }
-    //   })
-    //   .then((res: any) => {
-    //     console.log(res.result);
-    //   });
+    map
+      .startGeometrySearch({
+        types: ['police'],
+        radius: 5000,
+        showResult: true
+      })
+      .then((res: any) => {
+        console.log(res);
+      });
     // if (this.model_view) {
     //   this.model_view.newHideOut(
     //     {x: -13.011890024929382, y: 250.93535559918166, z: 395.3027167055879},
@@ -469,7 +464,8 @@ export default class MapConfig {
     // }
   }
   public btn_test3(map: any) {
-    map.changeDgeneOut();
+    map.deleteOverlays({types: ['police']});
+    //map.changeDgeneOut();
     //map.hideBarChart();
     //map.showDgene({duration: 0}); //显示三维模型
     //map.showLayer({label: 'fbd1333'});
@@ -487,7 +483,7 @@ export default class MapConfig {
     // });
     //map.hideLayer({label: '匝道灯'});
     //map.deleteHeatMap();
-    //map.deleteOverlaysCluster({types: ['sxj1']});
+
     //map.deleteAllOverlays();
     //map.deleteOverlays({types: ['police']});
     //map.hideLayer({label: 'ceshi'});

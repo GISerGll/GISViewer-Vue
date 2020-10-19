@@ -48,6 +48,7 @@ import AnimateLine from './widgets/MigrateChart/AnimateLine';
 import {Bar3DChart} from './widgets/MigrateChart/arcgis/Bar3DChart';
 import {Utils} from './Utils';
 import ToolTip from './widgets/Overlays/arcgis/ToolTip';
+import {Cluster2D} from './widgets/Cluster/arcgis/Cluster2D';
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
@@ -237,16 +238,7 @@ export default class MapAppArcGIS2D {
               res.feature.attributes['SECTIONID'] ||
               res.feature.attributes[res.displayFieldName];
             this.showGisDeviceInfo(layername, id, res.feature);
-            // this.HighlightLayer.add(
-            //   new Graphic({
-            //     geometry: res.feature.geometry,
-            //     symbol: {
-            //       type: 'simple-line', // autocasts as SimpleLineSymbol()
-            //       color: [226, 119, 40],
-            //       width: 4
-            //     } as any
-            //   })
-            // );
+            this.HighFeature(res.feature.geometry);
             let selectLayer = this.getLayerByName(layername, layerid);
             if (selectLayer.popupTemplates) {
               this.showSubBar(selectLayer, event.mapPoint, res.feature);
@@ -269,6 +261,7 @@ export default class MapAppArcGIS2D {
       }
     });
     await view.when();
+
     if (mapConfig.operationallayers) {
       this.createLayer(view, mapConfig.operationallayers);
     }
@@ -489,6 +482,10 @@ export default class MapAppArcGIS2D {
               const drawlayer = DrawLayer.getInstance(view);
               drawlayer.addDrawLayer(layerConfig);
               break;
+            case 'image':
+              const heat = HeatImage2D.getInstance(view);
+              heat.addImage({images: layerConfig, points: []});
+              break;
           }
           layerConfig.type = type;
           return layer;
@@ -500,6 +497,7 @@ export default class MapAppArcGIS2D {
     this.HighlightLayer = new GraphicsLayer();
     this.view.map.add(this.HighlightLayer);
   }
+
   public async showSubwayFlow() {
     const flow = SubwayLine.getInstance(this.view);
     flow.showSubwayFlow();
@@ -537,6 +535,15 @@ export default class MapAppArcGIS2D {
     const find = FindFeature.getInstance(this.view);
     return await find.findLayerFeature(params);
   }
+  public async HighFeature(geometry?: any) {
+    // const overlay = OverlayArcgis2D.getInstance(this.view);
+    // return await overlay.findFeature(params);
+    const findfeature = FindFeature.getInstance(this.view);
+    findfeature.startHighlightOverlays(geometry);
+  }
+  public async showLayer(params: ILayerConfig) {
+    console.log(params);
+    this.view.map.allLayers.forEach((baselayer: ILayerConfig) => {
   public async showToolTip(param:Vue.Component) :Promise<IResult>{
     const tooltip = OverlayArcgis2D.getInstance(this.view);
     return await tooltip.showToolTip(param);

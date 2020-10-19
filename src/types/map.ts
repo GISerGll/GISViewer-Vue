@@ -136,6 +136,8 @@ export interface IOverlayClusterParameter {
   overlays?: Array<IOverlay>;
   type?: string;
   zoom: number;
+  custom: any;
+  ispic: boolean;
   distance: number;
   defaultSymbol?: IPointSymbol;
   clusterSymbol?: IPointSymbol;

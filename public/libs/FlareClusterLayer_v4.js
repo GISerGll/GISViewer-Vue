@@ -239,8 +239,13 @@ define([
       _this._viewLoadCount = 0;
       _this._clusters = {};
       _this.eventzoom = -1;
+      _this._zoomExtent = undefined;
+      _this._clusterScale = undefined;
+      _this._scaleSub = 1;
+      _this.customText = options.custom || {};
       _this.isdrawall = true;
       _this.allExtent = undefined;
+      _this.texts = [];
       _this.areaGrphics = [];
       // set the defaults
       if (!options) {
@@ -251,6 +256,7 @@ define([
         return _this;
       }
       _this.singlePopupTemplate = options.singlePopupTemplate;
+      _this.clusterPic = options.clusterPic;
       // set up the clustering properties
       _this.clusterRatio = options.clusterRatio || 75; // sets the size of each clusters bounds
       _this.clusterToScale = options.clusterToScale || 2000000; // the scale to stop clustering at and just display single points
@@ -298,7 +304,8 @@ define([
           color: new Color([255, 255, 255]),
           font: {
             size: 10,
-            family: 'arial'
+            family: 'arial',
+            weight: 'bold'
           },
           yoffset: -3 // setting yoffset as vertical alignment doesn't work in IE/Edge
         });
@@ -388,33 +395,19 @@ define([
       view
     ) {
       this._getAllExtent();
+      this._scaleSub = this._clusterScale / this._activeView.scale;
       if (isStationary) {
         if (this._activeView.type == '2d') {
           if (this.eventzoom !== view.zoom) {
             //放大缩小,需要重绘
+            this._zoomExtent = this._activeView.extent;
             if (this._data) {
               this.draw();
             }
-            this.isdrawall = this._activeView.extent.contains(this.allExtent);
             this.eventzoom = view.zoom;
-          } else {
-            if (!this._activeView.extent.contains(this.allExtent)) {
-              //只画了部分
-              if (this._data) {
-                this.draw();
-              }
-              this.isdrawall = false;
-            } else {
-              //只画了部分之后,需要重绘
-              if (!this.isdrawall) {
-                if (this._data) {
-                  this.draw();
-                }
-              }
-              this.isdrawall = true;
-            }
           }
         } else {
+          this._zoomExtent = this._activeView.extent;
           if (this._data) {
             this.draw();
           }
@@ -458,6 +451,7 @@ define([
     };
     FlareClusterLayer.prototype._getAllExtent = function() {
       if (!this.allExtent) {
+        this._clusterScale = this._activeView.scale;
         var data = this._data;
         var xmin = 100000000;
         var xmax = 0;
@@ -479,9 +473,11 @@ define([
           new SpatialReference({wkid: wkid})
         );
       }
+      return this.allExtent;
     };
     FlareClusterLayer.prototype.draw = function(activeView) {
       var _this = this;
+      this.texts = [];
       if (activeView) {
         // if we're swapping views from the currently active one, clear the surface object so it get's recreated fresh after the first draw
         if (this._activeView && activeView !== this._activeView) {
@@ -494,7 +490,7 @@ define([
         this._queuedInitialDraw = true;
         return;
       }
-      var currentExtent = this._extent();
+      var currentExtent = this._getAllExtent();
       if (!this._activeView || !this._data || !currentExtent) return;
       this._is2d = this._activeView.type === '2d';
       // check for required renderer
@@ -628,6 +624,9 @@ define([
           }
         }
       }
+      if (this.customText && this.customText.content) {
+        this._addText();
+      }
       // emit an event to signal drawing is complete.
       this.emit('draw-complete', {});
       console.timeEnd('draw-data-' + this._activeView.type);
@@ -677,7 +676,51 @@ define([
         // no symbology for singles defined, use the default symbol from the cluster renderer
         graphic.symbol = this.clusterRenderer.defaultSymbol;
       }
+      this.texts.push(graphic);
       this.add(graphic);
+    };
+    FlareClusterLayer.prototype.getContent = function(attr, content) {
+      let tipContent = content;
+      if (content) {
+        //键值对
+        for (let fieldName in attr) {
+          if (attr.hasOwnProperty(fieldName)) {
+            tipContent = tipContent.replace(
+              '{' + fieldName + '}',
+              attr[fieldName]
+            );
+          }
+        }
+      }
+      return tipContent;
+    };
+    FlareClusterLayer.prototype._addText = function() {
+      var graphics = this.texts;
+      for (var i = 0; i < graphics.length; i++) {
+        var graphic = graphics[i];
+        let pt = graphic.geometry;
+        var textsymbol = {
+          type: 'text', // autocasts as new TextSymbol()
+          color: this.customText.color || 'red',
+          text: this.customText.content || '',
+          backgroundColor: this.customText.backgroundColor || 'black',
+          borderLineColor: this.customText.lineColor || 'white',
+          borderLineSize: this.customText.lineWidth || 1,
+          font: {
+            // autocasts as new Font()
+            size: this.customText.fontSize || 10,
+            weight: this.customText.weight || 'bold'
+          }
+        };
+
+        textsymbol.yoffset = graphic.symbol.height / 2;
+        textsymbol.text = this.getContent(
+          graphic.attributes,
+          this.customText.content
+        );
+        var graphicText = new Graphic({geometry: pt, symbol: textsymbol});
+        this.add(graphicText);
+      }
     };
     FlareClusterLayer.prototype._createCluster = function(gridCluster) {
       return __awaiter(this, void 0, void 0, function() {
@@ -729,6 +772,22 @@ define([
               cluster.clusterGraphic.attributes.clusterId = cluster.clusterId;
               textSymbol = this.textSymbol.clone();
               textSymbol.text = gridCluster.clusterCount.toString();
+              if (this.clusterPic) {
+                var classBreaks = this.clusterRenderer.classBreakInfos;
+                var cCount = Number(gridCluster.clusterCount);
+                var yoffset = classBreaks[0].symbol.height / 2;
+                var index = 0;
+                for (var i = 0; i < classBreaks.length; i++) {
+                  var cbs = classBreaks[i];
+                  if (cCount <= cbs.maxValue && cCount > cbs.minValue) {
+                    yoffset = cbs.symbol.height / 2;
+                    index = i;
+                  }
+                }
+                textSymbol.yoffset = yoffset;
+                textSymbol.font.size = textSymbol.font.size + index;
+                textSymbol.font.weight = 'bold';
+              }
               cluster.textGraphic = new Graphic({
                 geometry: point,
                 attributes: {
@@ -795,9 +854,11 @@ define([
       webExtent,
       extentIsUnioned
     ) {
+      var clusterWidth = this._activeView.width * this._scaleSub;
+      var clusterHeight = this._activeView.height * this._scaleSub;
       // get the total amount of grid spaces based on the height and width of the map (divide it by clusterRatio) - then get the degrees for x and y
-      var xCount = Math.round(this._activeView.width / this.clusterRatio);
-      var yCount = Math.round(this._activeView.height / this.clusterRatio);
+      var xCount = Math.round(clusterWidth / this.clusterRatio);
+      var yCount = Math.round(clusterHeight / this.clusterRatio);
       // if the extent has been unioned due to normalization, double the count of x in the cluster grid as the unioning will halve it.
       if (extentIsUnioned) {
         xCount *= 2;
@@ -938,16 +999,18 @@ define([
             if (_this.clusterAreaDisplay === 'activated') {
               _this._showGraphic(cluster.areaGraphic);
             }
-            var wkid = _this._activeView.spatialReference.isWebMercator
-              ? 102100
-              : 4326;
+            // console.log('++:', _this._activeView.spatialReference);
+            // console.log('++:', extent);
+            // var wkid = _this._activeView.spatialReference.isWebMercator
+            //   ? 102100
+            //   : 4326;
             _this._activeView.goTo({
               target: new Extent({
                 xmin: extent.xmin,
                 ymin: extent.ymin,
                 xmax: extent.xmax,
                 ymax: extent.ymax,
-                spatialReference: new SpatialReference({wkid: wkid})
+                spatialReference: new SpatialReference({wkid: 102100})
               })
             });
             return;
@@ -1513,6 +1576,9 @@ define([
     // #region helper functions
     FlareClusterLayer.prototype._extent = function() {
       return this._activeView ? this._activeView.extent : undefined;
+    };
+    FlareClusterLayer.prototype._extent2 = function() {
+      return this._zoomExtent ? this._zoomExtent : this._activeView.extent;
     };
     FlareClusterLayer.prototype._scale = function() {
       return this._activeView ? this._activeView.scale : undefined;

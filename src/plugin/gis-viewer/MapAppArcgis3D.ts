@@ -1,4 +1,4 @@
-import {setDefaultOptions, loadCss, loadModules} from 'esri-loader';
+import { setDefaultOptions, loadCss, loadModules } from 'esri-loader';
 import {
   ILayerConfig,
   IOverlayParameter,
@@ -18,12 +18,16 @@ import {
   IGeometrySearchParameter,
   ICustomTip
 } from '@/types/map';
-import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
-import {RasterStretchRenderer} from 'esri/rasterRenderers';
-import {FindFeature} from './widgets/FindFeature/arcgis/FindFeature';
-import {HeatMap} from './widgets/HeatMap/arcgis/HeatMap';
-import {HeatMap3D} from './widgets/HeatMap/arcgis/HeatMap3D';
+import { OverlayArcgis3D } from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
+import { RasterStretchRenderer } from 'esri/rasterRenderers';
+import { FindFeature } from './widgets/FindFeature/arcgis/FindFeature';
+import { HeatMap } from './widgets/HeatMap/arcgis/HeatMap';
+import { HeatMap3D } from './widgets/HeatMap/arcgis/HeatMap3D';
 import ToolTip from './widgets/Overlays/arcgis/ToolTip';
+import { Cluster } from './widgets/Cluster/arcgis/Cluster';
+import { DrawLayer } from './widgets/DrawLayer/arcgis/DrawLayer';
+import { MigrateChart } from './widgets/MigrateChart/arcgis/MigrateChart';
+import { HeatImage } from './widgets/HeatMap/arcgis/HeatImage';
 import {Cluster} from './widgets/Cluster/arcgis/Cluster';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 import {DrawLayer} from './widgets/DrawLayer/arcgis/DrawLayer';
@@ -36,6 +40,9 @@ import {GeometrySearch} from './widgets/GeometrySearch/arcgis/GeometrySearch';
 import {Bar3DChart} from './widgets/MigrateChart/arcgis/Bar3DChart';
 import {Utils} from './Utils';
 import LayerOperationArcGIS from "@/plugin/gis-viewer/widgets/LayerOperation/arcgis/LayerOperationArcgis";
+import { GeometrySearch } from './widgets/GeometrySearch/arcgis/GeometrySearch';
+import { Bar3DChart } from './widgets/MigrateChart/arcgis/Bar3DChart';
+import { Utils } from './Utils';
 
 export default class MapAppArcGIS3D implements IMapContainer {
   public view!: __esri.SceneView;
@@ -48,7 +55,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
     const apiUrl =
       mapConfig.arcgis_api || mapConfig.apiUrl || 'https://js.arcgis.com/4.15/';
 
-    setDefaultOptions({url: `${apiUrl}/init.js`});
+    setDefaultOptions({ url: `${apiUrl}/init.js` });
 
     const cssFile: string = mapConfig.theme
       ? `themes/${mapConfig.theme}/main.css`
@@ -134,7 +141,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
         // });
         let result = response.results[0];
         const graphic = result.graphic;
-        let {type, id} = graphic.attributes;
+        let { type, id } = graphic.attributes;
         let label = graphic.layer ? (graphic.layer as any).label : '';
         if (
           graphic.layer &&
@@ -209,7 +216,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
   private loadCustomCss() {
     require('./styles/custom.css');
   }
-  private destroy() {}
+  private destroy() { }
   //使toolTip中支持{字段}的形式
   private getContent(attr: any, content: string): string {
     let tipContent = content;
@@ -470,30 +477,30 @@ export default class MapAppArcGIS3D implements IMapContainer {
       });
     }
   }
-  public async showJurisdiction() {}
-  public async hideJurisdiction() {}
+  public async showJurisdiction() { }
+  public async hideJurisdiction() { }
   public async findFeature(params: IFindParameter) {
     // const overlay = OverlayArcgis3D.getInstance(this.view);
     // return await overlay.findFeature(params);
     const find = FindFeature.getInstance(this.view);
     return await find.findLayerFeature(params);
   }
-  public async showDistrictMask(param: IDistrictParameter) {}
-  public async hideDistrictMask() {}
-  public async showRoad() {}
-  public async hideRoad() {}
-  public async showStreet() {}
-  public async hideStreet() {}
-  public async locateStreet(param: IStreetParameter) {}
-  public setMapStyle(param: string) {}
+  public async showDistrictMask(param: IDistrictParameter) { }
+  public async hideDistrictMask() { }
+  public async showRoad() { }
+  public async hideRoad() { }
+  public async showStreet() { }
+  public async hideStreet() { }
+  public async locateStreet(param: IStreetParameter) { }
+  public setMapStyle(param: string) { }
 
   public async routeSearch(params: routeParameter): Promise<IResult> {
-    return {status: 0, message: ''};
+    return { status: 0, message: '' };
   }
-  public clearRouteSearch() {}
+  public clearRouteSearch() { }
 
-  public showRoutePoint(params: any) {}
-  public clearRoutePoint() {}
+  public showRoutePoint(params: any) { }
+  public clearRoutePoint() { }
 
   public async addDrawLayer(params: any): Promise<IResult> {
     const drawlayer = DrawLayer.getInstance(this.view);
@@ -546,6 +553,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
     return heatmap2.startup(params);
   }
 
+  public deleteHeatImage() { }
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
@@ -557,15 +565,16 @@ export default class MapAppArcGIS3D implements IMapContainer {
     geometrySearch.clearGeometrySearch();
   }
   public async showDgene(params: any): Promise<IResult> {
-    return {status: 0, message: ''};
+    return { status: 0, message: '' };
   }
+  public hideDgene() { }
   public showEditingLabel(params:any):any{}
   public hideDgene() {}
   public async addDgeneFusion(params: any): Promise<IResult> {
-    return {status: 0, message: ''};
+    return { status: 0, message: '' };
   }
   public async restoreDegeneFsion(): Promise<IResult> {
-    return {status: 0, message: ''};
+    return { status: 0, message: '' };
   }
   public showCustomTip(params: ICustomTip) {
     ToolTip.clear(this.view, params.prop.className);
@@ -574,4 +583,6 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public showDgeneOutPoint(params: any) {}
   public changeDgeneOut() {}
     public async arcgisLoadGDLayer(){}
+  public showDgeneOutPoint(params: any) { }
+  public changeDgeneOut() { }
 }
