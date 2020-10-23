@@ -89,13 +89,13 @@ export class HeatMapBD {
         this._state = 'hot';
       } else {
         this.addOverlays(params);
-        this._state = 'nomal';
+        this._state = 'normal';
       }
       this.view.addEventListener(
         'zoomend',
         (this.zoomEvent = function(e: any) {
           if (e.target.getZoom() <= zoom) {
-            if (_this._state == 'nomal') {
+            if (_this._state == 'normal') {
               _this._clear();
               _this.addHeatLayer(params);
               _this._state = 'hot';
@@ -104,7 +104,7 @@ export class HeatMapBD {
             if (_this._state == 'hot') {
               _this._clear();
               _this.addOverlays(params);
-              _this._state = 'nomal';
+              _this._state = 'normal';
             }
           }
         })
@@ -116,9 +116,11 @@ export class HeatMapBD {
   }
   public getHeatColor(colors: string[] | undefined): any {
     let obj: any = {
-      0.2: 'rgb(0, 255, 255)',
-      0.5: 'rgb(0, 110, 255)',
-      0.8: 'rgb(100, 0, 255)'
+      0.35:'rgb(0, 0, 255)',
+      0.55:'rgb(117,211,248)',
+      0.7:'rgb(0, 255, 0)',
+      0.85:'rgb(255,234,0)',
+      1:'rgb(255,0,0)'
     };
     if (colors && colors.length >= 4) {
       //"rgba(30,144,255,0)","rgba(30,144,255)","rgb(0, 255, 0)","rgb(255, 255, 0)", "rgb(254,89,0)"

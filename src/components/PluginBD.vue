@@ -11,8 +11,7 @@
       <button @click="btn_addOverlays_pt">添加点</button>
       <button @click="btn_addOverlays_line">添加线</button>
       <button @click="btn_addOverlays_polygon">添加面</button>
-      <button @click="btn_deleteOverlays">删除覆盖物</button><br>
-      <button @click="btn_showToolTip">开启VUE弹窗</button>
+      <button @click="btn_deleteOverlays">删除覆盖物</button>
       <button @click="btn_closeToolTip">关闭VUE弹窗</button><br>
       <button @click="btn_drawPoints">撒点</button>
       <button @click="btn_drawLines">画线</button>
@@ -29,10 +28,11 @@
       <button @click="btn_createElectFenceByEndPtsConnection">直线围栏</button>
       <button @click="btn_showCircleOutline">圆边界</button>
       <button @click="btn_showEditingLabel">编辑围栏</button>
+      <button @click="btn_addHeatMap">添加热力图</button>
+      <button @click="btn_deleteHeatMap">删除热力图</button>
+      <button @click="btn_addOverlaysCluster">添加聚合点</button>
+      <button @click="btn_deleteOverlaysCluster">删除聚合点</button>
 
-      <!--      <button @click="btn_">删除</button><br>-->
-      <!--      <button @click="btn_addHeatMap">添加热力图</button>-->
-      <!--      <button @click="btn_deleteHeatMap">删除热力图</button>-->
     </div>
     <gis-viewer
       ref="gisViewer"
@@ -46,9 +46,6 @@
 </template>
 <script lang="ts">
   import {Vue, Component} from 'vue-property-decorator';
-  import WuLuMuQiConfig from '@/config/config_arcgis';
-  import axios from 'axios';
-  import {IResult} from "@/types/map";
   import MapConfig from "@/config/config_baidu";
   import Parent from "@/components/tooltips/Parent.vue";
   @Component
@@ -114,7 +111,7 @@
           //symbol for 2d
           type: 'point-2d',
           // primitive: "square",
-          url: 'assets/image/Anchor.png',
+          url: 'assets/image/a.png',
           size:  (img as Object)? [(img as any).width,(img as any).height] : [12,12],
           // color: "red",
           // outline: {
@@ -133,17 +130,17 @@
         overlays: [
           {
             id: 'test001',
-            geometry: {x: 87.597, y: 43.814},
+            geometry: {x: 102.2687, y: 27.8843},
             fields: {name: '测试2', featureid: '0002'}
           },
           {
             id: 'test002',
-            geometry: {x: 87.587, y: 43.814},
+            geometry: {x: 102.2687, y: 27.8853},
             fields: {name: '测试3', featureid: '0003'}
           },
           {
             id: 'test003',
-            geometry: {x: 87.577, y: 43.814},
+            geometry: {x: 102.2607, y: 27.8813},
             fields: {name: '测试4', featureid: '0001'}
           }
         ],
@@ -158,7 +155,6 @@
       console.log(obj)
     }
     private async btn_addOverlays_line() {
-
       let path1 = [  // first path
         [87.597,43.817],
         [87.597,43.824],
@@ -192,8 +188,9 @@
             fields: {name: '测试2', featureid: '0002'}
           }
         ],
-        showPopup: true,
+        showPopup: false,
         autoPopup: false,
+        movePopup: true,
         defaultInfoTemplate: {
           title: '1212',
           content: '<div>name:{name}<br/><button>{name}</button></div>'
@@ -453,7 +450,98 @@
         image.src = url;
       });
     }
+    private async btn_addHeatMap(){
+      let map = this.$refs.gisViewer as any;
+      var points = [];
+      var x = 102.267713;
+      var y = 27.881396;
+      for (var i = 0; i < 50000; i++) {
+        var x1 = x + (Math.random() * 2 - 1) / 20;
+        var y1 = y + (Math.random() * 2 - 1) / 20;
+        var value = Math.floor(100 * Math.random() + 1);
+        var a = i % 2 == 0 ? '1' : '0';
+        points.push({
+          geometry: {x: x1, y: y1},
+          fields: {desc: '上海体育馆停车场', totalSpace: value, type: a}
+        });
+      }
+      var json = {
+        points: points,
+        options: {
+          field: 'totalSpace',
+          radius: '20',
+          // colors: [
+          //   'rgb(255, 255, 255)',
+          //   'rgba(206, 199, 25,0.5)',
+          //   'rgba(255, 140, 27,0.5)',
+          //   'rgba(246, 64, 64,0.5)'
+          // ],
+          maxValue: 1000,
+          minValue: 1,
+          zoom: 20,
+          renderer: {
+            type: 'simple',
+            symbol: {
+              type: 'esriSMS',
+              url: 'assets/image/Anchor.png',
+              width: 64,
+              height: 66,
+              yoffset: 16
+            }
+          }
+        }
+      };
+      map.addHeatMap(json);
+    }
+    private async btn_deleteHeatMap(){
+      let map = this.$refs.gisViewer as any;
+      map.deleteHeatMap();
+    }
+    private async btn_addOverlaysCluster(){
+      let map = this.$refs.gisViewer as any;
 
+      let clusterArg = {
+        zoom:20,
+        distance:100,
+        type: 'police',
+        defaultSymbol: {
+          //symbol for 2d
+          type: 'point-2d',
+          // primitive: "square",
+          url: 'assets/image/a.png',
+          size:  [24,24],
+        },
+        overlays: [
+          {
+            id: 'test001',
+            geometry: {x: 102.2687, y: 27.8843},
+            fields: {name: '测试2', featureid: '0002'}
+          },
+          {
+            id: 'test002',
+            geometry: {x: 102.2687, y: 27.8853},
+            fields: {name: '测试3', featureid: '0003'}
+          },
+          {
+            id: 'test003',
+            geometry: {x: 102.2607, y: 27.8813},
+            fields: {name: '测试4', featureid: '0001'}
+          }
+        ],
+        showPopup: false,
+        autoPopup: false,
+        // defaultTooltip: {
+        //   title: '1212',
+        //   content: '<div>name:{name}<br/><button>{name}</button></div>'
+        // },
+        defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
+      }
+      map.addOverlaysCluster(clusterArg);
+
+    }
+    private async btn_deleteOverlaysCluster(){
+
+    }
 
     private async mapLoaded() {
       let map = this.$refs.gisViewer as any;
@@ -487,7 +575,7 @@
             fields: {
               name: '测试2',
               featureid: '0002',
-              infoWindow: { type:"normal" ,value1:"这是一个信息弹窗",value2:"随意测试一下"}}
+              popupWindow: { type:"normal" ,value1:"这是一个信息弹窗",value2:"随意测试一下"}}
           },
           {
             id: 'test002',
@@ -495,7 +583,7 @@
             fields: {
               name: '测试3',
               featureid: '0003',
-              infoWindow: { type:"alarm" ,value1:"这是一个警告弹窗",value2:"随意测试一下"}}
+              popupWindow: { type:"alarm" ,value1:"这是一个警告弹窗",value2:"随意测试一下"}}
           },
           {
             id: 'test003',
@@ -503,25 +591,24 @@
             fields: {
               name: '测试4',
               featureid: '0001',
-              infoWindow: { type:"suspicious",value1:"这是一个正常弹窗",value2:"这是一个正常弹窗"}}
+              popupWindow: { type:"suspicious",value1:"这是一个正常弹窗",value2:"这是一个正常弹窗"}}
           }
         ],
-        showPopup: true,
+        showPopup: false,
         autoPopup: false,
-        defaultInfoTemplate: {
-          title: '1212',
-          content: '<div>name:{name}<br/><button>{name}</button></div>'
-        },
+        movePopup: true,
+        popupComponent:Parent,
+        // defaultInfoTemplate: {
+        //   title: '1212',
+        //   content: '<div>name:{name}<br/><button>{name}</button></div>'
+        // },
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       });
 
       // await map.showToolTip(Parent);
     }
-    private showGisDeviceInfo(type: string, id: string, detail: any) {
-      console.log(type, id, detail);
-    }
-    private moveGisDeviceInfo(type: string, id: string, detail: any) {
-      console.log(type, id, detail);
+    private showGisDeviceInfo(type: string, id: string) {
+      console.log(type, id);
     }
     private mapClick(pt: object) {
       console.log(pt);

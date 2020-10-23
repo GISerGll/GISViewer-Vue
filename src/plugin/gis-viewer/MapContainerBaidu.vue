@@ -37,6 +37,7 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
     this.mapApp = new MapApp();
     await this.mapApp.initialize(this.mapConfig, this.mapId);
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
+    this.mapApp.mapClick = this.mapClick;
   }
   @Emit('map-click')
   public mapClick(point: object) {}

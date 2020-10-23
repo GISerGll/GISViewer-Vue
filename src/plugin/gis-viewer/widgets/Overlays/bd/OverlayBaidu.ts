@@ -10,16 +10,21 @@ import {
 } from '@/types/map';
 import {Vue} from "vue-property-decorator";
 import ToolTipBaiDu from "@/plugin/gis-viewer/widgets/Overlays/bd/ToolTipBaiDu";
+import ToolTip2D from "@/plugin/gis-viewer/widgets/Overlays/arcgis/ToolTip2D";
 declare let BMap: any;
 declare let BMapLib: any;
 
 export class OverlayBaidu {
   private static intances: Map<string, any>;
+
   private view!: any;
-  private overlayers = new Array();
-  private tooltip:any
+  private overlays = new Array();
   private markerClustererLayer = new Array();
-  public showGisDeviceInfo: any;
+
+  private tooltip:any;
+  private popupTypes: Map<string, any> = new Map<string, any>();
+  private tooltipTypes:Map<string, any> = new Map<string, any>();
+  private popup:any;
 
   private constructor(view: any) {
     this.view = view;
@@ -168,24 +173,41 @@ export class OverlayBaidu {
     }
     return tipContent;
   }
-  private _showGisDeviceInfo(type: string, id: string) {
-    this.showGisDeviceInfo(type, id);
-  }
+  // private _showGisDeviceInfo(type: string, id: string) {
+  //   this.showGisDeviceInfo(type, id);
+  // }
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     const _this = this;
     const defaultSymbol = this.makeSymbol(params.defaultSymbol);
-
-    const showPopup = params.showPopup;
-    const defaultInfoTemplate = params.defaultInfoTemplate;
-    const autoPopup = params.autoPopup;
-    const showToolTip = params.showTooltip;
     const defaultType = params.type;
-    const toolTipContent = params.toolTipContent;
     const defaultButtons = params.defaultButtons;
+      //默认弹窗样式
+      const defaultInfoTemplate = params.defaultInfoTemplate;
+      //自定义vue弹窗样式
+      /************auto/move/show-popup/tooltip*****************/
+      const showPopup = params.showPopup;
+      const showToolTip = params.showTooltip;
+      const moveToolTip = params.moveTooltip;
+      const movePopup = params.movePopup;
+      const autoPopup = params.autoPopup;
+      const autoToolTip = params.autoTooltip;
 
-    if (showToolTip) {
-      //this.MoveToolTip(toolTipContent);
-    }
+      const tooltipComponent = params.tooltipComponent;
+      const popupComponent = params.popupComponent;
+
+      const popupAndTooltip = {
+          showPopup,
+          showToolTip,
+          moveToolTip,
+          movePopup,
+          autoPopup,
+          autoToolTip
+      };
+
+      const componentsObj = {
+          tooltipComponent,
+          popupComponent
+      }
 
     let addCount = 0;
     for (let i = 0; i < params.overlays.length; i++) {
@@ -204,24 +226,14 @@ export class OverlayBaidu {
       let title: any;
       let content: string = '';
 
-      if (showPopup) {
-        if (defaultInfoTemplate === undefined) {
-          content = this.getInfoWindowContent(graphic);
-        } else {
-          title = defaultInfoTemplate.title;
-          content = this.getPopUpHtml(graphic, defaultInfoTemplate.content);
-        }
-        if (autoPopup) {
-          let infoWindow = new BMap.InfoWindow(content, {
-            //width : 270,     // 信息窗口宽度
-            //height: 50,     // 信息窗口高度
-            title: title, // 信息窗口标题
-            enableMessage: true, //设置允许信息窗发送短息
-            message: ''
-          });
-          graphic.isOpenInfo = true;
-          this.view.openInfoWindow(infoWindow, graphic.point);
-        }
+      this.overlays.push(graphic);
+      this.view.addOverlay(graphic);
+      addCount++;
+
+      if (defaultInfoTemplate) {
+        title = defaultInfoTemplate.title;
+        content = this.getPopUpHtml(graphic, defaultInfoTemplate.content);
+
         graphic.addEventListener('click', function(e: any) {
           let infoWindow = new BMap.InfoWindow(content, {
             width: 0, // 信息窗口宽度
@@ -232,17 +244,23 @@ export class OverlayBaidu {
           }); // 创建信息窗口对象
           e.target.isOpenInfo = true;
           mapView.openInfoWindow(infoWindow, e.point);
-          _this._showGisDeviceInfo(e.target.type, e.target.id);
+          // _this._showGisDeviceInfo(e.target.type, e.target.id);
         });
       }
-      this.overlayers.push(graphic);
-      this.view.addOverlay(graphic);
-      addCount++;
+
 
       if (params.overlays.length == 1) {
         this.view.panTo(graphic.getPosition());
       }
     }
+
+    //处理弹窗逻辑,弹窗优先级popup->tooltip,动作优先级show->move->auto
+    //冲突关系：同类冲突，例如autpPopup和movePopup冲突，autoTooltip和moveTooltip冲突
+    //示意：假如同时存在autoPopup和showPopup为true，认为两者冲突，则autoPopup为false
+    if(!defaultInfoTemplate){
+      await this.processPopupAndTooltip(popupAndTooltip,componentsObj);
+    }
+
     return {
       status: 0,
       message: 'ok',
@@ -253,7 +271,7 @@ export class OverlayBaidu {
     let type = params.layerName;
     let ids = params.ids || [];
     let level = params.level || this.view.getZoom();
-    let overlays = this.overlayers;
+    let overlays = this.overlays;
     let centerResult = params.centerResult;
     overlays.forEach((overlay) => {
       if (type == overlay.type && ids.indexOf(overlay.id) >= 0) {
@@ -270,9 +288,7 @@ export class OverlayBaidu {
       }
     });
   }
-  public async addOverlaysCluster(
-    params: IOverlayClusterParameter
-  ): Promise<IResult> {
+  public async addOverlaysCluster(params: IOverlayClusterParameter): Promise<IResult> {
     const _this = this;
 
     const defaultType = params.type;
@@ -305,19 +321,21 @@ export class OverlayBaidu {
       graphic.attributes = fields;
       graphic.id = overlay.id;
       graphic.type = overlay.type || defaultType;
-      let content = this.getPopUpHtml(graphic, defaultTooltip);
+      if(defaultTooltip){
+        let content = this.getPopUpHtml(graphic, defaultTooltip);
 
-      graphic.addEventListener('click', function(e: any) {
-        let infoWindow = new BMap.InfoWindow(content, {
-          width: 0, // 信息窗口宽度
-          height: 0, // 信息窗口高度
-          title: '', // 信息窗口标题
-          enableMessage: true, //设置允许信息窗发送短息
-          message: ''
-        }); // 创建信息窗口对象
-        mapView.openInfoWindow(infoWindow, e.point);
-        _this._showGisDeviceInfo(e.target.type, e.target.id);
-      });
+        graphic.addEventListener('click', function(e: any) {
+          let infoWindow = new BMap.InfoWindow(content, {
+            width: 0, // 信息窗口宽度
+            height: 0, // 信息窗口高度
+            title: '', // 信息窗口标题
+            enableMessage: true, //设置允许信息窗发送短息
+            message: ''
+          }); // 创建信息窗口对象
+          mapView.openInfoWindow(infoWindow, e.point);
+          // _this._showGisDeviceInfo(e.target.type, e.target.id);
+        });
+      }
 
       markers.push(graphic);
     }
@@ -336,11 +354,11 @@ export class OverlayBaidu {
     };
   }
   public async deleteAllOverlays() {
-    if (this.overlayers.length > 0) {
-      for (let i = 0; i < this.overlayers.length; i++) {
-        this.view.removeOverlay(this.overlayers[i]);
+    if (this.overlays.length > 0) {
+      for (let i = 0; i < this.overlays.length; i++) {
+        this.view.removeOverlay(this.overlays[i]);
       }
-      this.overlayers = [];
+      this.overlays = [];
     }
     this.view.closeInfoWindow();
   }
@@ -348,7 +366,7 @@ export class OverlayBaidu {
     let types = params.types || [];
     let ids = params.ids || [];
     let delCount = 0;
-    this.overlayers = this.overlayers.filter((graphic) => {
+    this.overlays = this.overlays.filter((graphic) => {
       if (
         //只判断type
         (types.length > 0 &&
@@ -393,6 +411,144 @@ export class OverlayBaidu {
     }
     this.view.closeInfoWindow();
   }
+  private async listenOverlayClick(popupType:string,popup:Vue.Component):Promise<IResult>{
+    if(!popupType){
+      return {
+        status:0,
+        message:'error!please input type of popup/tooltip',
+      }
+    }
+    if(!popup){
+      return {
+        status:0,
+        message:'error!please input vue popup/tooltip component',
+      }
+    }
+
+    this.view.removeEventListener('click');
+    switch (popupType) {
+      case "showPopup":
+        this.view.addEventListener('click',(e:any)=>{
+          if(e.overlay){
+            let overlay = e.overlay;
+            let content = overlay.attributes.popupWindow;
+            let center = e.overlay.getPosition();
+
+            if (this.popup) {
+              this.popup.remove();
+              this.popup = null;
+            }
+            this.popup = new ToolTipBaiDu(
+                this.view,
+                popup,
+                content,
+                center
+            );
+          }
+        });
+
+        break;
+      case "showTooltip":
+        this.view.addEventListener('click',(e:any)=>{
+          if(e.overlay){
+            let overlay = e.overlay;
+            let content = overlay.attributes.popupWindow;
+            let center = e.overlay.getPosition();
+
+            if (this.tooltip) {
+              this.tooltip.remove();
+              this.tooltip = null;
+            }
+            this.tooltip = new ToolTipBaiDu(
+                this.view,
+                popup,
+                content,
+                center
+            );
+          }
+        });
+        break;
+      default:
+        break;
+    }
+
+    return {
+      status:0,
+      message:'成功调用该方法！'
+    }
+
+  }
+  private async listenOverlayMouseOver(popupType:string,popup:Vue.Component):Promise<any>{
+    if(!popupType){
+      return {
+        status:0,
+        message:'error!please input type of popup/tooltip',
+      }
+    }
+    if(!popup){
+      return {
+        status:0,
+        message:'error!please input vue popup/tooltip component',
+      }
+    }
+
+    this.view.removeEventListener('mousemove');
+    switch (popupType) {
+      case "movePopup":
+        this.view.addEventListener('mousemove',(e:any)=>{
+          if(e.overlay){
+            let overlay = e.overlay;
+            let content = overlay.attributes.popupWindow;
+            let center = e.overlay.getPosition();
+
+            if (this.popup) {
+              this.popup.remove();
+              this.popup = null;
+            }
+            this.popup = new ToolTipBaiDu(
+                this.view,
+                popup,
+                content,
+                center
+            );
+          }else{
+            if (this.popup) {
+              this.popup.remove();
+              this.popup = null;
+            }
+          }
+        });
+
+        break;
+      case "moveTooltip":
+        this.view.addEventListener('click',(e:any)=>{
+          if(e.overlay){
+            let overlay = e.overlay;
+            let content = overlay.attributes.popupWindow;
+            let center = e.overlay.getPosition();
+
+            if (this.tooltip) {
+              this.tooltip.remove();
+              this.tooltip = null;
+            }
+            this.tooltip = new ToolTipBaiDu(
+                this.view,
+                popup,
+                content,
+                center
+            );
+          }else{
+            if (this.popup) {
+              this.popup.remove();
+              this.popup = null;
+            }
+          }
+        });
+        break;
+      default:
+        break;
+    }
+  }
   public async showToolTip(tooltip:Vue.Component):Promise<IResult>{
     if(!tooltip && this.tooltip){
       await this.closeToolTip();
@@ -436,10 +592,211 @@ export class OverlayBaidu {
       close = true;
     }
 
+    if(this.popup){
+      this.popup.remove();
+      this.popup = null;
+      close = true
+    }
+
     return {
       status:0,
       message:'ok',
       result:close ? '成功关闭VUE弹窗': '未存在VUE弹窗'
+    }
+  }
+  private async autoPopup(popup:Vue.Component,type?:string) :Promise<IResult>{
+    if(!this.overlays.length){
+      return {
+        status:0,
+        message:'there is no overlays,add first!'
+      }
+    }
+
+    let popupCount = 0;
+    let popups:ToolTipBaiDu[] = [];
+
+    if(type && (typeof type === 'string')){               //有type情况
+      let popupOfType:ToolTip2D[] = this.popupTypes.get(type);   //首先检查该图层是否已经显示Popup
+      if(popupOfType){
+        this.popupTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
+        for(let popup of popupOfType){
+          popup.remove();
+        }
+      }
+
+      for(const overlay of this.overlays){
+        if(overlay.type !== type){
+          continue;
+        }
+
+        let content = overlay.attributes.popupWindow;
+        if(!content){
+          continue;
+        }
+
+        let center =  overlay.getPosition();
+        let _popup = new ToolTipBaiDu(
+            this.view,
+            popup,
+            content,
+            center
+        );
+        popups.push(_popup);
+        popupCount++;
+      }
+      this.popupTypes.set(type,popups);
+
+      return {
+        status:0,
+        message:`finish autoPopup`,
+        result:`the layer of ${type} with ${popupCount}popups!`
+      }
+    }else {
+      for(const overlay of this.overlays){
+        let content = overlay.attributes.popupWindow;
+        if(!content){
+          continue;
+        }
+
+        let center =  overlay.getPosition();
+        let _popup = new ToolTipBaiDu(
+            this.view,
+            popup,
+            content,
+            center
+        );
+        popups.push(_popup);
+        popupCount++;
+      }
+
+      return {
+        status:0,
+        message:`finish autoPopup`,
+        result:`add the number of${popupCount}popups!`
+      }
+    }
+  }
+  private async autoTooltip(tooltip:Vue.Component,type?:string){
+    if(!this.overlays.length){
+      return {
+        status:0,
+        message:'there is no overlays,add first!'
+      }
+    }
+
+    let tooltipCount = 0;
+    let tooltips:ToolTipBaiDu[] = [];
+
+    if(type && (typeof type === 'string')){               //有type情况
+      let tooltipOfType:ToolTip2D[] = this.tooltipTypes.get(type);   //首先检查该图层是否已经显示Popup
+      if(tooltipOfType){
+        this.tooltipTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
+        for(let popup of tooltipOfType){
+          popup.remove();
+        }
+      }
+
+      for(const overlay of this.overlays){
+        if(overlay.type !== type){
+          continue;
+        }
+
+        let content = overlay.attributes.tooltipWindow;
+        if(!content){
+          continue;
+        }
+
+        let center =  overlay.getPosition();
+        let _popup = new ToolTipBaiDu(
+            this.view,
+            tooltip,
+            content,
+            center
+        );
+        tooltips.push(_popup);
+        tooltipCount++;
+      }
+      this.popupTypes.set(type,tooltips);
+
+      return {
+        status:0,
+        message:`finish autoPopup`,
+        result:`the layer of ${type} with ${tooltipCount}popups!`
+      }
+    }else {
+      for(const overlay of this.overlays){
+        let content = overlay.attributes.popupWindow;
+        if(!content){
+          continue;
+        }
+
+        let center =  overlay.getPosition();
+        let _tooltip = new ToolTipBaiDu(
+            this.view,
+            tooltip,
+            content,
+            center
+        );
+        tooltips.push(_tooltip);
+        tooltipCount++;
+      }
+
+      return {
+        status:0,
+        message:`finish autoPopup`,
+        result:`add the number of${tooltipCount}popups!`
+      }
+    }
+  }
+  private async processPopupAndTooltip(popAndTip:any,componentsObj:any){
+    let showPopup = popAndTip.showPopup;
+    let showTooltip = popAndTip.showToolTip;
+    let moveTooltip = popAndTip.moveToolTip;
+    let movePopup = popAndTip.movePopup;
+    let autoPopup = popAndTip.autoPopup;
+    let autoTooltip = popAndTip.autoToolTip;
+
+    const tooltipComponent = componentsObj.tooltipComponent;
+    const popupComponent = componentsObj.popupComponent;
+
+    if(showPopup){
+      autoPopup = false;
+      movePopup = false;
+    }else if(movePopup){
+      autoPopup = false;
+    }else {
+      if(autoPopup){
+        console.log('autoPopup')
+      }
+    }
+
+    if(showTooltip){
+      autoTooltip = false;
+      moveTooltip = false;
+    }else if(moveTooltip){
+      autoTooltip = false;
+    }else {
+      if(autoTooltip){
+        console.log('autoTooltip')
+      }
+    }
+
+    if(showPopup && popupComponent){
+      await this.listenOverlayClick('showPopup',popupComponent);
+    }else if(movePopup && popupComponent){
+      await this.listenOverlayMouseOver('movePopup',popupComponent);
+    }else if(autoPopup && popupComponent){
+      await this.autoPopup(popupComponent);
+    }else {
+      console.log('no overlays popup');
+    }
+
+    if(showTooltip && tooltipComponent){
+      await this.listenOverlayClick('showTooltip',tooltipComponent)
+    }else if(moveTooltip && tooltipComponent){
+      await this.listenOverlayClick('moveTooltip',tooltipComponent)
+    }else if(autoTooltip && tooltipComponent){
+      await this.autoTooltip(tooltipComponent);
     }
   }
 }

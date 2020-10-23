@@ -25,10 +25,6 @@ import { HeatMap } from './widgets/HeatMap/arcgis/HeatMap';
 import { HeatMap3D } from './widgets/HeatMap/arcgis/HeatMap3D';
 import ToolTip from './widgets/Overlays/arcgis/ToolTip';
 import { Cluster } from './widgets/Cluster/arcgis/Cluster';
-import { DrawLayer } from './widgets/DrawLayer/arcgis/DrawLayer';
-import { MigrateChart } from './widgets/MigrateChart/arcgis/MigrateChart';
-import { HeatImage } from './widgets/HeatMap/arcgis/HeatImage';
-import {Cluster} from './widgets/Cluster/arcgis/Cluster';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 import {DrawLayer} from './widgets/DrawLayer/arcgis/DrawLayer';
 import {MigrateChart} from './widgets/MigrateChart/arcgis/MigrateChart';
@@ -40,9 +36,6 @@ import {GeometrySearch} from './widgets/GeometrySearch/arcgis/GeometrySearch';
 import {Bar3DChart} from './widgets/MigrateChart/arcgis/Bar3DChart';
 import {Utils} from './Utils';
 import LayerOperationArcGIS from "@/plugin/gis-viewer/widgets/LayerOperation/arcgis/LayerOperationArcgis";
-import { GeometrySearch } from './widgets/GeometrySearch/arcgis/GeometrySearch';
-import { Bar3DChart } from './widgets/MigrateChart/arcgis/Bar3DChart';
-import { Utils } from './Utils';
 
 export default class MapAppArcGIS3D implements IMapContainer {
   public view!: __esri.SceneView;
@@ -553,7 +546,6 @@ export default class MapAppArcGIS3D implements IMapContainer {
     return heatmap2.startup(params);
   }
 
-  public deleteHeatImage() { }
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
@@ -569,7 +561,6 @@ export default class MapAppArcGIS3D implements IMapContainer {
   }
   public hideDgene() { }
   public showEditingLabel(params:any):any{}
-  public hideDgene() {}
   public async addDgeneFusion(params: any): Promise<IResult> {
     return { status: 0, message: '' };
   }
@@ -582,7 +573,5 @@ export default class MapAppArcGIS3D implements IMapContainer {
   }
   public showDgeneOutPoint(params: any) {}
   public changeDgeneOut() {}
-    public async arcgisLoadGDLayer(){}
-  public showDgeneOutPoint(params: any) { }
-  public changeDgeneOut() { }
+  public async arcgisLoadGDLayer(){}
 }

@@ -27,7 +27,7 @@ export class OverlayArcgis2D {
   private view!: __esri.MapView;
   private tooltip:any;
   private popupTypes: Map<string, any> = new Map<string, any>();
-    private tooltipTypes:Map<string, any> = new Map<string, any>();
+  private tooltipTypes:Map<string, any> = new Map<string, any>();
   private popup:any;
 
   private static primitive2D = [
@@ -283,18 +283,18 @@ export class OverlayArcgis2D {
       overlayLayer.minScale = Utils.getScale(this.view, zooms[0]);
       overlayLayer.maxScale = Utils.getScale(this.view, zooms[1]);
     }
+    /************auto/move/show-popup/tooltip*****************/
+      const showPopup = params.showPopup;
+      const showToolTip = params.showTooltip;
+      const moveToolTip = params.moveTooltip;
+      const movePopup = params.movePopup;
+      const autoPopup = params.autoPopup;
+      const autoToolTip = params.autoTooltip;
 
-      let showPopup = params.showPopup;
-      let showToolTip = params.showTooltip;
-      let moveToolTip = params.moveTooltip;
-      let movePopup = params.movePopup;
-      let autoPopup = params.autoPopup;
-      let autoToolTip = params.autoTooltip;
+      const tooltipComponent = params.tooltipComponent;
+      const popupComponent = params.popupComponent;
 
-      let tooltipComponent = params.tooltipComponent;
-      let popupComponent = params.popupComponent;
-
-      let popupAndTooltip = {
+      const popupAndTooltip = {
           showPopup,
           showToolTip,
           moveToolTip,
@@ -303,7 +303,7 @@ export class OverlayArcgis2D {
           autoToolTip
       };
 
-      let componentsObj = {
+      const componentsObj = {
           tooltipComponent,
           popupComponent
       }
@@ -671,7 +671,6 @@ export class OverlayArcgis2D {
                 }
             }
         }else {
-            debugger;
             this.tooltipTypes.clear();
             console.log(this.overlayGroups);
 

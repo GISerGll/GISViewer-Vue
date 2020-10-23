@@ -32,63 +32,73 @@ export default class MapAppBaidu implements IMapContainer {
   public mapClick: any;
 
   public async initialize(mapConfig: any, mapContainer: string): Promise<any> {
-      const apiUrl = mapConfig.baidu_api; //"http://localhost:8090/baidu/BDAPI.js";
-      let view: any;
-      // const apiRoot = mapConfig.baidu_api.substring(0, apiUrl.lastIndexOf('/'));
-      const mapV = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/mapv.js';
-      await Utils.loadScripts([
-          apiUrl,
-          mapV
+    const apiUrl = mapConfig.baidu_api; //"http://localhost:8090/baidu/BDAPI.js";
+    let view: any;
+    // const apiRoot = mapConfig.baidu_api.substring(0, apiUrl.lastIndexOf('/'));
+    const mapV = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/mapv.js';
+    const heatMap = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/Heatmap_min.js';
+    const cluster1 = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/TextIconOverlay.js'
+    const cluster2 = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/MarkerClusterer.js';
+    await Utils.loadScripts([
+      apiUrl,
+      mapV,
+    ]).then(()=>{               //heatMap需要BMap
+      Utils.loadScripts([
+          heatMap,
+          cluster1,
+          cluster2
       ])
+    })
 
-      view = new BMap.Map(mapContainer);
+    view = new BMap.Map(mapContainer);
 
-      let mapLoadPromise = new Promise(resolve => {
-          view.addEventListener("tilesloaded",(results:any)=>{
-              resolve(results);
-          });
-      })
+    let mapLoadPromise = new Promise(resolve => {
+      view.addEventListener("tilesloaded",(results:any)=>{
+        resolve(results);
+      });
+    })
 
-      let gisUrl = mapConfig.gisServer
-          ? mapConfig.gisServer
-          : this.getIpPort(apiUrl);
-      if (mapConfig.theme === 'dark') {
-          view.setMapStyle({style: 'midnight'});
-      }
+    let gisUrl = mapConfig.gisServer
+        ? mapConfig.gisServer
+        : this.getIpPort(apiUrl);
+    if (mapConfig.theme === 'dark') {
+      view.setMapStyle({style: 'midnight'});
+    }
 
-      if (mapConfig.baseLayers) {
-          mapConfig.baseLayers.forEach((element: any) => {
-              this.createLayer(view, element);
-          });
-      }
-      let zoom = 12;
-      let center = new BMap.Point(102.267713, 27.881396);
-      if (mapConfig.options.zoom) {
-          zoom = mapConfig.options.zoom;
-      }
-      if (mapConfig.options.center) {
-          center = new BMap.Point(
-              mapConfig.options.center[0],
-              mapConfig.options.center[1]
-          );
-      }
+    if (mapConfig.baseLayers) {
+      mapConfig.baseLayers.forEach((element: any) => {
+        this.createLayer(view, element);
+      });
+    }
+    let zoom = 12;
+    let center = new BMap.Point(102.267713, 27.881396);
+    if (mapConfig.options.zoom) {
+      zoom = mapConfig.options.zoom;
+    }
+    if (mapConfig.options.center) {
+      center = new BMap.Point(
+          mapConfig.options.center[0],
+          mapConfig.options.center[1]
+      );
+    }
 
-      console.log(`center:(${center.lng},${center.lat}),zoom:${zoom}`);
-      view.centerAndZoom(center, zoom);
-      view.enableScrollWheelZoom();
+    console.log(`center:(${center.lng},${center.lat}),zoom:${zoom}`);
+    view.centerAndZoom(center, zoom);
+    view.enableScrollWheelZoom();
 
-      await mapLoadPromise.then(async ()=>{
-          console.log('map Loaded!');
-          await view.removeEventListener("tilesLoaded");
-          await view.addEventListener('click',(e:any)=>{
-              if(e.overlay){
-                  this.showGisDeviceInfo(e.overlay.id,e.overlay.type);
-              }
-          });
-      })
+    await mapLoadPromise.then(async ()=>{
+      console.log('map Loaded!');
+      await view.removeEventListener("tilesLoaded");
+      await view.addEventListener('click',(e:any)=>{
+        if(e.overlay){
+          this.showGisDeviceInfo(e.overlay.id,e.overlay.type);
+        }
+        this.mapClick(e.point);
+      });
+    })
 
-      this.view = view;
-      this.view.gisServer = gisUrl;
+    this.view = view;
+    this.view.gisServer = gisUrl;
   }
   private async loadOtherScripts(scriptUrls: string[]): Promise<any> {
     let promises = scriptUrls.map((url) => {
@@ -145,7 +155,7 @@ export default class MapAppBaidu implements IMapContainer {
   }
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     const overlay = OverlayBaidu.getInstance(this.view);
-    overlay.showGisDeviceInfo = this.showGisDeviceInfo;
+    // overlay.showGisDeviceInfo = this.showGisDeviceInfo;
     return await overlay.addOverlays(params);
   }
   public async findFeature(params: IFindParameter):Promise<any> {
@@ -155,7 +165,7 @@ export default class MapAppBaidu implements IMapContainer {
   public async findLayerFeature(params: IFindParameter) {}
   public async addOverlaysCluster(params: IOverlayClusterParameter) {
     const overlay = OverlayBaidu.getInstance(this.view);
-    overlay.showGisDeviceInfo = this.showGisDeviceInfo;
+    // overlay.showGisDeviceInfo = this.showGisDeviceInfo;
     await overlay.addOverlaysCluster(params);
   }
 
