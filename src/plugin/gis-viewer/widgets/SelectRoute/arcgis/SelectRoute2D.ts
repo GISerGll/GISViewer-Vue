@@ -21,6 +21,16 @@ export default class SelectRoute2D {
   private selectedTrafficSignalLayer!: __esri.GraphicsLayer;
   /** 已选定的信号机编号 */
   private selectedTrafficSignalIdArray: Array<string> = [];
+  private selectedTrafficSignalSymbol = {
+    type: "simple-marker",
+    style: "circle",
+    color: "gold",
+    size: "12px",
+    outline: {
+      color: "white",
+      width: 1,
+    },
+  } as any;
 
   private mouseMoveHandler: any;
 
@@ -139,6 +149,7 @@ export default class SelectRoute2D {
           const { FID } = this.view.popup.selectedFeature.attributes;
           const selectedGraphic = await this.getRoadGraphicByFID(FID);
           await this.addSelectedRoad(selectedGraphic.clone(), true);
+          await this.view.goTo(this.selectedRoadGraphicArray);
 
           const startLine = this.selectedRoadGraphicArray[0]
             .geometry as __esri.Polyline;
@@ -185,7 +196,9 @@ export default class SelectRoute2D {
     const trafficSignalUrl =
       params?.trafficSignalUrl ||
       "http://115.28.88.187:6080/arcgis/rest/services/ZhongZhi/RoadNetwork/MapServer/0";
-
+    if (params?.symbol.selectedSignal) {
+      this.selectedTrafficSignalSymbol = params?.symbol.selectedSignal;
+    }
     type MapModules = [
       typeof import("esri/layers/GraphicsLayer"),
       typeof import("esri/layers/FeatureLayer")
@@ -262,15 +275,24 @@ export default class SelectRoute2D {
     this.selectedTrafficSignalIdArray = [];
 
     this.mouseMoveHandler = this.view.on("pointer-move", async (event: any) => {
-      const result = await this.view.hitTest(event, {
-        include: this.allRoadLayer,
-      });
-      if (result.results.length > 0) {
-        const graphic = result.results[0].graphic;
+      await this.onPointerMoveHandler(event);
+    });
+  }
+
+  private pointerMoveRoadFid = "";
+
+  private async onPointerMoveHandler(event: any) {
+    const result = await this.view.hitTest(event, {
+      include: this.allRoadLayer,
+    });
+    if (result.results.length > 0) {
+      const graphic = result.results[0].graphic;
+      if (graphic.attributes["FID"] !== this.pointerMoveRoadFid) {
+        this.pointerMoveRoadFid = graphic.attributes["FID"];
         const point = this.view.toMap(event);
         this.view.popup.open({ location: point, features: [graphic] });
       }
-    });
+    }
   }
 
   /** 根据FID查找道路Graphic */
@@ -332,16 +354,7 @@ export default class SelectRoute2D {
       const signalGraphic = graphic.clone();
       const signalId: string = signalGraphic.attributes["SYNODE_ID"];
       if (!this.selectedTrafficSignalIdArray.includes(signalId)) {
-        signalGraphic.symbol = {
-          type: "simple-marker",
-          style: "circle",
-          color: "gold",
-          size: "12px",
-          outline: {
-            color: "white",
-            width: 1,
-          },
-        } as any;
+        signalGraphic.symbol = this.selectedTrafficSignalSymbol;
         this.selectedTrafficSignalLayer.add(signalGraphic);
         this.selectedTrafficSignalIdArray.push(signalId);
       }
@@ -448,15 +461,6 @@ export default class SelectRoute2D {
       const center = unionGeometry.extent.center;
       this.view.goTo(center);
     }
-
-    // 如果只有一条待选路段，打开弹出框
-    // if (this.candidateRoadLayer.graphics.length === 1) {
-    //   this.view.popup.open({
-    //     location: (this.candidateRoadLayer.graphics.getItemAt(0)
-    //       .geometry as __esri.Polyline).extent.center,
-    //     features: [this.candidateRoadLayer.graphics.getItemAt(0)],
-    //   });
-    // }
   }
 
   /** 显示选择好的道路 */
