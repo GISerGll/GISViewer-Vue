@@ -282,13 +282,16 @@ export interface ISelectRouteParam {
 }
 
 export interface ISelectRouteResult {
+  autoStart?: boolean; // 显示选路结果时是否自动开始轨迹演示
   routeInfo: {
+    // 路段信息
     ids: Array<string>;
     length?: number;
     startPoint?: [number, number];
     endPoint?: [number, number];
   };
   signalInfo: {
+    // 信号机信息
     ids: Array<string>;
   };
 }

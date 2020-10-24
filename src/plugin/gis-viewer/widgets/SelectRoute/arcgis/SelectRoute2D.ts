@@ -59,18 +59,14 @@ export default class SelectRoute2D {
   } as __esri.ActionButton;
 
   private popupTemplate = {
-    title: "{NAME_CHN}",
+    title: "{RNAME}",
     content: [
       {
         type: "fields",
         fieldInfos: [
           {
-            fieldName: "S_LANES",
+            fieldName: "LANENUM",
             label: "车道数",
-          },
-          {
-            fieldName: "WIDTH",
-            label: "宽度",
           },
           {
             fieldName: "LENGTH",
@@ -111,7 +107,7 @@ export default class SelectRoute2D {
           this.selectedRoadGraphicArray = [];
 
           // popup.selectedFeature.attributes只包含popupTemplate中配置的字段
-          // 只能用FID来查找ROAD_ID
+          // 只能用FID来查找ID
           const { FID } = this.view.popup.selectedFeature.attributes;
           const selectedGraphic = await this.getRoadGraphicByFID(FID);
           this.addSelectedRoad(selectedGraphic.clone());
@@ -131,7 +127,7 @@ export default class SelectRoute2D {
           const selectedGraphic = await this.getRoadGraphicByFID(FID);
 
           //从已选定路段中移除当前及之后路段
-          this.reSelectRoad(selectedGraphic.attributes["ROAD_ID"]);
+          this.reSelectRoad(selectedGraphic.attributes["ID"]);
 
           break;
         }
@@ -141,6 +137,7 @@ export default class SelectRoute2D {
           const selectedGraphic = await this.getRoadGraphicByFID(FID);
           await this.addSelectedRoad(selectedGraphic.clone(), true);
           await this.view.goTo(this.selectedRoadGraphicArray);
+          this.view.zoom -= 1;
 
           const startLine = this.selectedRoadGraphicArray[0]
             .geometry as __esri.Polyline;
@@ -152,14 +149,14 @@ export default class SelectRoute2D {
 
           let routeLength = 0;
           this.selectedRoadGraphicArray.forEach((graphic) => {
-            const roadLength = graphic.attributes["LENGTH"];
+            const roadLength = graphic.attributes["LENGTH"] * 1000;
             routeLength += roadLength;
           });
 
           // 向父组件回传本次路径选择结果
           if (this.selectRouteFinished) {
             const roadIds = this.selectedRoadGraphicArray.map(
-              (graphic) => graphic.attributes["ROAD_ID"]
+              (graphic) => graphic.attributes["ID"]
             );
             this.selectRouteFinished({
               routeInfo: {
@@ -183,7 +180,7 @@ export default class SelectRoute2D {
   public async initializeRoute(params: ISelectRouteParam) {
     const roadNetworkUrl =
       params?.roadUrl ??
-      "http://115.28.88.187:6080/arcgis/rest/services/ZhongZhi/RoadNetwork/MapServer/2";
+      "http://115.28.88.187:6080/arcgis/rest/services/ZhongZhi/RoadNetwork/MapServer/1";
     const trafficSignalUrl =
       params?.trafficSignalUrl ??
       "http://115.28.88.187:6080/arcgis/rest/services/ZhongZhi/RoadNetwork/MapServer/0";
@@ -211,7 +208,6 @@ export default class SelectRoute2D {
     } else {
       this.allRoadLayer = new FeatureLayer({
         url: roadNetworkUrl,
-        definitionExpression: "ROAD_CLASS <> 47000",
         popupTemplate: {
           ...this.popupTemplate,
           actions: [this.beginRouteButton],
@@ -281,14 +277,20 @@ export default class SelectRoute2D {
 
   private async onPointerMoveHandler(event: any) {
     const result = await this.view.hitTest(event, {
-      include: this.allRoadLayer,
+      exclude: [this.allTrafficSignalLayer],
     });
     if (result.results.length > 0) {
       const graphic = result.results[0].graphic;
-      if (graphic.attributes["FID"] !== this.pointerMoveRoadFid) {
+      if (
+        graphic.layer === this.allRoadLayer &&
+        graphic.attributes["FID"] !== this.pointerMoveRoadFid
+      ) {
         this.pointerMoveRoadFid = graphic.attributes["FID"];
         const point = this.view.toMap(event);
-        this.view.popup.open({ location: point, features: [graphic] });
+        this.view.popup.open({
+          location: point,
+          features: [graphic],
+        });
       }
     }
   }
@@ -301,12 +303,12 @@ export default class SelectRoute2D {
     return results.features[0];
   }
 
-  /** 根据road_id查找Graphic */
+  /** 根据ID查找Graphic */
   private async getRoadGraphicByRoadId(
     roadId: string
   ): Promise<__esri.Graphic | void> {
     const query = this.allRoadLayer.createQuery();
-    query.where = `ROAD_ID='${roadId}'`;
+    query.where = `ID='${roadId}'`;
     const results = await this.allRoadLayer.queryFeatures(query);
     if (results.features.length > 0) {
       return results.features[0];
@@ -320,7 +322,7 @@ export default class SelectRoute2D {
     signalId: string
   ): Promise<__esri.Graphic | void> {
     const query = this.allTrafficSignalLayer.createQuery();
-    query.where = `SYNODE_ID='${signalId}'`;
+    query.where = `FSTR_SCATS='${signalId}'`;
     const results = await this.allTrafficSignalLayer.queryFeatures(query);
     if (results.features.length > 0) {
       return results.features[0];
@@ -350,7 +352,7 @@ export default class SelectRoute2D {
     const results = await this.allTrafficSignalLayer.queryFeatures(query);
     results.features.forEach((graphic) => {
       const signalGraphic = graphic.clone();
-      const signalId: string = signalGraphic.attributes["SYNODE_ID"];
+      const signalId: string = signalGraphic.attributes["FSTR_SCATS"];
       if (!this.selectedTrafficSignalIdArray.includes(signalId)) {
         signalGraphic.symbol = this.selectedTrafficSignalSymbol;
         this.selectedTrafficSignalLayer.add(signalGraphic);
@@ -388,7 +390,7 @@ export default class SelectRoute2D {
     // 显示候选路段
     this.candidateRoadLayer.removeAll();
     if (!isLastRoad) {
-      this.showNextRoad(graphic.attributes["TROAD_ID"]);
+      this.showNextRoad(graphic.attributes["EROADID"]);
     }
   }
 
@@ -396,7 +398,7 @@ export default class SelectRoute2D {
     let roadIndex = 0;
     for (let i = 0; i < this.selectedRoadGraphicArray.length; i++) {
       const graphic = this.selectedRoadGraphicArray[i];
-      if (graphic.attributes["ROAD_ID"] === roadId) {
+      if (graphic.attributes["ID"] === roadId) {
         roadIndex = i;
         break;
       }
@@ -504,5 +506,15 @@ export default class SelectRoute2D {
     }
 
     await this.view.goTo(this.selectedRoadGraphicArray);
+    this.view.zoom -= 1;
+  }
+
+  private getPolylineFirstPoint(line: __esri.Polyline): __esri.Point {
+    return line.getPoint(0, 0);
+  }
+
+  private getPolylineLastPoint(line: __esri.Polyline): __esri.Point {
+    const path = line.paths[0];
+    return line.getPoint(0, path.length - 1);
   }
 }
