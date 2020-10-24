@@ -21,16 +21,7 @@ export default class SelectRoute2D {
   private selectedTrafficSignalLayer!: __esri.GraphicsLayer;
   /** 已选定的信号机编号 */
   private selectedTrafficSignalIdArray: Array<string> = [];
-  private selectedTrafficSignalSymbol = {
-    type: "simple-marker",
-    style: "circle",
-    color: "gold",
-    size: "12px",
-    outline: {
-      color: "white",
-      width: 1,
-    },
-  } as any;
+  private selectedTrafficSignalSymbol: any;
 
   private mouseMoveHandler: any;
 
@@ -191,14 +182,21 @@ export default class SelectRoute2D {
   /** 读取路段数据，并显示路段 */
   public async initializeRoute(params: ISelectRouteParam) {
     const roadNetworkUrl =
-      params?.roadUrl ||
+      params?.roadUrl ??
       "http://115.28.88.187:6080/arcgis/rest/services/ZhongZhi/RoadNetwork/MapServer/2";
     const trafficSignalUrl =
-      params?.trafficSignalUrl ||
+      params?.trafficSignalUrl ??
       "http://115.28.88.187:6080/arcgis/rest/services/ZhongZhi/RoadNetwork/MapServer/0";
-    if (params?.symbol.selectedSignal) {
-      this.selectedTrafficSignalSymbol = params?.symbol.selectedSignal;
-    }
+    this.selectedTrafficSignalSymbol = params?.symbol?.selectedSignal ?? {
+      type: "simple-marker",
+      style: "circle",
+      color: "gold",
+      size: "12px",
+      outline: {
+        color: "white",
+        width: 1,
+      },
+    };
     type MapModules = [
       typeof import("esri/layers/GraphicsLayer"),
       typeof import("esri/layers/FeatureLayer")
