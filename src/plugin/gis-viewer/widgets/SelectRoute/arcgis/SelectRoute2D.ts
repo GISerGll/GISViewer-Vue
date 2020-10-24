@@ -139,36 +139,55 @@ export default class SelectRoute2D {
           await this.view.goTo(this.selectedRoadGraphicArray);
           this.view.zoom -= 1;
 
-          const firstPoint = this.getRouteBeginPoint();
-          const lastPoint = this.getRouteEndPoint();
-
-          let routeLength = 0;
-          this.selectedRoadGraphicArray.forEach((graphic) => {
-            const roadLength = graphic.attributes["LENGTH"] * 1000;
-            routeLength += roadLength;
-          });
-
-          // 向父组件回传本次路径选择结果
-          if (this.selectRouteFinished) {
-            const roadIds = this.selectedRoadGraphicArray.map(
-              (graphic) => graphic.attributes["ID"]
-            );
-            this.selectRouteFinished({
-              routeInfo: {
-                ids: roadIds,
-                startPoint: [firstPoint.x, firstPoint.y],
-                endPoint: [lastPoint.x, lastPoint.y],
-                length: routeLength,
-              },
-              signalInfo: {
-                ids: this.selectedTrafficSignalIdArray,
-              },
-            });
-          }
+          this.emitRouteResult();
           break;
         }
       }
     });
+  }
+
+  /** 向父组件回传本次路径选择结果 */
+  private async emitRouteResult() {
+    const firstPoint = this.getRouteBeginPoint();
+    const lastPoint = this.getRouteEndPoint();
+
+    let routeLength = 0;
+    this.selectedRoadGraphicArray.forEach((graphic) => {
+      const roadLength = graphic.attributes["LENGTH"] * 1000;
+      routeLength += roadLength;
+    });
+
+    const signals = [];
+    for (let i = 0; i < this.selectedTrafficSignalIdArray.length; i++) {
+      const id = this.selectedTrafficSignalIdArray[i];
+      const signalGraphic = await this.getTrafficSignalById(id);
+      if (signalGraphic) {
+        const { FSTR_DESC: name } = signalGraphic.attributes;
+        signals.push({
+          id,
+          name,
+          x: (signalGraphic.geometry as __esri.Point).x,
+          y: (signalGraphic.geometry as __esri.Point).y,
+        });
+      }
+    }
+
+    if (this.selectRouteFinished) {
+      const roadIds = this.selectedRoadGraphicArray.map(
+        (graphic) => graphic.attributes["ID"]
+      );
+      this.selectRouteFinished({
+        routeInfo: {
+          ids: roadIds,
+          startPoint: [firstPoint.x, firstPoint.y],
+          endPoint: [lastPoint.x, lastPoint.y],
+          length: routeLength,
+        },
+        signalInfo: {
+          signals,
+        },
+      });
+    }
   }
 
   /** 读取路段数据，并显示路段 */
@@ -446,24 +465,26 @@ export default class SelectRoute2D {
         geometryToUnion.push(candidateRoad.geometry);
       });
 
-      type MapModules = [typeof import("esri/geometry/geometryEngineAsync")];
-      const [geometryEngineAsync] = await (loadModules([
-        "esri/geometry/geometryEngineAsync",
-      ]) as Promise<MapModules>);
-      const unionGeometry = (await geometryEngineAsync.union(
-        geometryToUnion
-      )) as __esri.Polyline;
-      const center = unionGeometry.extent.center;
-      this.view.goTo(center);
+      if (geometryToUnion.length > 0) {
+        type MapModules = [typeof import("esri/geometry/geometryEngineAsync")];
+        const [geometryEngineAsync] = await (loadModules([
+          "esri/geometry/geometryEngineAsync",
+        ]) as Promise<MapModules>);
+        const unionGeometry = (await geometryEngineAsync.union(
+          geometryToUnion
+        )) as __esri.Polyline;
+        const center = unionGeometry.extent.center;
+        this.view.goTo(center);
+      }
     }
   }
 
   /** 显示选择好的道路 */
   public async showSelectedRoute(params: ISelectRouteResult) {
     this.allRoadLayer.popupEnabled = false;
+    this.mouseMoveHandler.remove();
 
     const roadIds = params.routeInfo.ids;
-    const signalIds = params.signalInfo.ids;
 
     this.selectedRoadLayer.removeAll();
     this.selectedRoadGraphicArray = [];
@@ -481,22 +502,25 @@ export default class SelectRoute2D {
       }
     }
 
-    this.selectedTrafficSignalLayer.removeAll();
-    for (let i = 0; i < signalIds.length; i++) {
-      const signalId = signalIds[i];
-      const signalGraphic = await this.getTrafficSignalById(signalId);
-      if (signalGraphic) {
-        signalGraphic.symbol = {
-          type: "simple-marker",
-          style: "circle",
-          color: "gold",
-          size: "12px",
-          outline: {
-            color: "white",
-            width: 1,
-          },
-        } as any;
-        this.selectedTrafficSignalLayer.add(signalGraphic);
+    if (params.signalInfo) {
+      const signalIds = params.signalInfo.signals.map((signal) => signal.id);
+      this.selectedTrafficSignalLayer.removeAll();
+      for (let i = 0; i < signalIds.length; i++) {
+        const signalId = signalIds[i];
+        const signalGraphic = await this.getTrafficSignalById(signalId);
+        if (signalGraphic) {
+          signalGraphic.symbol = {
+            type: "simple-marker",
+            style: "circle",
+            color: "gold",
+            size: "12px",
+            outline: {
+              color: "white",
+              width: 1,
+            },
+          } as any;
+          this.selectedTrafficSignalLayer.add(signalGraphic);
+        }
       }
     }
 
@@ -538,17 +562,21 @@ export default class SelectRoute2D {
     this.view.zoom -= 1;
   }
 
+  /** 获取路段的起点 */
   private getPolylineFirstPoint(line: __esri.Polyline): __esri.Point {
     return line.getPoint(0, 0);
   }
 
+  /** 获取路段的终点 */
   private getPolylineLastPoint(line: __esri.Polyline): __esri.Point {
     const path = line.paths[0];
     return line.getPoint(0, path.length - 1);
   }
 
+  /** 获取路径的起点 */
   private getRouteBeginPoint(): __esri.Point {
     const lineGraphic = this.selectedRoadGraphicArray[0];
+    // direction=3时，反向车道
     const firstPoint =
       lineGraphic.attributes["DIRECTION"] === "3"
         ? this.getPolylineLastPoint(lineGraphic.geometry as __esri.Polyline)
@@ -556,10 +584,12 @@ export default class SelectRoute2D {
     return firstPoint;
   }
 
+  /** 获取路径的终点 */
   private getRouteEndPoint(): __esri.Point {
     const lineGraphic = this.selectedRoadGraphicArray[
       this.selectedRoadGraphicArray.length - 1
     ];
+    // direction=3时，反向车道
     const lastPoint =
       lineGraphic.attributes["DIRECTION"] === "3"
         ? this.getPolylineFirstPoint(lineGraphic.geometry as __esri.Polyline)
