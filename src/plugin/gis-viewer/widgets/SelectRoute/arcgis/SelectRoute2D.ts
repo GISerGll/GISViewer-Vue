@@ -222,6 +222,7 @@ export default class SelectRoute2D {
     } else {
       this.allRoadLayer = new FeatureLayer({
         url: roadNetworkUrl,
+        visible: params?.showRoad ?? true,
         popupTemplate: {
           ...this.popupTemplate,
           actions: [this.beginRouteButton],
@@ -255,6 +256,7 @@ export default class SelectRoute2D {
     if (!this.allTrafficSignalLayer) {
       this.allTrafficSignalLayer = new FeatureLayer({
         url: trafficSignalUrl,
+        visible: params?.showSignal ?? true,
         renderer: {
           type: "simple",
           symbol: {

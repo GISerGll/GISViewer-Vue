@@ -279,6 +279,8 @@ export interface ISelectRouteParam {
   roadUrl?: string;
   trafficSignalUrl?: string;
   symbol?: any;
+  showRoad?: boolean;
+  showSignal?: boolean;
 }
 
 export interface ISelectRouteResult {
