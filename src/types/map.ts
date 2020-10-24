@@ -186,6 +186,7 @@ export interface IMapContainer {
   changeDgeneOut: () => void;
   initializeRouteSelect: (params: ISelectRouteParam) => Promise<void>;
   showSelectedRoute: (params: ISelectRouteResult) => Promise<void>;
+  playSelectedRoute: (speed: number) => Promise<void>;
   startDrawOverlays: (params: IDrawOverlays) => Promise<void>;
   stopDrawOverlays: () => Promise<void>;
   getDrawOverlays: () => Promise<IResult>;
