@@ -92,7 +92,7 @@ export class LayerSearch {
           }
         } as any
       });
-      this.view.graphics.add(circleGraphic);
+      //this.view.graphics.add(circleGraphic);
     }
     return new Promise((resolve, reject) => {
       this.doQueryLayer({
