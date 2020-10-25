@@ -1,5 +1,8 @@
 import { ISelectRouteParam, ISelectRouteResult } from "@/types/map";
 import { loadModules } from "esri-loader";
+import along from "@turf/along";
+import length from "@turf/length";
+import { lineString } from "@turf/helpers";
 
 export default class SelectRoute2D {
   private static intances: Map<string, SelectRoute2D>;
@@ -79,6 +82,10 @@ export default class SelectRoute2D {
 
   /** 选择路径结束后的回调事件 */
   public selectRouteFinished!: (routeInfo: ISelectRouteResult) => void;
+  /** 轨迹回放时，车辆进入信号机范围回调事件 */
+  public intoSignal!: (signalId: string) => void;
+  /** 轨迹回放时，车辆离开信号机范围回调事件 */
+  public outofSignal!: (signalId: string) => void;
 
   public static getInstance(view: __esri.MapView) {
     const id = view.container.id;
@@ -139,36 +146,55 @@ export default class SelectRoute2D {
           await this.view.goTo(this.selectedRoadGraphicArray);
           this.view.zoom -= 1;
 
-          const firstPoint = this.getRouteBeginPoint();
-          const lastPoint = this.getRouteEndPoint();
-
-          let routeLength = 0;
-          this.selectedRoadGraphicArray.forEach((graphic) => {
-            const roadLength = graphic.attributes["LENGTH"] * 1000;
-            routeLength += roadLength;
-          });
-
-          // 向父组件回传本次路径选择结果
-          if (this.selectRouteFinished) {
-            const roadIds = this.selectedRoadGraphicArray.map(
-              (graphic) => graphic.attributes["ID"]
-            );
-            this.selectRouteFinished({
-              routeInfo: {
-                ids: roadIds,
-                startPoint: [firstPoint.x, firstPoint.y],
-                endPoint: [lastPoint.x, lastPoint.y],
-                length: routeLength,
-              },
-              signalInfo: {
-                ids: this.selectedTrafficSignalIdArray,
-              },
-            });
-          }
+          this.emitRouteResult();
           break;
         }
       }
     });
+  }
+
+  /** 向父组件回传本次路径选择结果 */
+  private async emitRouteResult() {
+    const firstPoint = this.getRouteBeginPoint();
+    const lastPoint = this.getRouteEndPoint();
+
+    let routeLength = 0;
+    this.selectedRoadGraphicArray.forEach((graphic) => {
+      const roadLength = graphic.attributes["LENGTH"] * 1000;
+      routeLength += roadLength;
+    });
+
+    const signals = [];
+    for (let i = 0; i < this.selectedTrafficSignalIdArray.length; i++) {
+      const id = this.selectedTrafficSignalIdArray[i];
+      const signalGraphic = await this.getTrafficSignalById(id);
+      if (signalGraphic) {
+        const { FSTR_DESC: name } = signalGraphic.attributes;
+        signals.push({
+          id,
+          name,
+          x: (signalGraphic.geometry as __esri.Point).x,
+          y: (signalGraphic.geometry as __esri.Point).y,
+        });
+      }
+    }
+
+    if (this.selectRouteFinished) {
+      const roadIds = this.selectedRoadGraphicArray.map(
+        (graphic) => graphic.attributes["ID"]
+      );
+      this.selectRouteFinished({
+        routeInfo: {
+          ids: roadIds,
+          startPoint: [firstPoint.x, firstPoint.y],
+          endPoint: [lastPoint.x, lastPoint.y],
+          length: routeLength,
+        },
+        signalInfo: {
+          signals,
+        },
+      });
+    }
   }
 
   /** 读取路段数据，并显示路段 */
@@ -203,6 +229,7 @@ export default class SelectRoute2D {
     } else {
       this.allRoadLayer = new FeatureLayer({
         url: roadNetworkUrl,
+        visible: params?.showRoad ?? true,
         popupTemplate: {
           ...this.popupTemplate,
           actions: [this.beginRouteButton],
@@ -236,6 +263,7 @@ export default class SelectRoute2D {
     if (!this.allTrafficSignalLayer) {
       this.allTrafficSignalLayer = new FeatureLayer({
         url: trafficSignalUrl,
+        visible: params?.showSignal ?? true,
         renderer: {
           type: "simple",
           symbol: {
@@ -446,24 +474,26 @@ export default class SelectRoute2D {
         geometryToUnion.push(candidateRoad.geometry);
       });
 
-      type MapModules = [typeof import("esri/geometry/geometryEngineAsync")];
-      const [geometryEngineAsync] = await (loadModules([
-        "esri/geometry/geometryEngineAsync",
-      ]) as Promise<MapModules>);
-      const unionGeometry = (await geometryEngineAsync.union(
-        geometryToUnion
-      )) as __esri.Polyline;
-      const center = unionGeometry.extent.center;
-      this.view.goTo(center);
+      if (geometryToUnion.length > 0) {
+        type MapModules = [typeof import("esri/geometry/geometryEngineAsync")];
+        const [geometryEngineAsync] = await (loadModules([
+          "esri/geometry/geometryEngineAsync",
+        ]) as Promise<MapModules>);
+        const unionGeometry = (await geometryEngineAsync.union(
+          geometryToUnion
+        )) as __esri.Polyline;
+        const center = unionGeometry.extent.center;
+        this.view.goTo(center);
+      }
     }
   }
 
   /** 显示选择好的道路 */
   public async showSelectedRoute(params: ISelectRouteResult) {
     this.allRoadLayer.popupEnabled = false;
+    this.mouseMoveHandler.remove();
 
     const roadIds = params.routeInfo.ids;
-    const signalIds = params.signalInfo.ids;
 
     this.selectedRoadLayer.removeAll();
     this.selectedRoadGraphicArray = [];
@@ -481,22 +511,25 @@ export default class SelectRoute2D {
       }
     }
 
-    this.selectedTrafficSignalLayer.removeAll();
-    for (let i = 0; i < signalIds.length; i++) {
-      const signalId = signalIds[i];
-      const signalGraphic = await this.getTrafficSignalById(signalId);
-      if (signalGraphic) {
-        signalGraphic.symbol = {
-          type: "simple-marker",
-          style: "circle",
-          color: "gold",
-          size: "12px",
-          outline: {
-            color: "white",
-            width: 1,
-          },
-        } as any;
-        this.selectedTrafficSignalLayer.add(signalGraphic);
+    if (params.signalInfo) {
+      const signalIds = params.signalInfo.signals.map((signal) => signal.id);
+      this.selectedTrafficSignalLayer.removeAll();
+      for (let i = 0; i < signalIds.length; i++) {
+        const signalId = signalIds[i];
+        const signalGraphic = await this.getTrafficSignalById(signalId);
+        if (signalGraphic) {
+          signalGraphic.symbol = {
+            type: "simple-marker",
+            style: "circle",
+            color: "gold",
+            size: "12px",
+            outline: {
+              color: "white",
+              width: 1,
+            },
+          } as any;
+          this.selectedTrafficSignalLayer.add(signalGraphic);
+        }
       }
     }
 
@@ -538,17 +571,21 @@ export default class SelectRoute2D {
     this.view.zoom -= 1;
   }
 
+  /** 获取路段的起点 */
   private getPolylineFirstPoint(line: __esri.Polyline): __esri.Point {
     return line.getPoint(0, 0);
   }
 
+  /** 获取路段的终点 */
   private getPolylineLastPoint(line: __esri.Polyline): __esri.Point {
     const path = line.paths[0];
     return line.getPoint(0, path.length - 1);
   }
 
+  /** 获取路径的起点 */
   private getRouteBeginPoint(): __esri.Point {
     const lineGraphic = this.selectedRoadGraphicArray[0];
+    // direction=3时，反向车道
     const firstPoint =
       lineGraphic.attributes["DIRECTION"] === "3"
         ? this.getPolylineLastPoint(lineGraphic.geometry as __esri.Polyline)
@@ -556,14 +593,137 @@ export default class SelectRoute2D {
     return firstPoint;
   }
 
+  /** 获取路径的终点 */
   private getRouteEndPoint(): __esri.Point {
     const lineGraphic = this.selectedRoadGraphicArray[
       this.selectedRoadGraphicArray.length - 1
     ];
+
+    // direction=3时，反向车道
     const lastPoint =
       lineGraphic.attributes["DIRECTION"] === "3"
         ? this.getPolylineFirstPoint(lineGraphic.geometry as __esri.Polyline)
         : this.getPolylineLastPoint(lineGraphic.geometry as __esri.Polyline);
     return lastPoint;
+  }
+
+  /**
+   * 播放车辆移动动画
+   */
+  public async playSelectedRoute(speed: number) {
+    if (!this.selectedRoadGraphicArray.length) {
+      return;
+    }
+
+    // 每秒帧数
+    const framePerSecond = 20;
+    // 公里/小时 -> 米/秒
+    const speedInSeconds = (speed * 1000) / 3600;
+    // 每帧前进距离
+    const lengthPerFrame = speedInSeconds / framePerSecond;
+
+    // 合并到一个path中
+    const totalPath: Array<any> = [];
+    this.selectedRoadGraphicArray.forEach((graphic) => {
+      let path = (graphic.geometry as __esri.Polyline).paths[0];
+      if (graphic.attributes["DIRECTION"] === "3") {
+        path.reverse();
+      }
+      // 如果前一段的最后一个点和这段的第一个点重合，去掉一个点
+      if (
+        totalPath.length &&
+        totalPath[totalPath.length - 1][0] === path[0][0] &&
+        totalPath[totalPath.length - 1][1] === path[0][1]
+      ) {
+        path.shift();
+      }
+      totalPath.push(...path);
+    });
+
+    const line = lineString(totalPath);
+    let currentLength = lengthPerFrame;
+    const totalLength = length(line, { units: "meters" });
+    const pointArray: Array<Array<number>> = [];
+    while (currentLength < totalLength) {
+      const point = along(line, currentLength, {
+        units: "meters",
+      });
+      pointArray.push(point.geometry.coordinates);
+      currentLength += lengthPerFrame;
+    }
+
+    type MapModules = [
+      typeof import("esri/Graphic"),
+      typeof import("esri/geometry/Point")
+    ];
+    const [Graphic, Point] = await (loadModules([
+      "esri/Graphic",
+      "esri/geometry/Point",
+    ]) as Promise<MapModules>);
+    let currentIndex = 0;
+    const carGraphic = new Graphic({
+      geometry: new Point({
+        x: pointArray[currentIndex][0],
+        y: pointArray[currentIndex][1],
+      }),
+      symbol: {
+        type: "simple-marker",
+        style: "circle",
+        color: "green",
+        size: "8px",
+        outline: {
+          color: "white",
+          width: 1,
+        },
+      } as any,
+    });
+    this.selectedRoadLayer.add(carGraphic);
+
+    let nearSignalPoint: __esri.Point | null;
+    let nearSignalId: string;
+
+    const interval = setInterval(() => {
+      currentIndex++;
+      carGraphic.geometry = new Point({
+        x: pointArray[currentIndex][0],
+        y: pointArray[currentIndex][1],
+      });
+
+      // 车辆离开当前信号机时发出警报
+      if (!nearSignalPoint) {
+        // 车辆是否进入哪个信号机的周边
+        this.selectedTrafficSignalLayer.graphics.forEach((graphic) => {
+          const signalPoint = graphic.geometry as __esri.Point;
+          const distance = length(
+            lineString([
+              pointArray[currentIndex],
+              [signalPoint.x, signalPoint.y],
+            ]),
+            { units: "meters" }
+          );
+          if (distance < this.bufferDistance) {
+            nearSignalPoint = signalPoint;
+            nearSignalId = graphic.attributes["FSTR_SCATS"];
+            this.intoSignal(nearSignalId);
+          }
+        });
+      } else {
+        const distance = length(
+          lineString([
+            pointArray[currentIndex],
+            [nearSignalPoint.x, nearSignalPoint.y],
+          ]),
+          { units: "meters" }
+        );
+        if (distance > this.bufferDistance) {
+          nearSignalPoint = null;
+          this.outofSignal(nearSignalId);
+        }
+      }
+
+      if (currentIndex === pointArray.length - 1) {
+        clearInterval(interval);
+      }
+    }, 1000 / framePerSecond);
   }
 }

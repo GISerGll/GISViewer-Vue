@@ -186,6 +186,7 @@ export interface IMapContainer {
   changeDgeneOut: () => void;
   initializeRouteSelect: (params: ISelectRouteParam) => Promise<void>;
   showSelectedRoute: (params: ISelectRouteResult) => Promise<void>;
+  playSelectedRoute: (speed: number) => Promise<void>;
   startDrawOverlays: (params: IDrawOverlays) => Promise<void>;
   stopDrawOverlays: () => Promise<void>;
   getDrawOverlays: () => Promise<IResult>;
@@ -281,6 +282,8 @@ export interface ISelectRouteParam {
   roadUrl?: string;
   trafficSignalUrl?: string;
   symbol?: any;
+  showRoad?: boolean;
+  showSignal?: boolean;
 }
 
 export interface ISelectRouteResult {
@@ -294,6 +297,6 @@ export interface ISelectRouteResult {
   };
   signalInfo: {
     // 信号机信息
-    ids: Array<string>;
+    signals: Array<{ id: string; name: string; x: number; y: number }>;
   };
 }

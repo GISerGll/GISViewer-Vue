@@ -51,6 +51,8 @@ export default class MapAppArcGIS2D {
   public showGisDeviceInfo!: (type: string, id: string, detail: any) => void;
   public mapClick!: (point: object) => void;
   public selectRouteFinished!: (routeInfo: object) => void;
+  public intoSignal!: (signalId: string) => void;
+  public outofSignal!: (signalId: string) => void;
 
   public showFlow: boolean = false;
   private tolerance: number = 3;
@@ -717,6 +719,13 @@ export default class MapAppArcGIS2D {
   public async showSelectedRoute(params: ISelectRouteResult) {
     const selectRoute = SelectRoute2D.getInstance(this.view);
     await selectRoute.showSelectedRoute(params);
+  }
+
+  public async playSelectedRoute(speed: number) {
+    const selectRoute = SelectRoute2D.getInstance(this.view);
+    selectRoute.intoSignal = this.intoSignal;
+    selectRoute.outofSignal = this.outofSignal;
+    await selectRoute.playSelectedRoute(speed);
   }
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
