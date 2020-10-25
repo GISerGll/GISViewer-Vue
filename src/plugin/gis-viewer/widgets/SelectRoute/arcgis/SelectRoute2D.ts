@@ -26,6 +26,9 @@ export default class SelectRoute2D {
   private selectedTrafficSignalIdArray: Array<string> = [];
   private selectedTrafficSignalSymbol: any;
 
+  /** 轨迹回放图层 */
+  private playRouteLayer!: __esri.GraphicsLayer;
+
   private mouseMoveHandler: any;
 
   /** 搜索信号机的缓冲距离 */
@@ -286,6 +289,13 @@ export default class SelectRoute2D {
     } else {
       this.selectedTrafficSignalLayer = new GraphicsLayer();
       this.view.map.add(this.selectedTrafficSignalLayer);
+    }
+
+    if (this.playRouteLayer) {
+      this.playRouteLayer.removeAll();
+    } else {
+      this.playRouteLayer = new GraphicsLayer();
+      this.view.map.add(this.playRouteLayer);
     }
 
     this.selectedRoadGraphicArray = [];
@@ -679,7 +689,7 @@ export default class SelectRoute2D {
         },
       } as any,
     });
-    this.selectedRoadLayer.add(carGraphic);
+    this.playRouteLayer.add(carGraphic);
 
     let nearSignalPoint: __esri.Point | null;
     let nearSignalId: string;
@@ -733,9 +743,10 @@ export default class SelectRoute2D {
     if (this.playInterval) {
       clearInterval(this.playInterval);
     }
-    this.selectedRoadGraphicArray = [];
-    this.selectedRoadLayer.removeAll();
-    this.selectedTrafficSignalIdArray = [];
-    this.selectedTrafficSignalLayer.removeAll();
+    this.playRouteLayer.removeAll();
+    // this.selectedRoadGraphicArray = [];
+    // this.selectedRoadLayer.removeAll();
+    // this.selectedTrafficSignalIdArray = [];
+    // this.selectedTrafficSignalLayer.removeAll();
   }
 }
