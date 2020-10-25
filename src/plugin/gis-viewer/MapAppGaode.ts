@@ -308,6 +308,7 @@ export default class MapAppGaode implements IMapContainer {
   public async initializeRouteSelect(params: ISelectRouteParam) {}
   public async showSelectedRoute(params: ISelectRouteResult) {}
   public async playSelectedRoute(speed: number) {}
+  public stopPlaySelectedRoute() {}
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
   public async stopDrawOverlays(): Promise<void> {}
@@ -317,6 +318,6 @@ export default class MapAppGaode implements IMapContainer {
   public async startLayerSearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
-    return {status: 0, message: ''};
+    return { status: 0, message: "" };
   }
 }

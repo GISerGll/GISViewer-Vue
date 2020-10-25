@@ -297,6 +297,10 @@ export default class MapContainer extends Vue implements IMapContainer {
     await this.mapContainer.playSelectedRoute(speed);
   }
 
+  public stopPlaySelectedRoute() {
+    this.mapContainer.stopPlaySelectedRoute();
+  }
+
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
     return await this.mapContainer.startDrawOverlays(params);
   }

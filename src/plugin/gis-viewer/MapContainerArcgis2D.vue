@@ -198,6 +198,10 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     await this.mapApp.playSelectedRoute(speed);
   }
 
+  public stopPlaySelectedRoute() {
+    this.mapApp.stopPlaySelectedRoute();
+  }
+
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
     return await this.mapApp.startDrawOverlays(params);
   }

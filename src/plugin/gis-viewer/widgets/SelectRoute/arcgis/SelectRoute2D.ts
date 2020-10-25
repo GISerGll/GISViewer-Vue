@@ -181,7 +181,7 @@ export default class SelectRoute2D {
 
     if (this.selectRouteFinished) {
       const roadIds = this.selectedRoadGraphicArray.map(
-        (graphic) => graphic.attributes["ID"]
+        (graphic: __esri.Graphic) => graphic.attributes["ID"]
       );
       this.selectRouteFinished({
         routeInfo: {
@@ -607,6 +607,8 @@ export default class SelectRoute2D {
     return lastPoint;
   }
 
+  private playInterval: any;
+
   /**
    * 播放车辆移动动画
    */
@@ -669,8 +671,8 @@ export default class SelectRoute2D {
       symbol: {
         type: "simple-marker",
         style: "circle",
-        color: "green",
-        size: "8px",
+        color: "mediumblue",
+        size: "15px",
         outline: {
           color: "white",
           width: 1,
@@ -682,7 +684,7 @@ export default class SelectRoute2D {
     let nearSignalPoint: __esri.Point | null;
     let nearSignalId: string;
 
-    const interval = setInterval(() => {
+    this.playInterval = setInterval(() => {
       currentIndex++;
       carGraphic.geometry = new Point({
         x: pointArray[currentIndex][0],
@@ -722,8 +724,18 @@ export default class SelectRoute2D {
       }
 
       if (currentIndex === pointArray.length - 1) {
-        clearInterval(interval);
+        clearInterval(this.playInterval);
       }
     }, 1000 / framePerSecond);
+  }
+
+  public stopPlaySelectedRoute() {
+    if (this.playInterval) {
+      clearInterval(this.playInterval);
+    }
+    this.selectedRoadGraphicArray = [];
+    this.selectedRoadLayer.removeAll();
+    this.selectedTrafficSignalIdArray = [];
+    this.selectedTrafficSignalLayer.removeAll();
   }
 }
