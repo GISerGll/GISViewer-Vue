@@ -427,6 +427,7 @@ export default class SelectRoute2D {
     }
   }
 
+  /** 删除此路段后的选定路段，重新显示待选路段 */
   private reSelectRoad(roadId: string) {
     let roadIndex = 0;
     for (let i = 0; i < this.selectedRoadGraphicArray.length; i++) {
@@ -447,7 +448,7 @@ export default class SelectRoute2D {
 
   /** 显示多条待选路段 */
   private async showNextRoad(roadIds: string) {
-    // 去掉最后的逗号
+    // 去掉最后的逗号，否则split时会多一个空元素
     if (roadIds.substring(roadIds.length - 1, roadIds.length) === ",") {
       roadIds = roadIds.substring(0, roadIds.length - 1);
     }
@@ -462,13 +463,13 @@ export default class SelectRoute2D {
       }
     }
 
-    // 如果只有一个后续路段直接添加
     const geometryToUnion: Array<__esri.Geometry> = [];
     if (roadGraphicArray.length === 1) {
+      // 如果只有一个后续路段直接添加
       const roadGraphic = roadGraphicArray[0];
       this.addSelectedRoad(roadGraphic);
     } else {
-      // 显示后续路段
+      // 有多个后续路段时需要同时显示，让用户选择
       roadGraphicArray.forEach((roadGraphic) => {
         const candidateRoad = roadGraphic.clone();
         candidateRoad.symbol = {
@@ -484,6 +485,7 @@ export default class SelectRoute2D {
         geometryToUnion.push(candidateRoad.geometry);
       });
 
+      // 调整地图显示范围，能显示全部候选路段
       if (geometryToUnion.length > 0) {
         type MapModules = [typeof import("esri/geometry/geometryEngineAsync")];
         const [geometryEngineAsync] = await (loadModules([
@@ -595,7 +597,7 @@ export default class SelectRoute2D {
   /** 获取路径的起点 */
   private getRouteBeginPoint(): __esri.Point {
     const lineGraphic = this.selectedRoadGraphicArray[0];
-    // direction=3时，反向车道
+    // direction=3时，反向路段，起止点交换
     const firstPoint =
       lineGraphic.attributes["DIRECTION"] === "3"
         ? this.getPolylineLastPoint(lineGraphic.geometry as __esri.Polyline)
@@ -634,10 +636,11 @@ export default class SelectRoute2D {
     // 每帧前进距离
     const lengthPerFrame = speedInSeconds / framePerSecond;
 
-    // 合并到一个path中
+    // 将几个路段的path合并到一个path中
     const totalPath: Array<any> = [];
     this.selectedRoadGraphicArray.forEach((graphic) => {
       let path = (graphic.geometry as __esri.Polyline).paths[0];
+      // 反向路段，坐标倒序
       if (graphic.attributes["DIRECTION"] === "3") {
         path.reverse();
       }
@@ -656,6 +659,7 @@ export default class SelectRoute2D {
     let currentLength = lengthPerFrame;
     const totalLength = length(line, { units: "meters" });
     const pointArray: Array<Array<number>> = [];
+    // 使用turf.along，将path按照每帧前进距离分割
     while (currentLength < totalLength) {
       const point = along(line, currentLength, {
         units: "meters",
@@ -701,9 +705,9 @@ export default class SelectRoute2D {
         y: pointArray[currentIndex][1],
       });
 
-      // 车辆离开当前信号机时发出警报
+      // 车辆进入和离开信号机周边时发出警报
       if (!nearSignalPoint) {
-        // 车辆是否进入哪个信号机的周边
+        // 不在信号机范围内时检测和所有信号机的距离
         this.selectedTrafficSignalLayer.graphics.forEach((graphic) => {
           const signalPoint = graphic.geometry as __esri.Point;
           const distance = length(
@@ -713,6 +717,7 @@ export default class SelectRoute2D {
             ]),
             { units: "meters" }
           );
+          // 触发进入报警
           if (distance < this.bufferDistance) {
             nearSignalPoint = signalPoint;
             nearSignalId = graphic.attributes["FSTR_SCATS"];
@@ -720,6 +725,7 @@ export default class SelectRoute2D {
           }
         });
       } else {
+        // 在信号机范围内时只检测和当前信号机的距离
         const distance = length(
           lineString([
             pointArray[currentIndex],
@@ -727,26 +733,25 @@ export default class SelectRoute2D {
           ]),
           { units: "meters" }
         );
+        // 触发离开报警
         if (distance > this.bufferDistance) {
           nearSignalPoint = null;
           this.outofSignal(nearSignalId);
         }
       }
 
+      // 到达最后一个点位，停止计时
       if (currentIndex === pointArray.length - 1) {
         clearInterval(this.playInterval);
       }
     }, 1000 / framePerSecond);
   }
 
+  /** 停止播放 */
   public stopPlaySelectedRoute() {
     if (this.playInterval) {
       clearInterval(this.playInterval);
     }
     this.playRouteLayer.removeAll();
-    // this.selectedRoadGraphicArray = [];
-    // this.selectedRoadLayer.removeAll();
-    // this.selectedTrafficSignalIdArray = [];
-    // this.selectedTrafficSignalLayer.removeAll();
   }
 }
