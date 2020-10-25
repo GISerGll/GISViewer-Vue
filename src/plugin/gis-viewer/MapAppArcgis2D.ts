@@ -332,7 +332,11 @@ export default class MapAppArcGIS2D {
           id = attr[field];
         }
       }
-      this.showSubwayMigrateChart({id: id, type: 'd', url: layer.url});
+      this.showSubwayMigrateChart({
+        id: id,
+        type: 'd',
+        url: layer.url + '/' + layer.layerId
+      });
     } else {
       this.showSubwayMigrateChart(undefined);
     }

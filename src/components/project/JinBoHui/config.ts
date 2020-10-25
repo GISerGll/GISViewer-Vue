@@ -370,13 +370,19 @@ export let GisConfig = {
       url:
         'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_Subway/MapServer/1',
       type: 'feature',
+      showBar: true,
+      barFields: {
+        inField: 'JWPT.RAILWAY_VOL_SATURATION.FINT_IN',
+        outField: 'JWPT.RAILWAY_VOL_SATURATION.FINT_OUT'
+      },
+      showMigrate: true,
       popupTemplate: {
         title: '',
         content:
           '地铁线：{LINE_DESC}<br/>地铁站：{STATION_DESC}<br/>进站人数：{FINT_IN}<br/>出站人数：{FINT_OUT}'
       },
       refreshInterval: 5,
-      visible: false,
+      visible: true,
       outFields: ['*'],
       renderer: {
         type: 'unique-value',
