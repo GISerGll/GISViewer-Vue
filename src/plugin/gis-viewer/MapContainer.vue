@@ -294,6 +294,11 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async getDrawOverlays(): Promise<IResult> {
     return await this.mapContainer.getDrawOverlays();
   }
+  public async startLayerSearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return await this.mapContainer.startLayerSearch(params);
+  }
 }
 </script>
 

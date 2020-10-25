@@ -168,6 +168,11 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public async getDrawOverlays(): Promise<IResult> {
     return {status: 0, message: ''};
   }
+  public async startLayerSearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
 }
 </script>
 

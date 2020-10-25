@@ -13,6 +13,15 @@ export let GisConfig = {
   ],
   operationallayers: [
     {
+      label: '发布段',
+      type: 'dynamic',
+      url:
+        'http://10.31.214.201:6080/arcgis/rest/services/ShangHai/Kuaisulu_fbd/MapServer',
+      refreshInterval: 5,
+      visible: true,
+      outFields: ['*']
+    },
+    {
       label: '国展中心面',
       url:
         'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_Exhibition/MapServer',
@@ -27,11 +36,20 @@ export let GisConfig = {
     },
     {
       type: 'image',
+      url: 'assets/mapIcons/JinBoHui/gzzx.svg',
+      geometry: {x: 13502019.4482, y: 3658435.3621},
+      width: 742,
+      height: 674,
+      minScale: 9028
+    },
+    {
+      type: 'image',
       url: 'assets/mapIcons/JinBoHui/flower.png',
       geometry: {x: 13502204.92578, y: 3658256.1152},
       width: 564,
       height: 564,
-      minScale: 72224
+      minScale: 72224,
+      maxScale: 18056
     },
     {
       label: '国展中心点',
@@ -55,23 +73,377 @@ export let GisConfig = {
       }
     },
     {
-      label: '巴士线路',
+      label: '虹桥商务区',
       url:
-        'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_jieboxian/MapServer/10',
+        'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_Parking/MapServer/3',
+      type: 'feature',
+      visible: true,
+      showLabels: true,
+      outFields: ['*']
+    },
+    {
+      label: '停车场-面',
+      url:
+        'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_Parking/MapServer/0',
+      type: 'feature',
+      visible: true,
+      outFields: ['*']
+    },
+    {
+      label: '地铁线',
+      url:
+        'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_Subway/MapServer/2',
+      type: 'feature',
+      visible: true,
+      outFields: ['*']
+    },
+    {
+      label: '停车场-点',
+      url:
+        'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_Parking/MapServer/1',
+      type: 'feature',
+      popupTemplate: {
+        title: '',
+        content:
+          '描述：{PARK_DESC}<br/>总泊位数（大车）：{B_PARKNUM}<br/>总泊位数（小车）：{S_PARKNUM}<br/>总剩余泊位数（大车）：{B_REMAIN_PARKNUM}<br/>总剩余泊位数（小车）：{S_REMAIN_PARKNUM}<br/>泊位占用率（大车）：{B_PARKRATE}<br/>泊位占用率（小车）：{S_PARKRATE}<br/>预约到达率（大车）：{B_APPOINT_INRATE}<br/>预约到达率（小车）：{S_APPOINT_INRATE}'
+      },
+      visible: true,
+      refreshInterval: 5,
+      outFields: ['*'],
+      renderer: {
+        type: 'unique-value',
+        field: 'JWPT.PARK_STATUS_VW.STATUS',
+        defaultSymbol: {
+          type: 'picture-marker',
+          url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+          width: 24,
+          height: 33,
+          yoffset: 17
+        },
+        uniqueValueInfos: [
+          {
+            value: 'free',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          },
+          {
+            value: 'crowd',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          },
+          {
+            value: 'jam',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          },
+          {
+            value: 'saturation',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          }
+        ]
+      }
+    },
+    {
+      label: '小停车场-点',
+      url:
+        'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_Parking/MapServer/5',
+      type: 'feature',
+      popupTemplate: {
+        title: '',
+        content:
+          '描述：{PARK_DESC}<br/>总泊位数（小车）：{S_PARKNUM}<br/>总剩余泊位数（小车）：{S_REMAIN_PARKNUM}<br/>泊位占用率（小车）：{S_PARKRATE}<br/>预约到达率（小车）：{S_APPOINT_INRATE}'
+      },
+      visible: true,
+      refreshInterval: 5,
+      outFields: ['*'],
+      renderer: {
+        type: 'unique-value',
+        field: 'JWPT.PARK_STATUS_VW.STATUS',
+        defaultSymbol: {
+          type: 'picture-marker',
+          url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+          width: 24,
+          height: 33,
+          yoffset: 17
+        },
+        uniqueValueInfos: [
+          {
+            value: 'free',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          },
+          {
+            value: 'crowd',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          },
+          {
+            value: 'jam',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          },
+          {
+            value: 'saturation',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          }
+        ]
+      }
+    },
+    {
+      label: '大停车场-点',
+      url:
+        'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_Parking/MapServer/4',
+      type: 'feature',
+      popupTemplate: {
+        title: '',
+        content:
+          '描述：{PARK_DESC}<br/>总泊位数（大车）：{B_PARKNUM}<br/>总剩余泊位数（大车）：{B_REMAIN_PARKNUM}<br/>泊位占用率（大车）：{B_PARKRATE}<br/>预约到达率（大车）：{B_APPOINT_INRATE}'
+      },
+      visible: true,
+      refreshInterval: 5,
+      outFields: ['*'],
+      renderer: {
+        type: 'unique-value',
+        field: 'JWPT.PARK_STATUS_VW.STATUS',
+        defaultSymbol: {
+          type: 'picture-marker',
+          url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+          width: 24,
+          height: 33,
+          yoffset: 17
+        },
+        uniqueValueInfos: [
+          {
+            value: 'free',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          },
+          {
+            value: 'crowd',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          },
+          {
+            value: 'jam',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          },
+          {
+            value: 'saturation',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          }
+        ]
+      }
+    },
+    {
+      label: 'P8',
+      url:
+        'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_Parking/MapServer/6',
+      type: 'feature',
+      popupTemplate: {
+        title: '',
+        content:
+          '描述：{PARK_DESC}<br/>累计进场车次（大车）：{B_STAT_INNUM}<br/>累计进场车次（小车）：{S_STAT_INMUM}<br/>预约进场率（大车）：{B_APPOINT_INRATE}%<br/>预约进场率（小车）：{S_APPOINT_INRATE}%'
+      },
+      visible: true,
+      refreshInterval: 5,
+      outFields: ['*'],
+      renderer: {
+        type: 'unique-value',
+        field: 'JWPT.PARK_STATUS_VW.STATUS',
+        defaultSymbol: {
+          type: 'picture-marker',
+          url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+          width: 24,
+          height: 33,
+          yoffset: 17
+        },
+        uniqueValueInfos: [
+          {
+            value: 'free',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          },
+          {
+            value: 'crowd',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          },
+          {
+            value: 'jam',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          },
+          {
+            value: 'saturation',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/icon_P_green.png',
+              width: 24,
+              height: 33,
+              yoffset: 17
+            }
+          }
+        ]
+      }
+    },
+    {
+      label: '地铁标注点',
+      url:
+        'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_Subway/MapServer/1',
+      type: 'feature',
+      popupTemplate: {
+        title: '',
+        content:
+          '地铁线：{LINE_DESC}<br/>地铁站：{STATION_DESC}<br/>进站人数：{FINT_IN}<br/>出站人数：{FINT_OUT}'
+      },
+      refreshInterval: 5,
+      visible: false,
+      outFields: ['*'],
+      renderer: {
+        type: 'unique-value',
+        field: 'JWPT.RAILWAY_VOL_SATURATION.STATUS',
+        defaultSymbol: {
+          type: 'picture-marker',
+          url: 'assets/mapIcons/JinBoHui/point_red.png',
+          width: 36,
+          height: 36,
+          yoffset: 0
+        },
+        uniqueValueInfos: [
+          {
+            value: 'free',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/point_green.png',
+              width: 36,
+              height: 36,
+              yoffset: 0
+            }
+          },
+          {
+            value: 'crowd',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/point_yellow.png',
+              width: 36,
+              height: 36,
+              yoffset: 0
+            }
+          },
+          {
+            value: 'jam',
+            symbol: {
+              type: 'picture-marker',
+              url: 'assets/mapIcons/JinBoHui/point_red.png',
+              width: 36,
+              height: 36,
+              yoffset: 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      label: '测温点',
+      url:
+        'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_Parking/MapServer/7',
       type: 'feature',
       visible: true,
       outFields: ['*'],
-      minScale: 0,
-      maxScale: 0,
-      popupTemplate: {
-        title: '',
-        content: '{BUS_NUM}<br/>总乘客数：{PERSON_NUM}<br/>描述：{BUSLINE_DESC}'
+      renderer: {
+        type: 'simple',
+        symbol: {
+          type: 'picture-marker',
+          url: 'assets/mapIcons/JinBoHui/icon_cewen.png',
+          width: 24,
+          height: 33,
+          yoffset: 16
+        }
       }
     }
   ],
   options: {
-    center: [121.2974, 31.1916],
-    scale: 10000,
+    center: [121.2974, 31.1956],
+    scale: 18056,
     constraints: {
       rotationEnabled: false,
       minZoom: 0

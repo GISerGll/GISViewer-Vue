@@ -42,6 +42,7 @@ import ToolTip from './widgets/Overlays/arcgis/ToolTip';
 import {Cluster2D} from './widgets/Cluster/arcgis/Cluster2D';
 import SelectRoute2D from '@/plugin/gis-viewer/widgets/SelectRoute/arcgis/SelectRoute2D';
 import {DrawOverlays} from './widgets/DrawOverlays/arcgis/DrawOverlays';
+import {LayerSearch} from './widgets/GeometrySearch/arcgis/LayerSearch';
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
@@ -152,12 +153,7 @@ export default class MapAppArcGIS2D {
               : '';
           }
         }
-        if (
-          content == 'Null' ||
-          content == '' ||
-          content == null ||
-          content.toString().indexOf('Null') > -1
-        ) {
+        if (content == 'Null' || content == '' || content == null) {
           view.popup.close();
         }
       }
@@ -376,7 +372,7 @@ export default class MapAppArcGIS2D {
   }
   private getLayerByName(layername: string, id: string): any {
     let selLayer;
-    let layers = this.view.map.allLayers.toArray().forEach((layer: any) => {
+    this.view.map.allLayers.toArray().forEach((layer: any) => {
       if (layer.type == 'imagery' || layer.type == 'map-image') {
         let sublayers = (layer as __esri.MapImageLayer).allSublayers;
         sublayers.forEach((sublayer) => {
@@ -385,7 +381,6 @@ export default class MapAppArcGIS2D {
           }
         });
       }
-      return false;
     });
     return selLayer;
   }
@@ -735,5 +730,11 @@ export default class MapAppArcGIS2D {
   public async getDrawOverlays(): Promise<IResult> {
     const drawoverlay = DrawOverlays.getInstance(this.view);
     return await drawoverlay.getDrawOverlays();
+  }
+  public async startLayerSearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    const layersearch = LayerSearch.getInstance(this.view);
+    return await layersearch.startLayerSearch(params);
   }
 }

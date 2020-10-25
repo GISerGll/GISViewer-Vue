@@ -313,4 +313,9 @@ export default class MapAppGaode implements IMapContainer {
   public async getDrawOverlays(): Promise<IResult> {
     return {status: 0, message: ''};
   }
+  public async startLayerSearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
 }
