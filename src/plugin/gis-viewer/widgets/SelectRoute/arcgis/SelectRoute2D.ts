@@ -302,12 +302,13 @@ export default class SelectRoute2D {
     this.selectedRoadGraphicArray = [];
     this.selectedTrafficSignalIdArray = [];
 
-    this.mouseMoveHandler = this.view.on("pointer-move", debounce(async (event: any) => {
-      await this.onPointerMoveHandler(event);
-    }, 300));
+    this.mouseMoveHandler = this.view.on(
+      "pointer-move",
+      debounce(async (event: any) => {
+        await this.onPointerMoveHandler(event);
+      }, 300)
+    );
   }
-
-  private pointerMoveRoadFid = "";
 
   private async onPointerMoveHandler(event: any) {
     const result = await this.view.hitTest(event, {
@@ -315,11 +316,7 @@ export default class SelectRoute2D {
     });
     if (result.results.length > 0) {
       const graphic = result.results[0].graphic;
-      if (
-        graphic.layer === this.allRoadLayer &&
-        graphic.attributes["FID"] !== this.pointerMoveRoadFid
-      ) {
-        this.pointerMoveRoadFid = graphic.attributes["FID"];
+      if (graphic.layer === this.allRoadLayer) {
         const point = this.view.toMap(event);
         this.view.popup.open({
           location: point,
@@ -699,6 +696,7 @@ export default class SelectRoute2D {
     let nearSignalPoint: __esri.Point | null;
     let nearSignalId: string;
 
+    // 开始移动点位
     this.playInterval = setInterval(() => {
       currentIndex++;
       carGraphic.geometry = new Point({
