@@ -312,17 +312,16 @@ export default class SelectRoute2D {
 
   private async onPointerMoveHandler(event: any) {
     const result = await this.view.hitTest(event, {
-      exclude: [this.allTrafficSignalLayer],
+      include: [this.allRoadLayer],
     });
     if (result.results.length > 0) {
       const graphic = result.results[0].graphic;
-      if (graphic.layer === this.allRoadLayer) {
-        const point = this.view.toMap(event);
-        this.view.popup.open({
-          location: point,
-          features: [graphic],
-        });
-      }
+      console.log(graphic);
+      const point = this.view.toMap(event);
+      this.view.popup.open({
+        location: point,
+        features: [graphic],
+      });
     }
   }
 
