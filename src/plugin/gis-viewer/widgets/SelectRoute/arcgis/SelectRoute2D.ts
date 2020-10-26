@@ -3,6 +3,7 @@ import { loadModules } from "esri-loader";
 import along from "@turf/along";
 import length from "@turf/length";
 import { lineString } from "@turf/helpers";
+import { debounce } from "ts-debounce-throttle";
 
 export default class SelectRoute2D {
   private static intances: Map<string, SelectRoute2D>;
@@ -301,9 +302,9 @@ export default class SelectRoute2D {
     this.selectedRoadGraphicArray = [];
     this.selectedTrafficSignalIdArray = [];
 
-    this.mouseMoveHandler = this.view.on("pointer-move", async (event: any) => {
+    this.mouseMoveHandler = this.view.on("pointer-move", debounce(async (event: any) => {
       await this.onPointerMoveHandler(event);
-    });
+    }, 300));
   }
 
   private pointerMoveRoadFid = "";
