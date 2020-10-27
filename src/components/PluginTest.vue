@@ -5,6 +5,11 @@
       <button @click="btn_test2">test2</button>
       <button @click="btn_test3">test3</button>
     </div>
+    <div id="test2" style="display:block; position: absolute;">
+      <video controls="" autoplay="" name="media">
+        <source src="http://localhost/aaa.mp4" type="video/mp4" />
+      </video>
+    </div>
     <gis-viewer
       ref="gisViewer"
       platform="arcgis2d"
@@ -19,12 +24,12 @@
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from "vue-property-decorator";
-import axios from "axios";
-import MapConfig from "./MapConfig";
-import PluginGd from "./PluginGD.vue";
-import PluginTest3d from "./PluginTest3D.vue";
-import Test from "./Test.vue";
+import {Vue, Component, Prop} from 'vue-property-decorator';
+import axios from 'axios';
+import MapConfig from './MapConfig';
+import PluginGd from './PluginGD.vue';
+import PluginTest3d from './PluginTest3D.vue';
+import Test from './Test.vue';
 @Component
 export default class PluginTest extends Vue {
   private cg = new MapConfig();
@@ -44,12 +49,12 @@ export default class PluginTest extends Vue {
   }
   private showGisDeviceInfo(type: string, id: string, detail: any) {
     console.log(type, id, detail);
-    if (type == "model3d") {
+    if (type == 'model3d') {
       (this.$refs.gisViewer as any).showDgene({
         duration: 0,
         callback: (e: any) => {
           //console.log(e);
-        },
+        }
       });
     }
     // (this.$refs.gisViewer as any).showCustomTip({
@@ -66,11 +71,11 @@ export default class PluginTest extends Vue {
   }
 
   private intoSignal(id: string) {
-    console.log("Into: " + id);
+    console.log('Into: ' + id);
   }
 
   private outofSignal(id: string) {
-    console.log("Outof: " + id);
+    console.log('Outof: ' + id);
   }
 }
 </script>

@@ -265,10 +265,16 @@ export class FindFeature {
           if (options.zoom > 0) {
             that.view.goTo({target: graphics[0].geometry, zoom: options.zoom});
           } else {
-            that.view.goTo({
-              target: graphics[0].geometry,
-              scale: select.scale
-            });
+            if (select.scale == 0) {
+              that.view.goTo({
+                target: graphics[0].geometry
+              });
+            } else {
+              that.view.goTo({
+                target: graphics[0].geometry,
+                scale: select.scale
+              });
+            }
           }
           that.startHighlightOverlays(graphics[0].geometry);
           if (showPopUp) {
