@@ -5,11 +5,6 @@
       <button @click="btn_test2">test2</button>
       <button @click="btn_test3">test3</button>
     </div>
-    <div id="test2" style="display:block; position: absolute;">
-      <video controls="" autoplay="" name="media">
-        <source src="http://localhost/aaa.mp4" type="video/mp4" />
-      </video>
-    </div>
     <gis-viewer
       ref="gisViewer"
       platform="arcgis2d"
