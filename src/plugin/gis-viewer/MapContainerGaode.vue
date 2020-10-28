@@ -153,11 +153,11 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public pausePlayback(){}
   public goOnPlayback(){}
   public async startDrawOverlays():Promise<any>{}
-  public showToolTip(param:Vue.Component):Promise<IResult>{
-      return this.mapApp.showToolTip(param);
+  public showTooltip(param:Vue.Component):Promise<IResult>{
+      return this.mapApp.showTooltip(param);
   }
-  public closeToolTip() :Promise<IResult> {
-    return this.mapApp.closeToolTip();
+  public closeTooltip() :Promise<IResult> {
+    return this.mapApp.closeTooltip();
   }
   public async findLayerFeature():Promise<any>{}
   public showMonitorArea():any{}

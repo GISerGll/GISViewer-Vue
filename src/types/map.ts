@@ -124,7 +124,7 @@ export interface IOverlayParameter {
     moveTooltip?:boolean; //移动点位显示小提示
     defaultInfoTemplate?: IPopUpTemplate;
     defaultButtons?: Object[];
-    toolTipContent?: string; //悬浮窗内容
+    tooltipContent?: string; //悬浮窗内容
     defaultVisible?: boolean;
     tooltipComponent?: Vue.Component
     popupComponent?: Vue.Component
@@ -150,7 +150,7 @@ export interface IDrawOverlayParameter {
   drawType?: string;
   defaultSymbol?: IPointSymbol | IPolylineSymbol | IPolygonSymbol;
   showPopup?: boolean;
-  showToolTip?: boolean;
+  showTooltip?: boolean;
   type?: string;               //覆盖物类型, 用于按编号/类型删除
   generateId?: boolean;                 //是否随机生成覆盖物编号, 用于按编号/类型删除
   clearLastResults?: boolean;  //清除上一次绘画结果（调用一次方法只能存在一个graphic）
@@ -161,8 +161,8 @@ export interface IMapContainer {
   // deleteLayer: (param:ILayerConfig) => Promise<IResult>;
   // layerDefinition: (param:ILayerConfig) => Promise<IResult>;
   addOverlays: (param: IOverlayParameter) => Promise<IResult>;
-  showToolTip: (param:Vue.Component) => Promise<IResult>;
-  closeToolTip:() => Promise<IResult>;
+  // showTooltip: (param:Vue.Component) => Promise<IResult>;
+  closeTooltip:() => Promise<IResult>;
   addHeatMap: (param: IHeatParameter) => void;
   addOverlaysCluster: (param: IOverlayClusterParameter) => void;
   deleteOverlays: (param: IOverlayDelete) => Promise<IResult>;

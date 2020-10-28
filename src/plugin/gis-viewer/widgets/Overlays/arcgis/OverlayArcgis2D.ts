@@ -8,8 +8,8 @@ import {
   IPolygonSymbol
 } from '@/types/map';
 import {loadModules} from 'esri-loader';
-import ToolTip2D from './ToolTip2D';
-import ToolTip from './ToolTip';
+import Tooltip2D from './ToolTip2D';
+import Tooltip from './ToolTip';
 import HighFeauture from './HighFeauture3D';
 import HighFeauture2D from './HighFeauture2D';
 import {Vue} from 'vue-property-decorator';
@@ -25,9 +25,9 @@ export class OverlayArcgis2D {
   >();
   private overlayLayer!: __esri.GraphicsLayer;
   private view!: __esri.MapView;
-  private tooltip:any;
+  private Tooltip:any;
   private popupTypes: Map<string, any> = new Map<string, any>();
-  private tooltipTypes:Map<string, any> = new Map<string, any>();
+  private TooltipTypes:Map<string, any> = new Map<string, any>();
   private popup:any;
 
   private static primitive2D = [
@@ -92,7 +92,7 @@ export class OverlayArcgis2D {
     }
   }
 
-  private MoveToolTip(type: string, content: string) {
+  private MoveTooltip(type: string, content: string) {
         const view = this.view;
         const moveLayer = this.overlayGroups.get(type);
         let parent = this;
@@ -103,11 +103,11 @@ export class OverlayArcgis2D {
                     response.results.forEach((result) => {
                         if (result.graphic.layer === moveLayer) {
                             if (!tip) {
-                                tip = new ToolTip(
+                                tip = new Tooltip(
                                     view,
                                     {
                                         title: '',
-                                        content: parent.getToolTipContent(result.graphic, content)
+                                        content: parent.getTooltipContent(result.graphic, content)
                                     },
                                     result.graphic
                                 );
@@ -233,8 +233,8 @@ export class OverlayArcgis2D {
     divContent.innerHTML = tipContent;
     return divContent;
   }
-  //使toolTip中支持{字段}的形式
-  private getToolTipContent(graphic: any, content: string): string {
+  //使Tooltip中支持{字段}的形式
+  private getTooltipContent(graphic: any, content: string): string {
     let tipContent = content;
     if (content) {
       //键值对
@@ -283,24 +283,24 @@ export class OverlayArcgis2D {
       overlayLayer.minScale = Utils.getScale(this.view, zooms[0]);
       overlayLayer.maxScale = Utils.getScale(this.view, zooms[1]);
     }
-    /************auto/move/show-popup/tooltip*****************/
+    /************auto/move/show-popup/Tooltip*****************/
       const showPopup = params.showPopup;
-      const showToolTip = params.showTooltip;
-      const moveToolTip = params.moveTooltip;
+      const showTooltip = params.showTooltip;
+      const moveTooltip = params.moveTooltip;
       const movePopup = params.movePopup;
       const autoPopup = params.autoPopup;
-      const autoToolTip = params.autoTooltip;
+      const autoTooltip = params.autoTooltip;
 
       const tooltipComponent = params.tooltipComponent;
       const popupComponent = params.popupComponent;
 
       const popupAndTooltip = {
           showPopup,
-          showToolTip,
-          moveToolTip,
+          showTooltip,
+          moveTooltip,
           movePopup,
           autoPopup,
-          autoToolTip
+          autoTooltip
       };
 
       const componentsObj = {
@@ -354,7 +354,7 @@ export class OverlayArcgis2D {
       addCount++;
     }
 
-      //处理弹窗逻辑,弹窗优先级popup->tooltip,动作优先级show->move->auto
+      //处理弹窗逻辑,弹窗优先级popup->Tooltip,动作优先级show->move->auto
       //冲突关系：同类冲突，例如autpPopup和movePopup冲突，autoTooltip和moveTooltip冲突
       //示意：假如同时存在autoPopup和showPopup为true，认为两者冲突，则autoPopup为false
       await this.processPopupAndTooltip(popupAndTooltip,componentsObj);
@@ -471,7 +471,7 @@ export class OverlayArcgis2D {
                             this.popup.remove();
                             this.popup = null;
                         }
-                        this.popup = new ToolTip2D(
+                        this.popup = new Tooltip2D(
                             view,
                             popup,
                             content,
@@ -495,8 +495,8 @@ export class OverlayArcgis2D {
         }
     }
 
-    private async showTooltip(tooltip:Vue.Component) :Promise<IResult>{
-        if(!tooltip && (this.tooltip)){
+    private async showTooltip(Tooltip:Vue.Component) :Promise<IResult>{
+        if(!Tooltip && (this.Tooltip)){
             await this.closePopup();
         }
         const view = this.view;
@@ -506,15 +506,15 @@ export class OverlayArcgis2D {
             if (response.results.length > 0) {
                 response.results.forEach((result) => {
                     if(result.graphic.geometry.type === "point"){
-                        if(result.graphic.attributes && result.graphic.attributes.hasOwnProperty("tooltipWindow")){
+                        if(result.graphic.attributes && result.graphic.attributes.hasOwnProperty("TooltipWindow")){
                             let content = result.graphic.attributes.popupWindow;
-                            if (this.tooltip) {
-                                this.tooltip.remove();
-                                this.tooltip = null;
+                            if (this.Tooltip) {
+                                this.Tooltip.remove();
+                                this.Tooltip = null;
                             }
-                            this.tooltip = new ToolTip2D(
+                            this.Tooltip = new Tooltip2D(
                                 view,
-                                tooltip,
+                                Tooltip,
                                 content,
                                 result.graphic
                             );
@@ -522,9 +522,9 @@ export class OverlayArcgis2D {
                     }
                 });
             } else {
-                if (this.tooltip) {
-                    this.tooltip.remove();
-                    this.tooltip = null;
+                if (this.Tooltip) {
+                    this.Tooltip.remove();
+                    this.Tooltip = null;
                 }
             }
         });
@@ -554,7 +554,7 @@ export class OverlayArcgis2D {
                                 this.popup.remove();
                                 this.popup = null;
                             }
-                            this.popup = new ToolTip2D(
+                            this.popup = new Tooltip2D(
                                 view,
                                 popup,
                                 content,
@@ -579,8 +579,8 @@ export class OverlayArcgis2D {
         }
     }
 
-    private async moveToolTip(tooltip:Vue.Component){
-        if(!tooltip && (this.tooltip)){
+    private async moveTooltip(Tooltip:Vue.Component){
+        if(!Tooltip && (this.Tooltip)){
             await this.closePopup();
         }
         const view = this.view;
@@ -590,15 +590,15 @@ export class OverlayArcgis2D {
             if (response.results.length > 0) {
                 response.results.forEach((result) => {
                     if(result.graphic.geometry.type === "point"){
-                        if(result.graphic.attributes && result.graphic.attributes.hasOwnProperty("tooltipWindow")){
+                        if(result.graphic.attributes && result.graphic.attributes.hasOwnProperty("TooltipWindow")){
                             let content = result.graphic.attributes.popupWindow;
-                            if (this.tooltip) {
-                                this.tooltip.remove();
-                                this.tooltip = null;
+                            if (this.Tooltip) {
+                                this.Tooltip.remove();
+                                this.Tooltip = null;
                             }
-                            this.tooltip = new ToolTip2D(
+                            this.Tooltip = new Tooltip2D(
                                 view,
-                                tooltip,
+                                Tooltip,
                                 content,
                                 result.graphic
                             );
@@ -606,9 +606,9 @@ export class OverlayArcgis2D {
                     }
                 });
             } else {
-                if (this.tooltip) {
-                    this.tooltip.remove();
-                    this.tooltip = null;
+                if (this.Tooltip) {
+                    this.Tooltip.remove();
+                    this.Tooltip = null;
                 }
             }
         });
@@ -633,7 +633,7 @@ export class OverlayArcgis2D {
                     message:`there is no such layer of ${type}`
                 }
             }else {
-                let popupOfType:ToolTip2D[] = this.popupTypes.get(type);   //首先检查该图层是否已经显示Popup
+                let popupOfType:Tooltip2D[] = this.popupTypes.get(type);   //首先检查该图层是否已经显示Popup
                 if(popupOfType){
                     this.popupTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
                     for(let popup of popupOfType){
@@ -649,11 +649,11 @@ export class OverlayArcgis2D {
                     }
                 }
                 let popupCount = 0;
-                let popups:ToolTip2D[] = [];
+                let popups:Tooltip2D[] = [];
                 graphics.forEach((graphic)=>{
                     let content = graphic.attributes.popupWindow;
 
-                    let _popup = new ToolTip2D(
+                    let _popup = new Tooltip2D(
                         view,
                         popup,
                         content,
@@ -671,10 +671,10 @@ export class OverlayArcgis2D {
                 }
             }
         }else {
-            this.tooltipTypes.clear();
+            this.TooltipTypes.clear();
             console.log(this.overlayGroups);
 
-            let popups:ToolTip2D[] = [];
+            let popups:Tooltip2D[] = [];
 
             for(let key of this.overlayGroups.keys()){
                 let graphicLayer = this.overlayGroups.get(key);
@@ -688,7 +688,7 @@ export class OverlayArcgis2D {
                         if(graphic.attributes.hasOwnProperty('popupWindow')){
                             let content = graphic.attributes.popupWindow;
 
-                            let _popup = new ToolTip2D(
+                            let _popup = new Tooltip2D(
                                 view,
                                 popup,
                                 content,
@@ -709,59 +709,59 @@ export class OverlayArcgis2D {
         }
     }
 
-    private async autoTooltip(tooltip:Vue.Component,type?:string){
+    private async autoTooltip(Tooltip:Vue.Component,type?:string){
         const view = this.view;
 
         if(type){
-            let tooltipLayer = await this.getOverlayLayer(type);
+            let TooltipLayer = await this.getOverlayLayer(type);
 
-            if(!tooltipLayer){                   //输入type就必须存在该图层
+            if(!TooltipLayer){                   //输入type就必须存在该图层
                 return {
                     status:0,
                     message:`there is no such layer of ${type}`
                 }
             }else {
-                let tooltipOfType:ToolTip2D[] = this.tooltipTypes.get(type);   //首先检查该图层是否已经显示Popup
-                if(tooltipOfType){
-                    this.tooltipTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
-                    for(let tooltip of tooltipOfType){
-                        tooltip.remove();
+                let TooltipOfType:Tooltip2D[] = this.TooltipTypes.get(type);   //首先检查该图层是否已经显示Popup
+                if(TooltipOfType){
+                    this.TooltipTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
+                    for(let Tooltip of TooltipOfType){
+                        Tooltip.remove();
                     }
                 }
 
-                let graphics = tooltipLayer.graphics;
+                let graphics = TooltipLayer.graphics;
                 if(!graphics.length){
                     return {
                         status:0,
                         message:`no graphic in the graphicLayer of ${type}!`
                     }
                 }
-                let tooltipCount = 0;
-                let tooltips:ToolTip2D[] = [];
+                let TooltipCount = 0;
+                let Tooltips:Tooltip2D[] = [];
                 graphics.forEach((graphic)=>{
                     let content = graphic.attributes.popupWindow;
 
-                    let _tooltip = new ToolTip2D(
+                    let _Tooltip = new Tooltip2D(
                         view,
-                        tooltip,
+                        Tooltip,
                         content,
                         graphic
                     );
-                    tooltipCount++;
-                    tooltips.push(_tooltip);
+                    TooltipCount++;
+                    Tooltips.push(_Tooltip);
                 })
-                this.popupTypes.set(type,tooltips);
+                this.popupTypes.set(type,Tooltips);
 
                 return {
                     status:0,
                     message:`finish autoPopup`,
-                    result:`the layer of ${type} with ${tooltipCount}popups!`
+                    result:`the layer of ${type} with ${TooltipCount}popups!`
                 }
             }
         }else {
-            this.tooltipTypes.clear();
+            this.TooltipTypes.clear();
 
-            let tooltips:ToolTip2D[] = [];
+            let Tooltips:Tooltip2D[] = [];
 
             for(let key of this.overlayGroups.keys()){
                 let graphicLayer = this.overlayGroups.get(key);
@@ -775,18 +775,18 @@ export class OverlayArcgis2D {
                         if(graphic.attributes.hasOwnProperty('popupWindow')){
                             let content = graphic.attributes.popupWindow;
 
-                            let _tooltip = new ToolTip2D(
+                            let _Tooltip = new Tooltip2D(
                                 view,
-                                tooltip,
+                                Tooltip,
                                 content,
                                 graphic
                             );
-                            tooltips.push(_tooltip);
+                            Tooltips.push(_Tooltip);
                         }
                     }
                 })
 
-                this.popupTypes.set(key,tooltips);
+                this.popupTypes.set(key,Tooltips);
             }
 
             return {
@@ -798,9 +798,9 @@ export class OverlayArcgis2D {
 
     public async closePopup() :Promise<IResult>{
         let close = false;
-        if(this.tooltip){
-            this.tooltip.remove();
-            this.tooltip = null;
+        if(this.Tooltip){
+            this.Tooltip.remove();
+            this.Tooltip = null;
             close = true;
         }
 
@@ -813,11 +813,11 @@ export class OverlayArcgis2D {
 
     private async processPopupAndTooltip(popAndTip:any,componentsObj:any){
         let showPopup = popAndTip.showPopup;
-        let showTooltip = popAndTip.showToolTip;
-        let moveTooltip = popAndTip.moveToolTip;
+        let showTooltip = popAndTip.showTooltip;
+        let moveTooltip = popAndTip.moveTooltip;
         let movePopup = popAndTip.movePopup;
         let autoPopup = popAndTip.autoPopup;
-        let autoTooltip = popAndTip.autoToolTip;
+        let autoTooltip = popAndTip.autoTooltip;
 
         const tooltipComponent = componentsObj.tooltipComponent;
         const popupComponent = componentsObj.popupComponent;
@@ -857,7 +857,7 @@ export class OverlayArcgis2D {
         if(showTooltip && tooltipComponent){
             await this.showTooltip(tooltipComponent);
         }else if(moveTooltip && tooltipComponent){
-            await this.moveToolTip(tooltipComponent);
+            await this.moveTooltip(tooltipComponent);
         }else if(autoTooltip && tooltipComponent){
             await this.autoTooltip(tooltipComponent);
         }

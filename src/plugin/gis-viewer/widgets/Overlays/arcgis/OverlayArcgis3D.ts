@@ -207,7 +207,7 @@ export class OverlayArcgis3D {
     return divContent;
   }
   //使toolTip中支持{字段}的形式
-  private getToolTipContent(graphic: any, content: string): string {
+  private gettooltipContent(graphic: any, content: string): string {
     let tipContent = content;
     if (content) {
       //键值对
@@ -241,7 +241,7 @@ export class OverlayArcgis3D {
                   {
                     title: '',
                     istip: true,
-                    content: parent.getToolTipContent(result.graphic, content)
+                    content: parent.gettooltipContent(result.graphic, content)
                   },
                   result.graphic
                 );
@@ -274,7 +274,7 @@ export class OverlayArcgis3D {
     const defaultInfoTemplate = params.defaultInfoTemplate;
     const autoPopup = params.autoPopup;
     const showToolTip = params.showTooltip;
-    const toolTipContent = params.toolTipContent;
+    const tooltipContent = params.tooltipContent;
     const defaultButtons = params.defaultButtons;
     const defaultVisible = params.defaultVisible !== false;
     const iswgs = params.iswgs !== false;
@@ -285,8 +285,8 @@ export class OverlayArcgis3D {
       overlayLayer.maxScale = Utils.getScale(this.view, zooms[1]);
     }
 
-    if (showToolTip && toolTipContent) {
-      this.MoveToolTip(layerType, toolTipContent);
+    if (showToolTip && tooltipContent) {
+      this.MoveToolTip(layerType, tooltipContent);
     }
 
     let addCount = 0;
@@ -354,7 +354,7 @@ export class OverlayArcgis3D {
             title: '',
             id: overlay.id,
             zooms: custom.zooms,
-            content: this.getToolTipContent(graphic, customContent)
+            content: this.gettooltipContent(graphic, customContent)
           },
           graphic
         );

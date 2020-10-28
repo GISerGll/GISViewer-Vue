@@ -209,11 +209,11 @@ export default class MapContainer extends Vue implements IMapContainer {
   public locateStreet(param: IStreetParameter) {
     this.mapContainer.locateStreet(param);
   }
-  public async showToolTip(param: Vue.Component) :Promise<IResult>{
-    return await this.mapContainer.showToolTip(param);
-  }
-  public async closeToolTip() :Promise<IResult>{
-    return await this.mapContainer.closeToolTip();
+  // public async showTooltip(param: Vue.Component) :Promise<IResult>{
+  //   return await this.mapContainer.showTooltip(param);
+  // }
+  public async closeTooltip() :Promise<IResult>{
+    return await this.mapContainer.closeTooltip();
   }
   public async startDrawOverlays(param: IDrawOverlayParameter):Promise<IResult>{
     return this.mapContainer.startDrawOverlays(param)

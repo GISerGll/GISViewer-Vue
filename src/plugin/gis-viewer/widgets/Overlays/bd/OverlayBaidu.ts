@@ -186,22 +186,22 @@ export class OverlayBaidu {
       //自定义vue弹窗样式
       /************auto/move/show-popup/tooltip*****************/
       const showPopup = params.showPopup;
-      const showToolTip = params.showTooltip;
-      const moveToolTip = params.moveTooltip;
+      const showTooltip = params.showTooltip;
+      const moveTooltip = params.moveTooltip;
       const movePopup = params.movePopup;
       const autoPopup = params.autoPopup;
-      const autoToolTip = params.autoTooltip;
+      const autoTooltip = params.autoTooltip;
 
       const tooltipComponent = params.tooltipComponent;
       const popupComponent = params.popupComponent;
 
       const popupAndTooltip = {
           showPopup,
-          showToolTip,
-          moveToolTip,
+          showTooltip,
+          moveTooltip,
           movePopup,
           autoPopup,
-          autoToolTip
+          autoTooltip
       };
 
       const componentsObj = {
@@ -392,7 +392,7 @@ export class OverlayBaidu {
       return true;
     });
   }
-  public async deleteOverlaysCluster(params: IOverlayDelete) {
+  public async deleteOverlaysCluster(params: IOverlayDelete):Promise<IResult> {
     let types = params.types || [];
     if (this.markerClustererLayer && this.markerClustererLayer.length > 0) {
       this.markerClustererLayer.forEach((layer) => {
@@ -402,14 +402,25 @@ export class OverlayBaidu {
       });
     }
     this.view.closeInfoWindow();
+
+    return {
+      status:0,
+      message:'成功调用该方法',
+      result:types.length ? `成功删除${types}类型的聚合点` : `请输入types或删除所有聚合点`
+    }
   }
-  public async deleteAllOverlaysCluster() {
+  public async deleteAllOverlaysCluster():Promise<IResult> {
     if (this.markerClustererLayer && this.markerClustererLayer.length > 0) {
       this.markerClustererLayer.forEach((layer) => {
         layer.clearMarkers();
       });
     }
     this.view.closeInfoWindow();
+
+    return {
+      status:0,
+      message:'成功删除所有聚合点'
+    }
   }
   private async listenOverlayClick(popupType:string,popup:Vue.Component):Promise<IResult>{
     if(!popupType){
@@ -521,7 +532,7 @@ export class OverlayBaidu {
 
         break;
       case "moveTooltip":
-        this.view.addEventListener('click',(e:any)=>{
+        this.view.addEventListener('mousemove',(e:any)=>{
           if(e.overlay){
             let overlay = e.overlay;
             let content = overlay.attributes.popupWindow;
@@ -538,9 +549,9 @@ export class OverlayBaidu {
                 center
             );
           }else{
-            if (this.popup) {
-              this.popup.remove();
-              this.popup = null;
+            if (this.tooltip) {
+              this.tooltip.remove();
+              this.tooltip = null;
             }
           }
         });
@@ -549,9 +560,9 @@ export class OverlayBaidu {
         break;
     }
   }
-  public async showToolTip(tooltip:Vue.Component):Promise<IResult>{
+  public async showTooltip(tooltip:Vue.Component):Promise<IResult>{
     if(!tooltip && this.tooltip){
-      await this.closeToolTip();
+      await this.closeTooltip();
     }
     let overlays:any = this.view.getOverlays();
 
@@ -584,7 +595,7 @@ export class OverlayBaidu {
       result:'成功调用方法，但无法保证可以正确显示弹窗'
     }
   }
-  public async closeToolTip():Promise<IResult>{
+  public async closeTooltip():Promise<IResult>{
     let close = false;
     if(this.tooltip){
       this.tooltip.remove();
@@ -750,11 +761,11 @@ export class OverlayBaidu {
   }
   private async processPopupAndTooltip(popAndTip:any,componentsObj:any){
     let showPopup = popAndTip.showPopup;
-    let showTooltip = popAndTip.showToolTip;
-    let moveTooltip = popAndTip.moveToolTip;
+    let showTooltip = popAndTip.showTooltip;
+    let moveTooltip = popAndTip.moveTooltip;
     let movePopup = popAndTip.movePopup;
     let autoPopup = popAndTip.autoPopup;
-    let autoTooltip = popAndTip.autoToolTip;
+    let autoTooltip = popAndTip.autoTooltip;
 
     const tooltipComponent = componentsObj.tooltipComponent;
     const popupComponent = componentsObj.popupComponent;
@@ -794,7 +805,7 @@ export class OverlayBaidu {
     if(showTooltip && tooltipComponent){
       await this.listenOverlayClick('showTooltip',tooltipComponent)
     }else if(moveTooltip && tooltipComponent){
-      await this.listenOverlayClick('moveTooltip',tooltipComponent)
+      await this.listenOverlayMouseOver('moveTooltip',tooltipComponent)
     }else if(autoTooltip && tooltipComponent){
       await this.autoTooltip(tooltipComponent);
     }

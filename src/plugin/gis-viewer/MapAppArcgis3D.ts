@@ -516,8 +516,8 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public pausePlayback(){}
   public goOnPlayback(){}
   public async startDrawOverlays():Promise<any>{}
-  public async showToolTip():Promise<any>{}
-  public async closeToolTip():Promise<any>{}
+  public async showTooltip():Promise<any>{}
+  public async closeTooltip():Promise<any>{}
   public async findLayerFeature():Promise<any>{}
   public showMonitorArea():any{}
   public showCircleOutline():any{}

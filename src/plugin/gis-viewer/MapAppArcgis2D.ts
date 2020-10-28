@@ -541,11 +541,11 @@ export default class MapAppArcGIS2D {
     const findfeature = FindFeature.getInstance(this.view);
     findfeature.startHighlightOverlays(geometry);
   }
-  public async showToolTip(param:Vue.Component) :Promise<IResult>{
+  public async showTooltip(param:Vue.Component) :Promise<IResult>{
     const tooltip = OverlayArcgis2D.getInstance(this.view);
     return await tooltip.showToolTip(param);
   }
-  public closeToolTip() :Promise<IResult>{
+  public closeTooltip() :Promise<IResult>{
     const tooltip = OverlayArcgis2D.getInstance(this.view);
     return tooltip.closeToolTip();
   }

@@ -47,6 +47,7 @@
 <script lang="ts">
   import {Vue, Component} from 'vue-property-decorator';
   import MapConfig from "@/config/config_baidu";
+  import SimpleTooltip from "@/components/tooltips/simpleTooltip.vue";
   import Parent from "@/components/tooltips/Parent.vue";
   @Component
   export default class PluginTest extends Vue {
@@ -257,7 +258,7 @@
     }
     private async btn_closeToolTip(){
       let map = this.$refs.gisViewer as any;
-      map.closeToolTip();
+      map.closeTooltip();
     }
     private async btn_drawPoints(){
       let map = this.$refs.gisViewer as any;
@@ -540,7 +541,8 @@
 
     }
     private async btn_deleteOverlaysCluster(){
-
+      let map = this.$refs.gisViewer as any;
+      map.deleteAllOverlaysCluster();
     }
 
     private async mapLoaded() {
@@ -594,10 +596,11 @@
               popupWindow: { type:"suspicious",value1:"这是一个正常弹窗",value2:"这是一个正常弹窗"}}
           }
         ],
-        showPopup: false,
+        showPopup: true,
         autoPopup: false,
-        movePopup: true,
+        moveTooltip: true,
         popupComponent:Parent,
+        tooltipComponent:SimpleTooltip,
         // defaultInfoTemplate: {
         //   title: '1212',
         //   content: '<div>name:{name}<br/><button>{name}</button></div>'

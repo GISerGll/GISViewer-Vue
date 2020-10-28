@@ -301,11 +301,11 @@ export default class MapAppGaode implements IMapContainer {
   public pausePlayback(){}
   public goOnPlayback(){}
   public async startDrawOverlays():Promise<any>{}
-  public async showToolTip(param:Vue.Component):Promise<any>{
+  public async showTooltip(param:Vue.Component):Promise<any>{
       const tooltip = OverlayGaode.getInstance(this.view);
       return await tooltip.showToolTip(param);
   }
-  public async closeToolTip():Promise<any>{
+  public async closeTooltip():Promise<any>{
     const tooltip = OverlayGaode.getInstance(this.view);
     return await tooltip.closeToolTip();
   }
