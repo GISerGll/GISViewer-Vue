@@ -47,10 +47,10 @@
     "vue-router": "^3.4.7",
     "vue-template-compiler": "^2.6.12"
   },
-  "homepage": "https://github.com/herrshi/GISViewer-Vue",
+  "homepage": "https://gitee.com/herrshi/GISViewer-Vue",
   "repository": {
     "type": "git",
-    "url": "https://github.com/herrshi/GISViewer-Vue.git"
+    "url": "https://gitee.com/herrshi/GISViewer-Vue.git"
   },
   "typings": "types/index.d.ts"
 }
