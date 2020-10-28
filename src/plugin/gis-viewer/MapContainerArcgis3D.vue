@@ -21,7 +21,10 @@ import {
   routeParameter,
   IHeatImageParameter,
   IGeometrySearchParameter,
-  ICustomTip
+  ICustomTip,
+  ISelectRouteParam,
+  ISelectRouteResult,
+  IDrawOverlays
 } from '@/types/map';
 
 @Component({
@@ -175,6 +178,14 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   }
   public showDgeneOutPoint(params: any) {}
   public changeDgeneOut() {}
+
+  public async initializeRouteSelect(params: ISelectRouteParam) {}
+  public async showSelectedRoute(params: ISelectRouteResult) {}
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
+  public async stopDrawOverlays(): Promise<void> {}
+  public async getDrawOverlays(): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
     public async arcgisLoadGDLayer(){}
 }
 </script>

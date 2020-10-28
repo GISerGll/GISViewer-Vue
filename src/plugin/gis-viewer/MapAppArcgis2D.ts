@@ -20,7 +20,10 @@ import {
   IMonitorAreaParameter,
   IEditFenceLabel,
   IGeometrySearchParameter,
-  ICustomTip
+  ICustomTip,
+  ISelectRouteParam,
+  ISelectRouteResult,
+  IDrawOverlays
 } from '@/types/map';
 
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
@@ -49,11 +52,17 @@ import {Bar3DChart} from './widgets/MigrateChart/arcgis/Bar3DChart';
 import {Utils} from './Utils';
 import ToolTip from './widgets/Overlays/arcgis/ToolTip';
 import {Cluster2D} from './widgets/Cluster/arcgis/Cluster2D';
+import SelectRoute2D from '@/plugin/gis-viewer/widgets/SelectRoute/arcgis/SelectRoute2D';
+import {DrawOverlays} from './widgets/DrawOverlays/arcgis/DrawOverlays';
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
-  public showGisDeviceInfo: any;
-  public mapClick: any;
+
+  /** 触发后向父组件传参的函数 */
+  public showGisDeviceInfo!: (type: string, id: string, detail: any) => void;
+  public mapClick!: (point: object) => void;
+  public selectRouteFinished!: (routeInfo: object) => void;
+
   public showFlow: boolean = false;
   private tolerance: number = 3;
   private HighlightLayer!: __esri.GraphicsLayer;
@@ -152,6 +161,17 @@ export default class MapAppArcGIS2D {
     view.popup.watch('visible', async (newValue) => {
       if (newValue) {
         let content = view.popup.content;
+        if (view.popup.selectedFeature) {
+          var attributes = view.popup.selectedFeature.attributes;
+          var newAttr: any = new Object();
+          for (let field in attributes) {
+            let fieldArr: string[] = field.toString().split('.');
+            let newfield = fieldArr.pop() as string;
+            attributes[newfield] = attributes[field]
+              ? attributes[field].toString()
+              : '';
+          }
+        }
         if (
           content == 'Null' ||
           content == '' ||
@@ -164,6 +184,7 @@ export default class MapAppArcGIS2D {
     });
     view.on('click', async (event) => {
       this.hideBarChart();
+      this.showSubwayChart();
       if (this.HighlightLayer) {
         this.HighlightLayer.removeAll();
       }
@@ -186,6 +207,9 @@ export default class MapAppArcGIS2D {
         // });
         let result = response.results[0];
         const graphic = result.graphic;
+        if (!graphic.attributes) {
+          return;
+        }
         let {type, id} = graphic.attributes;
         let label = graphic.layer ? (graphic.layer as any).label : '';
         if (
@@ -217,6 +241,7 @@ export default class MapAppArcGIS2D {
         }
         this.showGisDeviceInfo(type, id, graphic.toJSON());
         this.showSubBar(graphic.layer, event.mapPoint, graphic);
+        this.showSubwayChart(graphic.layer, graphic);
       } else {
         this.doIdentifyTask(event.mapPoint).then((results: any) => {
           if (results.length > 0) {
@@ -282,6 +307,12 @@ export default class MapAppArcGIS2D {
     if (layer && layer.showBar) {
       this.view.popup.alignment = 'bottom-center';
       //console.log(res.feature);
+      let inField;
+      let outField;
+      if (layer.barFields) {
+        inField = layer.barFields.inField;
+        outField = layer.barFields.outField;
+      }
       this.showBarChart({
         points: [
           {
@@ -292,10 +323,12 @@ export default class MapAppArcGIS2D {
             },
             fields: {
               inflow:
+                feature.attributes[inField] ||
                 feature.attributes['IN_FLX_NR'] ||
                 feature.attributes['VOLUME_YESTERDAY'] ||
                 feature.attributes['YJZH.STAT_METROLINEFLOW.VOLUME_YESTERDAY'],
               outflow:
+                feature.attributes[outField] ||
                 feature.attributes['OUT_FLX_NR'] ||
                 feature.attributes['VOLUME_TODAY'] ||
                 feature.attributes['YJZH.STAT_METROLINEFLOW.VOLUME_TODAY']
@@ -306,6 +339,24 @@ export default class MapAppArcGIS2D {
       });
     } else {
       this.view.popup.alignment = 'auto';
+    }
+  }
+  private showSubwayChart(layer?: any, feature?: any) {
+    if (layer && layer.showMigrate) {
+      let attr = feature.attributes;
+      let id = '';
+      for (let field in attr) {
+        if (
+          field.indexOf('FEATUREID') > -1 ||
+          field.indexOf('DEVICEID') > -1 ||
+          field.indexOf('SECTIONID') > -1
+        ) {
+          id = attr[field];
+        }
+      }
+      this.showSubwayMigrateChart({id: id, type: 'd', url: layer.url});
+    } else {
+      this.showSubwayMigrateChart(undefined);
     }
   }
   private loadCustomCss() {
@@ -655,6 +706,10 @@ export default class MapAppArcGIS2D {
     const drawlayer = DrawLayer.getInstance(this.view);
     drawlayer.clearDrawLayer(params);
   }
+  public async showSubwayMigrateChart(params: any) {
+    const chart = MigrateChart.getInstance(this.view);
+    chart.showSubwayChart(params);
+  }
   public showMigrateChart(params: any) {
     const chart = MigrateChart.getInstance(this.view);
     chart.showPathChart(params);
@@ -741,7 +796,9 @@ export default class MapAppArcGIS2D {
   }
   public showCustomTip(params: ICustomTip) {
     let className: string = 'custom-popup';
-    ToolTip.clear(this.view, undefined, className);
+    if (params.clear !== false) {
+      ToolTip.clear(this.view, undefined, className);
+    }
     if (params && params.geometry) {
       params.prop.className = className;
       let ctip = new ToolTip(this.view, params.prop, params.geometry);
@@ -754,5 +811,30 @@ export default class MapAppArcGIS2D {
   public changeDgeneOut() {
     let dgene = DgeneFusion.getInstance(this.view);
     dgene.changeDgeneOut();
+  }
+
+  /** 初始化特勤线路基础数据，并进入路段选择状态 */
+  public async initializeRouteData(params: ISelectRouteParam) {
+    const selectRoute = SelectRoute2D.getInstance(this.view);
+    selectRoute.selectRouteFinished = this.selectRouteFinished;
+    await selectRoute.initializeRoute(params);
+  }
+
+  public async showSelectedRoute(params: ISelectRouteResult) {
+    const selectRoute = SelectRoute2D.getInstance(this.view);
+    await selectRoute.showSelectedRoute(params);
+  }
+
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
+    const drawoverlay = DrawOverlays.getInstance(this.view);
+    return await drawoverlay.startDrawOverlays(params);
+  }
+  public async stopDrawOverlays(): Promise<void> {
+    const drawoverlay = DrawOverlays.getInstance(this.view);
+    return await drawoverlay.stopDrawOverlays();
+  }
+  public async getDrawOverlays(): Promise<IResult> {
+    const drawoverlay = DrawOverlays.getInstance(this.view);
+    return await drawoverlay.getDrawOverlays();
   }
 }

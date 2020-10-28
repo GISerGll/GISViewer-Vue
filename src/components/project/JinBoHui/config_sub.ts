@@ -11,12 +11,25 @@ export let GisConfig = {
   ],
   operationallayers: [
     {
+      label: '国展中心面',
+      url:
+        'http://10.31.214.197:6080/arcgis/rest/services/JinBoHui/ShangHai_Exhibition/MapServer',
+      type: 'dynamic',
+      outFields: ['*'],
+      popupTemplates: {
+        0: {
+          title: '',
+          content: '客流：{FSTR_VOLUME}'
+        }
+      }
+    },
+    {
       type: 'image',
       url: 'assets/mapIcons/JinBoHui/gzzx.svg',
       geometry: {x: -16775.35204963667, y: -4222.84795454},
       width: 618,
       height: 561,
-      minScale: 16000
+      minScale: 8000
     },
     {
       type: 'image',
@@ -24,7 +37,29 @@ export let GisConfig = {
       geometry: {x: -16465.35204963667, y: -4542.84795454},
       width: 282,
       height: 282,
-      maxScale: 32000
+      minScale: 64000,
+      maxScale: 16000
+    },
+    {
+      label: '国展中心点',
+      url:
+        'http://10.31.214.197:6080/arcgis/rest/services/JinBoHui/ShangHai_Parking/MapServer/2',
+      type: 'feature',
+      outFields: ['*'],
+      maxScale: 128000,
+      popupTemplate: {
+        title: '',
+        content: '客流：{FSTR_VOLUME}'
+      },
+      renderer: {
+        type: 'simple',
+        symbol: {
+          type: 'picture-marker',
+          url: 'assets/mapIcons/JinBoHui/flower.png',
+          width: 32,
+          height: 32
+        }
+      }
     },
     {
       label: '停车场-面',
@@ -40,11 +75,7 @@ export let GisConfig = {
         'http://10.31.214.197:6080/arcgis/rest/services/JinBoHui/ShangHai_Subway/MapServer/2',
       type: 'feature',
       visible: true,
-      outFields: ['*'],
-      popupTemplate: {
-        title: '',
-        content: '线路：{Name_chn}'
-      }
+      outFields: ['*']
     },
     {
       label: '停车场-点',
@@ -122,6 +153,12 @@ export let GisConfig = {
       refreshInterval: 5,
       visible: true,
       outFields: ['*'],
+      showMigrate: true,
+      showBar: true,
+      barFields: {
+        inField: 'JWPT.RAILWAY_VOL_SATURATION.FINT_IN',
+        outField: 'JWPT.RAILWAY_VOL_SATURATION.FINT_OUT'
+      },
       popupTemplate: {
         title: '',
         content:
@@ -174,7 +211,7 @@ export let GisConfig = {
   ],
   options: {
     center: [-0.14532287775028, -0.0435806907338],
-    zoom: 6,
+    zoom: 5,
     constraints: {
       rotationEnabled: false,
       minZoom: 0

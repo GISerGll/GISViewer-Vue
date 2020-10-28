@@ -20,7 +20,10 @@ import {
   routeParameter,
   IHeatImageParameter,
   IGeometrySearchParameter,
-  ICustomTip
+  ICustomTip,
+  ISelectRouteParam,
+  ISelectRouteResult,
+  IDrawOverlays
 } from '@/types/map';
 @Component({
   name: 'MapAppBaidu'
@@ -161,6 +164,14 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
   public showDgeneOutPoint(params: any) {}
   public changeDgeneOut() {}
     public async arcgisLoadGDLayer(){}
+
+  public async initializeRouteSelect(params: ISelectRouteParam) {}
+  public async showSelectedRoute(params: ISelectRouteResult) {}
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
+  public async stopDrawOverlays(): Promise<void> {}
+  public async getDrawOverlays(): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
 }
 </script>
 

@@ -11,12 +11,25 @@ export let GisConfig = {
   ],
   operationallayers: [
     {
+      label: '国展中心面',
+      url:
+        'http://10.31.214.197:6080/arcgis/rest/services/JinBoHui/ShangHai_Exhibition/MapServer',
+      type: 'dynamic',
+      outFields: ['*'],
+      popupTemplates: {
+        0: {
+          title: '',
+          content: '客流：{FSTR_VOLUME}'
+        }
+      }
+    },
+    {
       type: 'image',
       url: 'assets/mapIcons/JinBoHui/gzzx.svg',
       geometry: {x: -16775.35204963667, y: -4222.84795454},
       width: 618,
       height: 561,
-      minScale: 16000
+      minScale: 8000
     },
     {
       type: 'image',
@@ -24,20 +37,42 @@ export let GisConfig = {
       geometry: {x: -16465.35204963667, y: -4542.84795454},
       width: 282,
       height: 282,
-      maxScale: 32000
+      minScale: 32000,
+      maxScale: 16000
+    },
+    {
+      label: '国展中心点',
+      url:
+        'http://10.31.214.197:6080/arcgis/rest/services/JinBoHui/ShangHai_Parking/MapServer/2',
+      type: 'feature',
+      outFields: ['*'],
+      maxScale: 64000,
+      popupTemplate: {
+        title: '',
+        content: '客流：{FSTR_VOLUME}'
+      },
+      renderer: {
+        type: 'simple',
+        symbol: {
+          type: 'picture-marker',
+          url: 'assets/mapIcons/JinBoHui/flower.png',
+          width: 32,
+          height: 32
+        }
+      }
     },
     {
       label: '地铁线',
       url:
         'http://10.31.214.197:6080/arcgis/rest/services/JinBoHui/ShangHai_Subway/MapServer/2',
       type: 'feature',
-      minScale: 144449,
+      minScale: 256000,
       mode: 0,
       visible: true,
       outFields: ['*'],
       popupTemplate: {
         title: '',
-        context: '线路：${Name_chn}'
+        context: '线路：{Name_chn}'
       }
     },
     {
@@ -83,12 +118,12 @@ export let GisConfig = {
       type: 'feature',
       visible: true,
       maxScale: 32000,
-      minScale: 128000,
+      minScale: 256000,
       outFields: ['*'],
       popupTemplate: {
         title: '',
         content:
-          '${LINE_DESC}<br/>地铁站：${STATION_DESC}<br/>进站人数：${FINT_IN}<br/>出站人数：${FINT_OUT}'
+          '地铁线：{LINE_DESC}<br/>地铁站：{STATION_DESC}<br/>进站人数：{FINT_IN}<br/>出站人数：{FINT_OUT}'
       },
       renderer: {
         type: 'unique-value',
@@ -148,7 +183,7 @@ export let GisConfig = {
       popupTemplate: {
         title: '',
         content:
-          '${LINE_DESC}<br/>地铁站：${STATION_DESC}<br/>进站人数：${FINT_IN}<br/>出站人数：${FINT_OUT}'
+          '{LINE_DESC}<br/>地铁站：{STATION_DESC}<br/>进站人数：{FINT_IN}<br/>出站人数：{FINT_OUT}'
       },
       renderer: {
         type: 'unique-value',
@@ -205,16 +240,16 @@ export let GisConfig = {
       popupTemplates: {
         '0': {
           title: '',
-          content: '描述：${DES}'
+          content: '描述：{DES}'
         },
         '1': {
           title: '',
-          content: '描述：${DES}'
+          content: '描述：{DES}'
         },
 
         '2': {
           title: '',
-          content: '描述：${DES}'
+          content: '描述：{DES}'
         }
       }
     },
@@ -229,35 +264,37 @@ export let GisConfig = {
       popupTemplates: {
         '0': {
           title: '',
-          content: '描述：${FSTR_DESC}'
+          content: '描述：{FSTR_DESC}'
         },
         '1': {
           title: '',
-          content: '描述：${FSTR_DESC}'
+          content: '描述：{FSTR_DESC}'
         },
         '2': {
           title: '',
-          content: '描述：${FSTR_DESC}'
+          content: '描述：{FSTR_DESC}'
         },
         '3': {
           title: '',
-          content: '描述：${FSTR_DESC}'
+          content: '描述：{FSTR_DESC}'
         }
       }
     },
     {
       label: '国展周边地面道路',
       url:
-        'http://10.31.214.197:6080/arcgis/rest/services/JinBoHui/ShangHai_GZZX_dmfbd/MapServer/0',
-      type: 'feature',
+        'http://10.31.214.197:6080/arcgis/rest/services/JinBoHui/ShangHai_GZZX_dmfbd/MapServer',
+      type: 'dynamic',
       visible: false,
       outFields: ['*'],
       refreshInterval: 5,
       maxScale: 0,
-      minScale: 128000,
-      popupTemplate: {
-        title: '',
-        context: '描述：${FSTR_DESC}'
+      minScale: 256000,
+      popupTemplates: {
+        0: {
+          title: '',
+          content: '描述：{FSTR_DESC}'
+        }
       }
     },
     {
@@ -271,7 +308,7 @@ export let GisConfig = {
   ],
   options: {
     center: [-0.14532287775028, -0.0435806907338],
-    zoom: 6,
+    zoom: 5,
     constraints: {
       rotationEnabled: false,
       minZoom: 0

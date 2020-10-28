@@ -11,12 +11,25 @@ export let GisConfig = {
   ],
   operationallayers: [
     {
+      label: '国展中心面',
+      url:
+        'http://10.31.214.197:6080/arcgis/rest/services/JinBoHui/ShangHai_Exhibition/MapServer',
+      type: 'dynamic',
+      outFields: ['*'],
+      popupTemplates: {
+        0: {
+          title: '',
+          content: '客流：{FSTR_VOLUME}'
+        }
+      }
+    },
+    {
       type: 'image',
       url: 'assets/mapIcons/JinBoHui/gzzx.svg',
       geometry: {x: -16775.35204963667, y: -4222.84795454},
       width: 618,
       height: 561,
-      minScale: 16000
+      minScale: 8000
     },
     {
       type: 'image',
@@ -24,7 +37,29 @@ export let GisConfig = {
       geometry: {x: -16465.35204963667, y: -4542.84795454},
       width: 282,
       height: 282,
-      maxScale: 32000
+      minScale: 64000,
+      maxScale: 16000
+    },
+    {
+      label: '国展中心点',
+      url:
+        'http://10.31.214.197:6080/arcgis/rest/services/JinBoHui/ShangHai_Parking/MapServer/2',
+      type: 'feature',
+      outFields: ['*'],
+      maxScale: 128000,
+      popupTemplate: {
+        title: '',
+        content: '客流：{FSTR_VOLUME}'
+      },
+      renderer: {
+        type: 'simple',
+        symbol: {
+          type: 'picture-marker',
+          url: 'assets/mapIcons/JinBoHui/flower.png',
+          width: 32,
+          height: 32
+        }
+      }
     },
     {
       label: '国展周边地面道路',
@@ -32,11 +67,11 @@ export let GisConfig = {
         'http://10.31.214.197:6080/arcgis/rest/services/JinBoHui/ShangHai_GZZX_dmfbd/MapServer',
       type: 'dynamic',
       visible: true,
-      outFields: ['*'],
       refreshInterval: 5,
+      minScale: 32000,
       popupTemplate: {
         title: '',
-        content: '描述：${FSTR_DESC}'
+        content: '描述：{FSTR_DESC}'
       }
     },
     {
@@ -45,21 +80,21 @@ export let GisConfig = {
         'http://10.31.214.197:6080/arcgis/rest/services/JinBoHui/Kuaisulu_fbd_GZZB/MapServer',
       type: 'dynamic',
       refreshInterval: 5,
-      visible: true,
+      visible: false,
       outFields: ['*'],
       popupTemplates: {
         '0': {
           title: '',
-          content: '描述：${DES}'
+          content: '描述：{DES}'
         },
         '1': {
           title: '',
-          content: '描述：${DES}'
+          content: '描述：{DES}'
         },
 
         '2': {
           title: '',
-          content: '描述：${DES}'
+          content: '描述：{DES}'
         }
       }
     },
@@ -74,19 +109,19 @@ export let GisConfig = {
       popupTemplates: {
         '0': {
           title: '',
-          content: '描述：${FSTR_DESC}'
+          content: '描述：{FSTR_DESC}'
         },
         '1': {
           title: '',
-          content: '描述：${FSTR_DESC}'
+          content: '描述：{FSTR_DESC}'
         },
         '2': {
           title: '',
-          content: '描述：${FSTR_DESC}'
+          content: '描述：{FSTR_DESC}'
         },
         '3': {
           title: '',
-          content: '描述：${FSTR_DESC}'
+          content: '描述：{FSTR_DESC}'
         }
       }
     },
@@ -98,7 +133,7 @@ export let GisConfig = {
       visible: true,
       popupTemplate: {
         title: '',
-        content: '描述：${FSTR_DESC}'
+        content: '描述：{FSTR_DESC}'
       },
       outFields: ['*'],
       renderer: {
@@ -120,7 +155,7 @@ export let GisConfig = {
       visible: false,
       popupTemplate: {
         title: '',
-        content: '描述：${FSTR_DESC}'
+        content: '描述：{FSTR_DESC}'
       },
       outFields: ['*'],
       renderer: {
@@ -142,7 +177,7 @@ export let GisConfig = {
       visible: false,
       popupTemplate: {
         title: '',
-        content: '描述：${FSTR_DESC}'
+        content: '描述：{FSTR_DESC}'
       },
       outFields: ['*'],
       renderer: {
@@ -189,7 +224,7 @@ export let GisConfig = {
     }
   ],
   options: {
-    center: [-0.14532287775028, -0.0435806907338],
+    center: [-0.14532287775028, -0.0405806907338],
     zoom: 6,
     constraints: {
       rotationEnabled: false,

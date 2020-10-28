@@ -3,7 +3,8 @@
   "defaultSymbol": {
     "type": "point",
     "url": "assets/image/chedao.png",
-    "size": [30, 40]
+    "size": [30, 40],
+    "yoffset": 20
   },
   "overlays": [
     {
@@ -18,6 +19,7 @@
         ],
         "textField": "显示文字"
       },
+
       "properties": {
         "policeSn": "011740",
         "policeName": "赵露斌",
@@ -5667,12 +5669,11 @@
     }
   ],
   "showPopup": false,
-  "ispic": false,
   "custom": {
     "color": "yellow",
     "fontSize": 14,
     "content": "{id}",
     "weight": "bold"
   },
-  "zoom": 13
+  "zoom": 14
 }

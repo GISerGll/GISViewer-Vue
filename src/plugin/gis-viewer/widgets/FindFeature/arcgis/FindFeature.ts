@@ -59,28 +59,35 @@ export class FindFeature {
     let level = params.level || 0;
     let centerResult = params.centerResult !== false;
     let layerIds = params.layerids || undefined;
+    let showPopUp = params.showPopUp !== false;
 
     this.view.map.allLayers.forEach((layer: any) => {
       if (params.layerName && layer.label === params.layerName) {
-        if (layer.visible) {
-          //console.log(layer);
-          if (layer.type == 'feature' || layer.type == 'map-image') {
-            this.doFindTask({
-              url: layer.url as string,
-              layer: layer,
-              layerIds: layerIds || this.getLayerIds(layer),
-              ids: ids,
-              zoom: level
-            });
-          }
+        //if (layer.visible) {
+        //console.log(layer);
+        if (layer.type == 'feature' || layer.type == 'map-image') {
+          this.doFindTask({
+            url: layer.url as string,
+            layer: layer,
+            layerIds: layerIds || this.getLayerIds(layer),
+            ids: ids,
+            zoom: level,
+            showPopUp: showPopUp
+          });
         }
+        //}
       }
       if (layer.type == 'graphics') {
         if (layer.graphics) {
           //addoverlay撒点图层
           let overlays = layer.graphics;
           overlays.forEach((overlay: any) => {
-            if (type == overlay.type && ids.indexOf(overlay.id) >= 0) {
+            if (
+              (type == overlay.type && ids.indexOf(overlay.id) >= 0) ||
+              (overlay.attributes &&
+                overlay.attributes.type == type &&
+                ids.indexOf(overlay.attributes.id) >= 0)
+            ) {
               if (centerResult) {
                 this.view.goTo({
                   target: overlay.geometry,
@@ -96,21 +103,31 @@ export class FindFeature {
         if (layer.data) {
           //cluster点聚合图层
           let overlays = layer.data;
+          let _this = this;
           overlays.forEach((overlay: any) => {
             if (type == overlay.type && ids.indexOf(overlay.id) >= 0) {
               if (centerResult) {
-                this.view.goTo({
-                  center: [overlay.x, overlay.y],
-                  zoom: Math.max(this.view.zoom, level)
-                });
+                this.view
+                  .goTo({
+                    center: [overlay.x, overlay.y],
+                    zoom: Math.max(this.view.zoom, level)
+                  })
+                  .then(() => {
+                    setTimeout(() => {
+                      for (let i = 0; i < layer.graphics.length; i++) {
+                        let graphic = layer.graphics.getItemAt(i);
+                        if (
+                          graphic.attributes &&
+                          graphic.attributes.type == type &&
+                          ids.indexOf(graphic.attributes.id) >= 0
+                        ) {
+                          _this.startJumpPoint([graphic]);
+                          break;
+                        }
+                      }
+                    }, 800);
+                  });
               }
-              this.startJumpPoint([
-                {
-                  geometry: {type: 'point', x: overlay.x, y: overlay.y},
-                  symbol: layer.flareRenderer.defaultSymbol,
-                  attributes: overlays
-                }
-              ]);
             }
           }, this);
         }
@@ -199,6 +216,7 @@ export class FindFeature {
       'esri/tasks/support/FindParameters'
     ]) as Promise<MapModules>);
     let ids = options.ids;
+    let showPopUp = options.showPopUp;
     let symbol = {
       type: 'simple-fill', // autocasts as new SimpleFillSymbol()
       color: [51, 51, 204, 0],
@@ -253,7 +271,9 @@ export class FindFeature {
             });
           }
           that.startHighlightOverlays(graphics[0].geometry);
-          that.showPopUp(select.layer, results[0].layerId, graphics[0]);
+          if (showPopUp) {
+            that.showPopUp(select.layer, results[0].layerId, graphics[0]);
+          }
           resolve(feats);
         });
       });
@@ -330,6 +350,19 @@ export class FindFeature {
           // autocasts as new SimpleLineSymbol()
           color: [0, 255, 255],
           style: 'dash',
+          width: 2
+        }
+      };
+    } else if (geometry.type == 'point') {
+      symbol = {
+        type: 'simple-marker', // autocasts as new SimpleFillSymbol()
+        color: [0, 0, 0, 0],
+        style: 'none',
+        size: 12,
+        outline: {
+          // autocasts as new SimpleLineSymbol()
+          color: [0, 255, 255],
+          style: 'solid',
           width: 2
         }
       };

@@ -15,7 +15,10 @@ import {
   routeParameter,
   IHeatImageParameter,
   IGeometrySearchParameter,
-  ICustomTip
+  ICustomTip,
+  ISelectRouteParam,
+  ISelectRouteResult,
+  IDrawOverlays
 } from '@/types/map';
 import {OverlayGaode} from '@/plugin/gis-viewer/widgets/Overlays/gd/OverlayGaode';
 import {JurisdictionPoliceGD} from './widgets/JurisdictionPolice/gd/JurisdictionPoliceGD';
@@ -80,7 +83,12 @@ export default class MapAppGaode implements IMapContainer {
     (this.view as any).mapOptions = mapConfig.options;
     this.view.on('click', async (evt) => {
       let mp = evt.lnglat;
-      this.mapClick({x: mp.lng, y: mp.lat, lng: mp.lng, lat: mp.lat});
+      this.mapClick({
+        x: mp.lng,
+        y: mp.lat,
+        lng: mp.lng,
+        lat: mp.lat
+      });
     });
     return new Promise((resole) => {
       this.view.on('complete', () => {
@@ -357,4 +365,13 @@ export default class MapAppGaode implements IMapContainer {
   public showCustomTip(params: ICustomTip) {}
   public showDgeneOutPoint(params: any) {}
   public changeDgeneOut() {}
+
+  public async initializeRouteSelect(params: ISelectRouteParam) {}
+  public async showSelectedRoute(params: ISelectRouteResult) {}
+
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
+  public async stopDrawOverlays(): Promise<void> {}
+  public async getDrawOverlays(): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
 }

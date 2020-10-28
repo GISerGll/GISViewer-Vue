@@ -15,6 +15,7 @@
       @map-loaded="mapLoaded"
       @map-click="mapClick"
       @marker-click="showGisDeviceInfo"
+      @select-route-finished="selectedRouteFinished"
     />
     <map-container-baidu
       ref="containerBaidu"
@@ -63,9 +64,12 @@ import {
   IMonitorAreaParameter,
   routeParameter,
   IHeatImageParameter,
+  IGeometrySearchParameter,
   ICustomTip,
-  IEditFenceLabel,
-  IGeometrySearchParameter
+  ISelectRouteParam,
+  ISelectRouteResult,
+  IDrawOverlays
+  IEditFenceLabel
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -140,6 +144,8 @@ export default class MapContainer extends Vue implements IMapContainer {
     id: string,
     detail: any
   ) {}
+  @Emit('select-route-finished')
+  public selectedRouteFinished(routeInfo: object) {}
 
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     return await this.mapContainer.addOverlays(params);
@@ -322,6 +328,24 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public changeDgeneOut() {
     this.mapContainer.changeDgeneOut();
+  }
+
+  public async initializeRouteSelect(params: ISelectRouteParam) {
+    await this.mapContainer.initializeRouteSelect(params);
+  }
+
+  public async showSelectedRoute(params: ISelectRouteResult) {
+    await this.mapContainer.showSelectedRoute(params);
+  }
+
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
+    return await this.mapContainer.startDrawOverlays(params);
+  }
+  public async stopDrawOverlays(): Promise<void> {
+    return await this.mapContainer.stopDrawOverlays();
+  }
+  public async getDrawOverlays(): Promise<IResult> {
+    return await this.mapContainer.getDrawOverlays();
   }
 }
 </script>
