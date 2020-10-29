@@ -1,5 +1,5 @@
 export let GisConfig = {
-  arcgis_api: 'http://localhost:8090/arcgis_js_api/library/4.14',
+  arcgis_api: 'http://localhost:8090/arcgis_js_api/library/4.17',
   theme: 'custom', //dark,vec
   baseLayers: [
     {
@@ -99,8 +99,8 @@ export let GisConfig = {
     }
   ],
   options: {
-    center: [-0.14532287775028, -0.0435806907338],
-    zoom: 5,
+    center: [-0.1232, -0.04358],
+    zoom: 4,
     constraints: {
       rotationEnabled: false,
       minZoom: 0

@@ -1,6 +1,6 @@
 export let GisConfig = {
   arcgis_api:
-    'http://10.31.214.203:8991/arcgis_js_v414_api/arcgis_js_api/library/4.14',
+    'http://10.31.214.203:8992/arcgis_js_v414_api/arcgis_js_api/library/4.14',
   theme: 'custom', //dark,vec
   baseLayers: [
     {
@@ -64,13 +64,14 @@ export let GisConfig = {
       maxScale: 0,
       popupTemplate: {
         title: '',
-        content: '{BUS_NUM}<br/>总乘客数：{PERSON_NUM}<br/>描述：{BUSLINE_DESC}'
+        content:
+          '计划班次：{BUS_NUM}<br/>已发乘客数：{PERSON_NUM}<br/>描述：{BUSLINE_DESC}'
       }
     }
   ],
   options: {
-    center: [-0.14532287775028, -0.0435806907338],
-    zoom: 2,
+    center: [-0.09426, -0.0552],
+    zoom: 4,
     constraints: {
       rotationEnabled: false,
       minZoom: 0

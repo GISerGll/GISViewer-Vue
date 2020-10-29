@@ -1,5 +1,5 @@
 export let GisConfig = {
-  arcgis_api: 'http://localhost:8090/arcgis_js_api/library/4.14',
+  arcgis_api: 'http://localhost:8090/arcgis_js_api/library/4.17',
   theme: 'custom', //dark,vec
   baseLayers: [
     {
