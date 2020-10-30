@@ -15,8 +15,8 @@ export class DgeneFusion {
   private mouseEventFn: any;
   private showOut: boolean = true;
   private loadOutState: boolean = false;
-  private videoStateUrl: string =
-    'http://10.31.214.237:15021/utcp/trafficemgc/getCameraStatus';
+  private videoStateUrl: string = './static/video.json';
+  //'http://10.31.214.237:15021/utcp/trafficemgc/getCameraStatus';
 
   private fusion_view_state: string = 'all';
   private FlyCenter: any;
@@ -558,20 +558,17 @@ export class DgeneFusion {
     let _this = this;
     this.getVideoStatus().then((res) => {
       let videos = res;
-      videos.forEach((video: any) => {
-        if (video.FSTR_ID) {
-          let name = _this.videocode + video.FSTR_ID;
-          if (video.FSTR_STATUS.toString() == '1') {
-            _this.fusion_view.setSpriteMaterialColor(name, 0x00ff00, 0.9);
-          } else {
-            _this.fusion_view.setSpriteMaterialColor(name, 0x000000, 0.9);
-          }
+      for (let name in videos) {
+        if (videos[name].STATUS.toString() == '1') {
+          _this.fusion_view.setSpriteMaterialColor(name, 0x00ff00, 0.9);
+        } else {
+          _this.fusion_view.setSpriteMaterialColor(name, 0x000000, 0.9);
         }
-      });
-      _this.showDgeneOutPoint(_this.showOut);
+      }
+      //_this.showDgeneOutPoint(_this.showOut);
       setTimeout(() => {
         _this.refreshVideoState();
-      }, 60 * 1000);
+      }, 10 * 1000);
     });
   }
 }
