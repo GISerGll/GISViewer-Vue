@@ -311,6 +311,10 @@ export default class SelectRoute2D {
   }
 
   private async onPointerMoveHandler(event: any) {
+    // 当前有弹框显示时，不再打开新弹框
+    if (this.view.popup.visible) {
+      return
+    }
     const result = await this.view.hitTest(event, {
       include: [this.allRoadLayer],
     });
