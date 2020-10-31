@@ -44,7 +44,7 @@ export default class PluginTest extends Vue {
     this.cg.btn_test3(this.$refs.gisViewer);
   }
   private layerLoaded() {
-    alert('1111212');
+    console.log('layer loaded');
   }
   private showGisDeviceInfo(type: string, id: string, detail: any) {
     console.log(type, id, detail);
