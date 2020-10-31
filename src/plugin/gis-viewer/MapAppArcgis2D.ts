@@ -53,6 +53,7 @@ export default class MapAppArcGIS2D {
   public selectRouteFinished!: (routeInfo: object) => void;
   public intoSignal!: (signalId: string) => void;
   public outofSignal!: (signalId: string) => void;
+  public layerLoaded: any;
 
   public showFlow: boolean = false;
   private tolerance: number = 3;
@@ -160,6 +161,7 @@ export default class MapAppArcGIS2D {
         }
       }
     });
+
     view.on('click', async (event) => {
       this.hideBarChart();
       this.showSubwayChart();
@@ -453,7 +455,8 @@ export default class MapAppArcGIS2D {
       typeof import('esri/layers/support/LabelClass'),
       typeof import('esri/Color'),
       typeof import('esri/symbols/Font'),
-      typeof import('esri/symbols/TextSymbol')
+      typeof import('esri/symbols/TextSymbol'),
+      typeof import('esri/core/watchUtils')
     ];
     const [
       FeatureLayer,
@@ -465,7 +468,8 @@ export default class MapAppArcGIS2D {
       LabelClass,
       Color,
       Font,
-      TextSymbol
+      TextSymbol,
+      watchUtils
     ] = await (loadModules([
       'esri/layers/FeatureLayer',
       'esri/layers/GraphicsLayer',
@@ -476,7 +480,8 @@ export default class MapAppArcGIS2D {
       'esri/layers/support/LabelClass',
       'esri/Color',
       'esri/symbols/Font',
-      'esri/symbols/TextSymbol'
+      'esri/symbols/TextSymbol',
+      'esri/core/watchUtils'
     ]) as Promise<MapModules>);
     let map = view.map;
 
@@ -518,7 +523,6 @@ export default class MapAppArcGIS2D {
           // if (layer) {
           //   layer.id = layerConfig.id || layerConfig.label;
           // }
-
           return layer;
         })
         .filter((layer: any) => {
@@ -528,6 +532,10 @@ export default class MapAppArcGIS2D {
 
     this.HighlightLayer = new GraphicsLayer();
     this.view.map.add(this.HighlightLayer);
+    let _this = this;
+    watchUtils.whenNotOnce(this.view, 'updating', (n: any, o: any) => {
+      _this.layerLoaded();
+    });
   }
 
   public async showSubwayFlow() {

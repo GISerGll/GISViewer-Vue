@@ -15,6 +15,7 @@
       @select-route-finished="selectRouteFinished"
       @into-signal="intoSignal"
       @outof-signal="outofSignal"
+      @layer-loaded="layerLoaded"
     />
   </div>
 </template>
@@ -41,6 +42,9 @@ export default class PluginTest extends Vue {
   }
   private btn_test3() {
     this.cg.btn_test3(this.$refs.gisViewer);
+  }
+  private layerLoaded() {
+    alert('1111212');
   }
   private showGisDeviceInfo(type: string, id: string, detail: any) {
     console.log(type, id, detail);

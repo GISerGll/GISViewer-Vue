@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Emit, Prop } from "vue-property-decorator";
-import MapApp from "@/plugin/gis-viewer/MapAppGaode";
+import {Vue, Component, Emit, Prop} from 'vue-property-decorator';
+import MapApp from '@/plugin/gis-viewer/MapAppGaode';
 import {
   IMapContainer,
   IOverlayParameter,
@@ -24,20 +24,20 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays,
-} from "@/types/map";
+  IDrawOverlays
+} from '@/types/map';
 
 @Component({
-  name: "MapContainerGaode",
+  name: 'MapContainerGaode'
 })
 export default class MapContainerGd extends Vue implements IMapContainer {
   private mapApp!: MapApp;
 
-  private mapId: string = "divAMap" + (Math.random() * 10000).toFixed(0);
+  private mapId: string = 'divAMap' + (Math.random() * 10000).toFixed(0);
   //地图配置
-  @Prop({ type: Object }) readonly mapConfig!: Object;
+  @Prop({type: Object}) readonly mapConfig!: Object;
 
-  @Emit("map-loaded")
+  @Emit('map-loaded')
   async mounted() {
     this.mapApp = new MapApp();
     await this.mapApp.initialize(this.mapConfig, this.mapId);
@@ -46,11 +46,13 @@ export default class MapContainerGd extends Vue implements IMapContainer {
     this.mapApp.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
     this.mapApp.mapClick = this.mapClick;
   }
-  @Emit("map-click")
+  @Emit('layer-loaded')
+  public layerLoaded() {}
+  @Emit('map-click')
   public mapClick(point: object) {}
-  @Emit("marker-click")
+  @Emit('marker-click')
   public showGisDeviceInfo(type: string, id: string, detail: any) {}
-  @Emit("marker-mouse")
+  @Emit('marker-mouse')
   public mouseGisDeviceInfo(
     event: any,
     type: string,
@@ -114,7 +116,7 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public findFeature(params: IFindParameter) {
     this.mapApp.findFeature(params);
   }
-  public showRoad(params: { ids: string[] }) {
+  public showRoad(params: {ids: string[]}) {
     this.mapApp.showRoad(params);
   }
   public hideRoad() {
@@ -145,7 +147,7 @@ export default class MapContainerGd extends Vue implements IMapContainer {
     this.mapApp.clearRoutePoint();
   }
   public async addDrawLayer(params: any): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public clearDrawLayer(params: ILayerConfig) {}
   public addHeatImage(params: IHeatImageParameter) {}
@@ -164,15 +166,15 @@ export default class MapContainerGd extends Vue implements IMapContainer {
     this.mapApp.clearGeometrySearch();
   }
   public async showDgene(params: any): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public hideDgene() {}
 
   public async addDgeneFusion(params: any): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public async restoreDegeneFsion(): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public showCustomTip(params: ICustomTip) {}
   public showDgeneOutPoint(params: any) {}
@@ -186,18 +188,18 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
   public async stopDrawOverlays(): Promise<void> {}
   public async getDrawOverlays(): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public async startLayerSearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
 }
 </script>
 
 <style scoped>
-@import "styles/main.css";
+@import 'styles/main.css';
 .my-map-div {
   padding: 0;
   margin: 0;

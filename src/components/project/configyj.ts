@@ -5,13 +5,7 @@ export let GisConfig = {
     {
       label: '深色底图',
       type: 'tiled',
-      url: 'https://10.31.214.248/server/rest/services/bj_xxb/MapServer',
-      visible: true
-    },
-    {
-      label: '标线',
-      url: 'https://10.31.214.248/server/rest/services/bx/MapServer',
-      type: 'tiled',
+      url: 'https://10.31.214.248/server/rest/services/bj_dmd/MapServer',
       visible: true
     }
   ],
