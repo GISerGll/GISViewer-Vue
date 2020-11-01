@@ -146,14 +146,24 @@ export default class MapAppArcGIS2D {
       if (newValue) {
         let content = view.popup.content;
         if (view.popup.selectedFeature) {
+          //feature
           var attributes = view.popup.selectedFeature.attributes;
           var newAttr: any = new Object();
           for (let field in attributes) {
             let fieldArr: string[] = field.toString().split('.');
             let newfield = fieldArr.pop() as string;
             attributes[newfield] = attributes[field]
-              ? attributes[field].toString()
+              ? attributes[field].toString().replace('Null', '')
               : '';
+          }
+        } else {
+          //dynamic
+          if (
+            typeof content === 'string' &&
+            content.toString().indexOf('Null') > -1
+          ) {
+            content = content.toString().replace(/Null/g, '');
+            view.popup.content = content;
           }
         }
         if (content == 'Null' || content == '' || content == null) {

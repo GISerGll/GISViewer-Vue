@@ -12,6 +12,8 @@ import {getThumbnailUrl} from 'esri/widgets/BasemapToggle/BasemapToggleViewModel
 import {param} from 'jquery';
 import {Utils} from '@/plugin/gis-viewer/Utils';
 import ToolTip from '../../Overlays/arcgis/ToolTip';
+import {Bar3DChart} from '../../MigrateChart/arcgis/Bar3DChart';
+import {MigrateChart} from '../../MigrateChart/arcgis/MigrateChart';
 
 export class FindFeature {
   private static intances: Map<string, any>;
@@ -280,6 +282,12 @@ export class FindFeature {
           if (showPopUp) {
             that.showPopUp(select.layer, results[0].layerId, graphics[0]);
           }
+          if (select.layer && select.layer.showBar) {
+            that.showSubBar(select.layer, graphics[0]);
+          }
+          if (select.layer && select.layer.showMigrate) {
+            that.showSubwayChart(select.layer, graphics[0]);
+          }
           resolve(feats);
         });
       });
@@ -289,6 +297,80 @@ export class FindFeature {
         resolve(e);
       });
     });
+  }
+  private showSubBar(layer: any, graphic: any) {
+    if (layer && layer.showBar) {
+      let point = graphic.geometry;
+      let attr = graphic.attributes;
+      this.view.popup.alignment = 'bottom-center';
+      //console.log(res.feature);
+      let inField, inField2;
+      let outField, outField2;
+      if (layer.barFields) {
+        inField = layer.barFields.inField;
+        outField = layer.barFields.outField;
+        inField2 = (inField.split('.').pop() as string) || inField;
+        outField2 = (outField.split('.').pop() as string) || outField;
+      }
+      this.showBarChart({
+        points: [
+          {
+            geometry: {
+              x: point.x,
+              y: point.y,
+              spatialReference: this.view.spatialReference
+            },
+            fields: {
+              inflow:
+                attr[inField] ||
+                attr[inField2] ||
+                attr['IN_FLX_NR'] ||
+                attr['VOLUME_YESTERDAY'] ||
+                attr['YJZH.STAT_METROLINEFLOW.VOLUME_YESTERDAY'],
+              outflow:
+                attr[outField] ||
+                attr[outField2] ||
+                attr['OUT_FLX_NR'] ||
+                attr['VOLUME_TODAY'] ||
+                attr['YJZH.STAT_METROLINEFLOW.VOLUME_TODAY']
+            }
+          }
+        ],
+        name: '地铁线路图'
+      });
+    } else {
+      this.view.popup.alignment = 'auto';
+    }
+  }
+  private showSubwayChart(layer?: any, feature?: any) {
+    if (layer && layer.showMigrate) {
+      let attr = feature.attributes;
+      let id = '';
+      for (let field in attr) {
+        if (
+          field.indexOf('FEATUREID') > -1 ||
+          field.indexOf('DEVICEID') > -1 ||
+          field.indexOf('SECTIONID') > -1
+        ) {
+          id = attr[field];
+        }
+      }
+      this.showSubwayMigrateChart({
+        id: id,
+        type: 'd',
+        url: layer.url + '/' + layer.layerId
+      });
+    } else {
+      this.showSubwayMigrateChart(undefined);
+    }
+  }
+  public showBarChart(params: any) {
+    const chart = Bar3DChart.getInstance(this.view);
+    chart.showBarChart(params);
+  }
+  public async showSubwayMigrateChart(params: any) {
+    const chart = MigrateChart.getInstance(this.view);
+    chart.showSubwayChart(params);
   }
   private showPopUp(layer: any, layerid: number, graphic: any) {
     let popup;
@@ -363,7 +445,7 @@ export class FindFeature {
       symbol = {
         type: 'simple-marker', // autocasts as new SimpleFillSymbol()
         color: [0, 0, 0, 0],
-        style: 'none',
+        style: 'circle',
         size: 12,
         outline: {
           // autocasts as new SimpleLineSymbol()
