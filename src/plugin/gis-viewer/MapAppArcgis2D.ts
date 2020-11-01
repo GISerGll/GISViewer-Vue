@@ -43,6 +43,7 @@ import {Cluster2D} from './widgets/Cluster/arcgis/Cluster2D';
 import SelectRoute2D from '@/plugin/gis-viewer/widgets/SelectRoute/arcgis/SelectRoute2D';
 import {DrawOverlays} from './widgets/DrawOverlays/arcgis/DrawOverlays';
 import {LayerSearch} from './widgets/GeometrySearch/arcgis/LayerSearch';
+import ImageOverlays from './widgets/HeatMap/arcgis/ImageOverlays';
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
@@ -191,7 +192,12 @@ export default class MapAppArcGIS2D {
         this.mapClick(event);
       }
       const response = await view.hitTest(event);
-      if (response.results.length > 0) {
+      if (
+        response.results.length > 0 &&
+        response.results[0].graphic.layer &&
+        (response.results[0].graphic.layer as any).label !== 'gzzx' &&
+        (response.results[0].graphic.layer as any).label !== 'flower'
+      ) {
         // response.results.forEach((result) => {
         //   //}
         // });
@@ -526,8 +532,8 @@ export default class MapAppArcGIS2D {
               drawlayer.addDrawLayer(layerConfig);
               break;
             case 'image':
-              const heat = HeatImage2D.getInstance(view);
-              heat.addImage({images: layerConfig, points: []});
+              const heat = ImageOverlays.getInstance(view);
+              heat.addImage(layerConfig);
               break;
           }
           // if (layer) {
