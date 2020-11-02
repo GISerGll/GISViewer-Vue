@@ -481,12 +481,14 @@ export default class SelectRoute2D {
       linkGraphicArray.forEach((linkGraphic) => {
         const candidateLink = linkGraphic.clone();
         const linkKind = linkGraphic.attributes.KIND;
+        console.log(linkKind, this.isCrossLink(linkKind));
         candidateLink.symbol = {
           type: "simple-line",
           style: this.isCrossLink(linkKind) ? "short-dash" : "solid",
           color: "dodgerblue",
           width: 4,
         } as any;
+        console.log(candidateLink.symbol);
         candidateLink.popupTemplate = {
           ...this.popupTemplate,
           actions: [this.addLinkButton, this.endRouteButton],
@@ -523,6 +525,13 @@ export default class SelectRoute2D {
   private isCrossLink(linkKind: string): boolean {
     // 交叉点内link会有两个属性，属性1|属性2
     // 属性1继承主路的属性，属性2是把属性1的最后两位改为0x04
+    const kindArray = linkKind.split("|");
+    for (let i = 0; i < kindArray.length; i++) {
+      const kind = kindArray[i];
+      if (kind.endsWith("04")) {
+        return true;
+      }
+    }
     return false;
   }
 
