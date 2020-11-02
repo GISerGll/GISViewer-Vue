@@ -11,13 +11,13 @@ export default class SelectRoute2D {
   private view!: __esri.MapView;
 
   /** 显示全部路网的图层 */
-  private allRoadLayer!: __esri.FeatureLayer;
-  /** 显示已选定道路的图层 */
-  private selectedRoadLayer!: __esri.GraphicsLayer;
-  /** 显示候选道路的图层 */
-  private candidateRoadLayer!: __esri.GraphicsLayer;
-  /** 已选定的道路graphic */
-  private selectedRoadGraphicArray: Array<__esri.Graphic> = [];
+  private allLinkLayer!: __esri.FeatureLayer;
+  /** 显示已选定Link的图层 */
+  private selectedLinkLayer!: __esri.GraphicsLayer;
+  /** 显示候选Link的图层 */
+  private candidateLinkLayer!: __esri.GraphicsLayer;
+  /** 已选定的Link graphic */
+  private selectedLinkGraphicArray: Array<__esri.Graphic> = [];
 
   /** 显示全部信号机的图层 */
   private allTrafficSignalLayer!: __esri.FeatureLayer;
@@ -35,33 +35,38 @@ export default class SelectRoute2D {
   /** 搜索信号机的缓冲距离 */
   private readonly bufferDistance = 20;
 
+  /** 将Link设为路径起点 */
   private beginRouteButton = {
     title: "开始",
     id: "beginRoute",
     className: "esri-icon-play",
   } as __esri.ActionButton;
 
+  /** 将Link设为路径终点 */
   private endRouteButton = {
     title: "结束",
     id: "endRoute",
     className: "esri-icon-check-mark",
   } as __esri.ActionButton;
 
-  private addRoadButton = {
+  /** 将Link添加到路径中 */
+  private addLinkButton = {
     title: "添加",
-    id: "addRoad",
+    id: "addLink",
     className: "esri-icon-plus",
   } as __esri.ActionButton;
 
-  private reSelectNextRoadButton = {
+  /** 重设此Link的后续 */
+  private reSelectNextLinkButton = {
     title: "重选",
-    id: "reSelectNextRoad",
+    id: "reSelectNextLink",
     className: "esri-icon-forward",
   } as __esri.ActionButton;
 
-  private resetAllRoadButton = {
+  /** 重置全部路径 */
+  private resetRouteButton = {
     title: "重设",
-    id: "resetAllRoad",
+    id: "resetRoute",
     className: "esri-icon-close",
   } as __esri.ActionButton;
 
@@ -112,42 +117,42 @@ export default class SelectRoute2D {
 
       switch (event.action.id) {
         case "beginRoute": {
-          // 选好起点后路网不再能点击，只能点击候选路段
-          this.allRoadLayer.popupEnabled = false;
+          // 选好起点后路网不再能点击，只能点击候选link
+          this.allLinkLayer.popupEnabled = false;
           this.mouseMoveHandler.remove();
-          this.selectedRoadGraphicArray = [];
+          this.selectedLinkGraphicArray = [];
 
           // popup.selectedFeature.attributes只包含popupTemplate中配置的字段
           // 只能用FID来查找ID
           const { FID } = this.view.popup.selectedFeature.attributes;
-          const selectedGraphic = await this.getRoadGraphicByFID(FID);
-          this.addSelectedRoad(selectedGraphic.clone());
+          const selectedGraphic = await this.getLinkGraphicByFID(FID);
+          this.addSelectedLink(selectedGraphic.clone());
 
           break;
         }
 
-        case "addRoad": {
+        case "addLink": {
           const { FID } = this.view.popup.selectedFeature.attributes;
-          const selectedGraphic = await this.getRoadGraphicByFID(FID);
-          this.addSelectedRoad(selectedGraphic.clone());
+          const selectedGraphic = await this.getLinkGraphicByFID(FID);
+          this.addSelectedLink(selectedGraphic.clone());
           break;
         }
 
-        case "reSelectNextRoad": {
+        case "reSelectNextLink": {
           const { FID } = this.view.popup.selectedFeature.attributes;
-          const selectedGraphic = await this.getRoadGraphicByFID(FID);
+          const selectedGraphic = await this.getLinkGraphicByFID(FID);
 
-          //从已选定路段中移除当前及之后路段
-          this.reSelectRoad(selectedGraphic.attributes["ID"]);
+          //从已选定link中移除当前及之后link
+          this.reSelectLink(selectedGraphic.attributes["ID"]);
 
           break;
         }
 
         case "endRoute": {
           const { FID } = this.view.popup.selectedFeature.attributes;
-          const selectedGraphic = await this.getRoadGraphicByFID(FID);
-          await this.addSelectedRoad(selectedGraphic.clone(), true);
-          await this.view.goTo(this.selectedRoadGraphicArray);
+          const selectedGraphic = await this.getLinkGraphicByFID(FID);
+          await this.addSelectedLink(selectedGraphic.clone(), true);
+          await this.view.goTo(this.selectedLinkGraphicArray);
           this.view.zoom -= 1;
 
           this.emitRouteResult();
@@ -163,9 +168,9 @@ export default class SelectRoute2D {
     const lastPoint = this.getRouteEndPoint();
 
     let routeLength = 0;
-    this.selectedRoadGraphicArray.forEach((graphic) => {
-      const roadLength = graphic.attributes["LENGTH"] * 1000;
-      routeLength += roadLength;
+    this.selectedLinkGraphicArray.forEach((linkGraphic) => {
+      const linkLength = linkGraphic.attributes["LENGTH"] * 1000;
+      routeLength += linkLength;
     });
 
     const signals = [];
@@ -184,12 +189,12 @@ export default class SelectRoute2D {
     }
 
     if (this.selectRouteFinished) {
-      const roadIds = this.selectedRoadGraphicArray.map(
-        (graphic: __esri.Graphic) => graphic.attributes["ID"]
+      const linkIds = this.selectedLinkGraphicArray.map(
+        (linkGraphic: __esri.Graphic) => linkGraphic.attributes["ID"]
       );
       this.selectRouteFinished({
         routeInfo: {
-          ids: roadIds,
+          ids: linkIds,
           startPoint: [firstPoint.x, firstPoint.y],
           endPoint: [lastPoint.x, lastPoint.y],
           length: routeLength,
@@ -201,7 +206,7 @@ export default class SelectRoute2D {
     }
   }
 
-  /** 读取路段数据，并显示路段 */
+  /** 读取link数据，并显示link */
   public async initializeRoute(params: ISelectRouteParam) {
     const roadNetworkUrl =
       params?.roadUrl ??
@@ -228,10 +233,10 @@ export default class SelectRoute2D {
       "esri/layers/FeatureLayer",
     ]) as Promise<MapModules>);
 
-    if (this.allRoadLayer) {
-      this.allRoadLayer.popupEnabled = true;
+    if (this.allLinkLayer) {
+      this.allLinkLayer.popupEnabled = true;
     } else {
-      this.allRoadLayer = new FeatureLayer({
+      this.allLinkLayer = new FeatureLayer({
         url: roadNetworkUrl,
         visible: params?.showRoad ?? true,
         popupTemplate: {
@@ -247,21 +252,21 @@ export default class SelectRoute2D {
           },
         } as any,
       });
-      this.view.map.add(this.allRoadLayer);
+      this.view.map.add(this.allLinkLayer);
     }
 
-    if (this.selectedRoadLayer) {
-      this.selectedRoadLayer.removeAll();
+    if (this.selectedLinkLayer) {
+      this.selectedLinkLayer.removeAll();
     } else {
-      this.selectedRoadLayer = new GraphicsLayer();
-      this.view.map.add(this.selectedRoadLayer);
+      this.selectedLinkLayer = new GraphicsLayer();
+      this.view.map.add(this.selectedLinkLayer);
     }
 
-    if (this.candidateRoadLayer) {
-      this.candidateRoadLayer.removeAll();
+    if (this.candidateLinkLayer) {
+      this.candidateLinkLayer.removeAll();
     } else {
-      this.candidateRoadLayer = new GraphicsLayer();
-      this.view.map.add(this.candidateRoadLayer);
+      this.candidateLinkLayer = new GraphicsLayer();
+      this.view.map.add(this.candidateLinkLayer);
     }
 
     if (!this.allTrafficSignalLayer) {
@@ -299,7 +304,7 @@ export default class SelectRoute2D {
       this.view.map.add(this.playRouteLayer);
     }
 
-    this.selectedRoadGraphicArray = [];
+    this.selectedLinkGraphicArray = [];
     this.selectedTrafficSignalIdArray = [];
 
     this.mouseMoveHandler = this.view.on(
@@ -313,10 +318,10 @@ export default class SelectRoute2D {
   private async onPointerMoveHandler(event: any) {
     // 当前有弹框显示时，不再打开新弹框
     if (this.view.popup.visible) {
-      return
+      return;
     }
     const result = await this.view.hitTest(event, {
-      include: [this.allRoadLayer],
+      include: [this.allLinkLayer],
     });
     if (result.results.length > 0) {
       const graphic = result.results[0].graphic;
@@ -329,21 +334,21 @@ export default class SelectRoute2D {
     }
   }
 
-  /** 根据FID查找道路Graphic */
-  private async getRoadGraphicByFID(fid: string): Promise<__esri.Graphic> {
-    const query = this.allRoadLayer.createQuery();
+  /** 根据FID查找link Graphic */
+  private async getLinkGraphicByFID(fid: string): Promise<__esri.Graphic> {
+    const query = this.allLinkLayer.createQuery();
     query.where = `FID=${fid}`;
-    const results = await this.allRoadLayer.queryFeatures(query);
+    const results = await this.allLinkLayer.queryFeatures(query);
     return results.features[0];
   }
 
-  /** 根据ID查找Graphic */
-  private async getRoadGraphicByRoadId(
-    roadId: string
+  /** 根据ID查找link Graphic */
+  private async getLinkGraphicByLinkId(
+    linkId: string
   ): Promise<__esri.Graphic | void> {
-    const query = this.allRoadLayer.createQuery();
-    query.where = `ID='${roadId}'`;
-    const results = await this.allRoadLayer.queryFeatures(query);
+    const query = this.allLinkLayer.createQuery();
+    query.where = `ID='${linkId}'`;
+    const results = await this.allLinkLayer.queryFeatures(query);
     if (results.features.length > 0) {
       return results.features[0];
     } else {
@@ -396,12 +401,12 @@ export default class SelectRoute2D {
   }
 
   /**
-   * 显示当前已选定的路段
-   * @param isLastRoad 是否为最后一个路段
+   * 显示当前已选定的link
+   * @param isLastLink 是否为最后一个link
    * */
-  private async addSelectedRoad(
+  private async addSelectedLink(
     graphic: __esri.Graphic,
-    isLastRoad: boolean = false
+    isLastLink: boolean = false
   ) {
     graphic.symbol = {
       type: "simple-line",
@@ -410,10 +415,10 @@ export default class SelectRoute2D {
     } as any;
     graphic.popupTemplate = {
       ...this.popupTemplate,
-      actions: [this.reSelectNextRoadButton, this.endRouteButton],
+      actions: [this.reSelectNextLinkButton, this.endRouteButton],
     } as any;
-    this.selectedRoadLayer.add(graphic);
-    this.selectedRoadGraphicArray.push(graphic);
+    this.selectedLinkLayer.add(graphic);
+    this.selectedLinkGraphicArray.push(graphic);
 
     const center = (graphic.geometry as __esri.Polyline).extent.center;
     this.view.goTo(center);
@@ -421,72 +426,77 @@ export default class SelectRoute2D {
     // 搜索周边信号机
     await this.searchTrafficSignal(graphic.geometry);
 
-    // 显示候选路段
-    this.candidateRoadLayer.removeAll();
-    if (!isLastRoad) {
-      this.showNextRoad(graphic.attributes["EROADID"]);
+    // 显示候选link
+    this.candidateLinkLayer.removeAll();
+    if (!isLastLink) {
+      this.showNextLink(graphic.attributes["EROADID"]);
     }
   }
 
-  /** 删除此路段后的选定路段，重新显示待选路段 */
-  private reSelectRoad(roadId: string) {
-    let roadIndex = 0;
-    for (let i = 0; i < this.selectedRoadGraphicArray.length; i++) {
-      const graphic = this.selectedRoadGraphicArray[i];
-      if (graphic.attributes["ID"] === roadId) {
-        roadIndex = i;
+  /** 删除此link后的选定link，重新显示待选lilnk */
+  private reSelectLink(linkId: string) {
+    let linkIndex = 0;
+    for (let i = 0; i < this.selectedLinkGraphicArray.length; i++) {
+      const linkGraphic = this.selectedLinkGraphicArray[i];
+      if (linkGraphic.attributes["ID"] === linkId) {
+        linkIndex = i;
         break;
       }
     }
-    const removeGraphics = this.selectedRoadGraphicArray.slice(roadIndex);
-    this.selectedRoadGraphicArray = this.selectedRoadGraphicArray.slice(
+    // 要删除的link
+    const removeGraphics = this.selectedLinkGraphicArray.slice(linkIndex);
+    this.selectedLinkGraphicArray = this.selectedLinkGraphicArray.slice(
       0,
-      roadIndex
+      linkIndex
     );
-    this.selectedRoadLayer.removeMany(removeGraphics);
-    this.addSelectedRoad(removeGraphics[0]);
+    this.selectedLinkLayer.removeMany(removeGraphics);
+    // 重新添加用户点击的link，显示待选link
+    this.addSelectedLink(removeGraphics[0]);
   }
 
-  /** 显示多条待选路段 */
-  private async showNextRoad(roadIds: string) {
+  /** 显示多条待选link */
+  private async showNextLink(linkIds: string) {
     // 去掉最后的逗号，否则split时会多一个空元素
-    if (roadIds.substring(roadIds.length - 1, roadIds.length) === ",") {
-      roadIds = roadIds.substring(0, roadIds.length - 1);
+    if (linkIds.substring(linkIds.length - 1, linkIds.length) === ",") {
+      linkIds = linkIds.substring(0, linkIds.length - 1);
     }
-    const roadIdArray = roadIds.split(",");
-    const roadGraphicArray: Array<__esri.Graphic> = [];
+    const linkIdArray = linkIds.split(",");
+    const linkGraphicArray: Array<__esri.Graphic> = [];
 
-    for (let i = 0; i < roadIdArray.length; i++) {
-      const roadId = roadIdArray[i];
-      const roadGraphic = await this.getRoadGraphicByRoadId(roadId);
-      if (roadGraphic) {
-        roadGraphicArray.push(roadGraphic);
+    for (let i = 0; i < linkIdArray.length; i++) {
+      const linkId = linkIdArray[i];
+      const linkGraphic = await this.getLinkGraphicByLinkId(linkId);
+      if (linkGraphic) {
+        linkGraphicArray.push(linkGraphic);
       }
     }
 
     const geometryToUnion: Array<__esri.Geometry> = [];
-    if (roadGraphicArray.length === 1) {
-      // 如果只有一个后续路段直接添加
-      const roadGraphic = roadGraphicArray[0];
-      this.addSelectedRoad(roadGraphic);
+    if (linkGraphicArray.length === 1) {
+      // 如果只有一个后续link直接添加
+      const linkGraphic = linkGraphicArray[0];
+      this.addSelectedLink(linkGraphic);
     } else {
-      // 有多个后续路段时需要同时显示，让用户选择
-      roadGraphicArray.forEach((roadGraphic) => {
-        const candidateRoad = roadGraphic.clone();
-        candidateRoad.symbol = {
+      // 有多个后续link时需要同时显示，让用户选择
+      linkGraphicArray.forEach((linkGraphic) => {
+        const candidateLink = linkGraphic.clone();
+        const linkKind = linkGraphic.attributes.KIND;
+        candidateLink.symbol = {
           type: "simple-line",
+          style: this.isCrossLink(linkKind) ? "short-dash" : "solid",
           color: "dodgerblue",
           width: 4,
         } as any;
-        candidateRoad.popupTemplate = {
+        candidateLink.popupTemplate = {
           ...this.popupTemplate,
-          actions: [this.addRoadButton, this.endRouteButton],
+          actions: [this.addLinkButton, this.endRouteButton],
         } as any;
-        this.candidateRoadLayer.add(candidateRoad);
-        geometryToUnion.push(candidateRoad.geometry);
+
+        this.candidateLinkLayer.add(candidateLink);
+        geometryToUnion.push(candidateLink.geometry);
       });
 
-      // 调整地图显示范围，能显示全部候选路段
+      // 调整地图显示范围，能显示全部候选link
       if (geometryToUnion.length > 0) {
         type MapModules = [typeof import("esri/geometry/geometryEngineAsync")];
         const [geometryEngineAsync] = await (loadModules([
@@ -501,26 +511,41 @@ export default class SelectRoute2D {
     }
   }
 
+  /**
+   * 遇到交叉点的转接link时，继续往前搜索，找到第一个主路设为待选link
+   */
+  private async showNextLinkForCross(linkId: string) {}
+
+  /**
+   * 是否为交叉点内link
+   * @param linkKind 道路属性
+   */
+  private isCrossLink(linkKind: string): boolean {
+    // 交叉点内link会有两个属性，属性1|属性2
+    // 属性1继承主路的属性，属性2是把属性1的最后两位改为0x04
+    return false;
+  }
+
   /** 显示选择好的道路 */
   public async showSelectedRoute(params: ISelectRouteResult) {
-    this.allRoadLayer.popupEnabled = false;
+    this.allLinkLayer.popupEnabled = false;
     this.mouseMoveHandler.remove();
 
-    const roadIds = params.routeInfo.ids;
+    const linkIds = params.routeInfo.ids;
 
-    this.selectedRoadLayer.removeAll();
-    this.selectedRoadGraphicArray = [];
-    for (let i = 0; i < roadIds.length; i++) {
-      const roadId = roadIds[i];
-      const roadGraphic = await this.getRoadGraphicByRoadId(roadId);
-      if (roadGraphic) {
-        roadGraphic.symbol = {
+    this.selectedLinkLayer.removeAll();
+    this.selectedLinkGraphicArray = [];
+    for (let i = 0; i < linkIds.length; i++) {
+      const linkId = linkIds[i];
+      const linkGraphic = await this.getLinkGraphicByLinkId(linkId);
+      if (linkGraphic) {
+        linkGraphic.symbol = {
           type: "simple-line",
           color: "red",
           width: 4,
         } as any;
-        this.selectedRoadLayer.add(roadGraphic);
-        this.selectedRoadGraphicArray.push(roadGraphic);
+        this.selectedLinkLayer.add(linkGraphic);
+        this.selectedLinkGraphicArray.push(linkGraphic);
       }
     }
 
@@ -565,7 +590,7 @@ export default class SelectRoute2D {
         yoffset: "20px",
       } as any,
     });
-    this.selectedRoadLayer.add(firstGraphic);
+    this.selectedLinkLayer.add(firstGraphic);
 
     const lastGraphic = new Graphic({
       geometry: lastPoint,
@@ -578,18 +603,18 @@ export default class SelectRoute2D {
         yoffset: "20px",
       } as any,
     });
-    this.selectedRoadLayer.add(lastGraphic);
+    this.selectedLinkLayer.add(lastGraphic);
 
-    await this.view.goTo(this.selectedRoadGraphicArray);
+    await this.view.goTo(this.selectedLinkGraphicArray);
     this.view.zoom -= 1;
   }
 
-  /** 获取路段的起点 */
+  /** 获取link的起点 */
   private getPolylineFirstPoint(line: __esri.Polyline): __esri.Point {
     return line.getPoint(0, 0);
   }
 
-  /** 获取路段的终点 */
+  /** 获取link的终点 */
   private getPolylineLastPoint(line: __esri.Polyline): __esri.Point {
     const path = line.paths[0];
     return line.getPoint(0, path.length - 1);
@@ -597,8 +622,8 @@ export default class SelectRoute2D {
 
   /** 获取路径的起点 */
   private getRouteBeginPoint(): __esri.Point {
-    const lineGraphic = this.selectedRoadGraphicArray[0];
-    // direction=3时，反向路段，起止点交换
+    const lineGraphic = this.selectedLinkGraphicArray[0];
+    // direction=3时，反向link，起止点交换
     const firstPoint =
       lineGraphic.attributes["DIRECTION"] === "3"
         ? this.getPolylineLastPoint(lineGraphic.geometry as __esri.Polyline)
@@ -608,8 +633,8 @@ export default class SelectRoute2D {
 
   /** 获取路径的终点 */
   private getRouteEndPoint(): __esri.Point {
-    const lineGraphic = this.selectedRoadGraphicArray[
-      this.selectedRoadGraphicArray.length - 1
+    const lineGraphic = this.selectedLinkGraphicArray[
+      this.selectedLinkGraphicArray.length - 1
     ];
 
     // direction=3时，反向车道
@@ -626,7 +651,7 @@ export default class SelectRoute2D {
    * 播放车辆移动动画
    */
   public async playSelectedRoute(speed: number) {
-    if (!this.selectedRoadGraphicArray.length) {
+    if (!this.selectedLinkGraphicArray.length) {
       return;
     }
 
@@ -637,11 +662,11 @@ export default class SelectRoute2D {
     // 每帧前进距离
     const lengthPerFrame = speedInSeconds / framePerSecond;
 
-    // 将几个路段的path合并到一个path中
+    // 将几个link的path合并到一个path中
     const totalPath: Array<any> = [];
-    this.selectedRoadGraphicArray.forEach((graphic) => {
+    this.selectedLinkGraphicArray.forEach((graphic) => {
       let path = (graphic.geometry as __esri.Polyline).paths[0];
-      // 反向路段，坐标倒序
+      // 反向link，坐标倒序
       if (graphic.attributes["DIRECTION"] === "3") {
         path.reverse();
       }
