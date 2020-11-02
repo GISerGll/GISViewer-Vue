@@ -147,15 +147,14 @@ export interface IOverlayClusterParameter {
 }
 
 export interface IDrawOverlayParameter {
-  drawType?: string;
+  drawType: string;
   defaultSymbol?: IPointSymbol | IPolylineSymbol | IPolygonSymbol;
   showPopup?: boolean;
   showTooltip?: boolean;
   type?: string;               //覆盖物类型, 用于按编号/类型删除
   generateId?: boolean;                 //是否随机生成覆盖物编号, 用于按编号/类型删除
-  clearLastResults?: boolean;  //清除上一次绘画结果（调用一次方法只能存在一个graphic）
+  clearLastResult?: boolean;  //清除上一次绘画结果（调用一次方法只能存在一个graphic）
 }
-
 export interface IMapContainer {
   // addLayer: (param:ILayerConfig) => Promise<IResult>;
   // deleteLayer: (param:ILayerConfig) => Promise<IResult>;
@@ -172,6 +171,8 @@ export interface IMapContainer {
   deleteHeatMap: () => void;
   showLayer: (param: ILayerConfig) => Promise<IResult>;
   hideLayer: (param: ILayerConfig) => Promise<IResult>;
+  hideOverlays: (param: IDrawOverlaysDelete) => Promise<IResult>;
+  showOverlays: (param: IDrawOverlaysDelete) => Promise<IResult>;
   setMapCenter: (param: IPointGeometry) => void;
   setMapCenterAndLevel: (param: ICenterLevel) => void;
   showJurisdiction: () => void;
@@ -179,12 +180,13 @@ export interface IMapContainer {
   showDistrictMask: (param: IDistrictParameter) => void;
   hideDistrictMask: () => void;
   findFeature: (param: IFindParameter) => any;
+  findOverlays: (param: IFindParameter) => Promise<IResult>;
   showRoad: (param: {ids: string[]}) => void;
   hideRoad: () => void;
   showStreet: () => void;
   hideStreet: () => void;
   locateStreet: (param: IStreetParameter) => void;
-  startDrawOverlays: (param: IDrawOverlayParameter) => Promise<IResult>
+  startDrawOverlays: (param: IDrawOverlays) => Promise<void>
   startTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>
   startRealTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>
   pausePlayback: () => void;
@@ -220,7 +222,8 @@ export interface IMapContainer {
   changeDgeneOut: () => void;
   initializeRouteSelect: (params: ISelectRouteParam) => Promise<void>;
   showSelectedRoute: (params: ISelectRouteResult) => Promise<void>;
-  stopDrawOverlays: () => Promise<void>;
+  stopDrawOverlays: (params:any) => Promise<IResult>;
+  deleteDrawOverlays: (params:IDrawOverlaysDelete) => Promise<IResult>;
   getDrawOverlays: () => Promise<IResult>;
   arcgisLoadGDLayer: () => void;
 }
@@ -393,7 +396,10 @@ export interface ISelectRouteParam {
   roadUrl?: string;
   trafficSignalUrl?: string;
 }
-
+export interface IDrawOverlaysDelete {
+  ids?:string[],
+  types?:string[],
+}
 export interface ISelectRouteResult {
   routeInfo: {
     ids: Array<string>;

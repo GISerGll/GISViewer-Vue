@@ -23,7 +23,7 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays
+  IDrawOverlays, IDrawOverlaysDelete
 } from '@/types/map';
 @Component({
   name: 'MapAppBaidu'
@@ -117,7 +117,7 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
   public async startRealTrackPlayback() :Promise<any>{}
   public pausePlayback(){}
   public goOnPlayback(){}
-  public async startDrawOverlays():Promise<any>{}
+  // public async startDrawOverlays():Promise<any>{}
   public async showTooltip(param:Vue.Component):Promise<any>{
     return this.mapApp.showTooltip(param);
   }
@@ -167,11 +167,28 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
 
   public async initializeRouteSelect(params: ISelectRouteParam) {}
   public async showSelectedRoute(params: ISelectRouteResult) {}
-  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
-  public async stopDrawOverlays(): Promise<void> {}
-  public async getDrawOverlays(): Promise<IResult> {
-    return {status: 0, message: ''};
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
+    return this.mapApp.startDrawOverlays(params);
   }
+  public async stopDrawOverlays(params:any): Promise<IResult> {
+    return await this.mapApp.stopDrawOverlays(params);
+  }
+  public async getDrawOverlays(): Promise<IResult> {
+    return await this.mapApp.getDrawOverlays();
+  }
+  public async deleteDrawOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
+    return this.mapApp.deleteDrawOverlays(params)
+  }
+  public async hideOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
+    return this.mapApp.hideOverlays(params)
+  }
+  public async showOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
+    return this.mapApp.showOverlays(params)
+  }
+  public async findOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
+    return this.mapApp.findOverlays(params)
+  }
+
 }
 </script>
 

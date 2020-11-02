@@ -18,7 +18,7 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays
+  IDrawOverlays, IDrawOverlaysDelete, IDrawOverlayParameter
 } from '@/types/map';
 import {OverlayGaode} from '@/plugin/gis-viewer/widgets/Overlays/gd/OverlayGaode';
 import {JurisdictionPoliceGD} from './widgets/JurisdictionPolice/gd/JurisdictionPoliceGD';
@@ -308,7 +308,7 @@ export default class MapAppGaode implements IMapContainer {
   public async startRealTrackPlayback() :Promise<any>{}
   public pausePlayback(){}
   public goOnPlayback(){}
-  public async startDrawOverlays():Promise<any>{}
+  // public async startDrawOverlays():Promise<any>{}
   public async showTooltip(param:Vue.Component):Promise<any>{
       const tooltip = OverlayGaode.getInstance(this.view);
       return await tooltip.showToolTip(param);
@@ -370,8 +370,22 @@ export default class MapAppGaode implements IMapContainer {
   public async showSelectedRoute(params: ISelectRouteResult) {}
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
-  public async stopDrawOverlays(): Promise<void> {}
+  public async stopDrawOverlays(): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
   public async getDrawOverlays(): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public async hideOverlays(params:IDrawOverlaysDelete):Promise<IResult> {
+    return {status:0, message:''}
+  }
+  public async showOverlays(params:IDrawOverlaysDelete):Promise<IResult> {
+    return {status:0, message:''}
+  }
+  public async deleteDrawOverlays(params: IDrawOverlaysDelete): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public async findOverlays(params:IFindParameter):Promise<IResult> {
     return {status: 0, message: ''};
   }
 }

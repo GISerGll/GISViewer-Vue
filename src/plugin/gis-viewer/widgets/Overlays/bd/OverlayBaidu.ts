@@ -273,20 +273,100 @@ export class OverlayBaidu {
     let level = params.level || this.view.getZoom();
     let overlays = this.overlays;
     let centerResult = params.centerResult;
-    overlays.forEach((overlay) => {
+    let _this = this;
+
+    for(let overlay of overlays){
+      await overlayAnimation(overlay);
+    }
+
+    async function overlayAnimation(overlay:any) {
       if (type == overlay.type && ids.indexOf(overlay.id) >= 0) {
         if (centerResult) {
           let center = overlay.getPosition();
           if (center.lat !== null && center.lng !== null) {
-            this.view.centerAndZoom(overlay.getPosition(), level);
+            await _this.view.centerAndZoom(overlay.getPosition(), level);
           }
         }
         overlay.setAnimation(2);
-        setTimeout(function() {
-          overlay.setAnimation(0);
-        }, 3600);
+        await sleep();
+        overlay.setAnimation(0);
+      }
+    }
+
+    async function sleep() {
+      return new Promise((resolve)=>{
+        setTimeout(()=>{
+          resolve();
+        },3000)
+      })
+    }
+  }
+  public async hideOverlays(params:IOverlayDelete): Promise<IResult> {
+    const overlays = this.view.getOverlays();
+    let types = params.types || [];
+    let ids = params.ids || [];
+
+    let hideCount = 0;
+    overlays.forEach((overlay:any) => {
+      if (
+          //只判断type
+          (types.length > 0 &&
+              ids.length === 0 &&
+              types.indexOf(overlay.type) >= 0) ||
+          //只判断id
+          (types.length === 0 &&
+              ids.length > 0 &&
+              ids.indexOf(overlay.id) >= 0) ||
+          //type和id都要判断
+          (types.length > 0 &&
+              ids.length > 0 &&
+              types.indexOf(overlay.type) >= 0 &&
+              ids.indexOf(overlay.id) >= 0)
+      ) {
+        overlay.hide();
+        if (overlay.isOpenInfo === true) {
+          this.view.closeInfoWindow();
+        }
+        hideCount++;
       }
     });
+    return {
+      status:0,
+      message:'成功调用改方法！',
+      result:`成功隐藏${hideCount}个覆盖物`
+    }
+  }
+  public async showOverlays(params:IOverlayDelete): Promise<IResult> {
+    const overlays = this.view.getOverlays();
+    let types = params.types || [];
+    let ids = params.ids || [];
+
+    let showCount = 0;
+    overlays.forEach((overlay:any) => {
+      if (
+          //只判断type
+          (types.length > 0 &&
+              ids.length === 0 &&
+              types.indexOf(overlay.type) >= 0) ||
+          //只判断id
+          (types.length === 0 &&
+              ids.length > 0 &&
+              ids.indexOf(overlay.id) >= 0) ||
+          //type和id都要判断
+          (types.length > 0 &&
+              ids.length > 0 &&
+              types.indexOf(overlay.type) >= 0 &&
+              ids.indexOf(overlay.id) >= 0)
+      ) {
+        overlay.show();
+        showCount++;
+      }
+    });
+    return {
+      status:0,
+      message:'成功调用改方法！',
+      result:`成功隐藏${showCount}个覆盖物`
+    }
   }
   public async addOverlaysCluster(params: IOverlayClusterParameter): Promise<IResult> {
     const _this = this;
@@ -363,6 +443,10 @@ export class OverlayBaidu {
     this.view.closeInfoWindow();
   }
   public async deleteOverlays(params: IOverlayDelete) {
+    if(!params){
+      console.error('no ids or types input,call "deleteAllOverlays" if you want!');
+      return ;
+    }
     let types = params.types || [];
     let ids = params.ids || [];
     let delCount = 0;
@@ -440,7 +524,7 @@ export class OverlayBaidu {
     switch (popupType) {
       case "showPopup":
         this.view.addEventListener('click',(e:any)=>{
-          if(e.overlay){
+          if(e.overlay && e.overlay.attributes && e.overlay.attributes.popupWindow){
             let overlay = e.overlay;
             let content = overlay.attributes.popupWindow;
             let center = e.overlay.getPosition();
@@ -461,7 +545,7 @@ export class OverlayBaidu {
         break;
       case "showTooltip":
         this.view.addEventListener('click',(e:any)=>{
-          if(e.overlay){
+          if(e.overlay&& e.overlay.attributes && e.overlay.attributes.tooltipWindow){
             let overlay = e.overlay;
             let content = overlay.attributes.popupWindow;
             let center = e.overlay.getPosition();
@@ -507,7 +591,7 @@ export class OverlayBaidu {
     switch (popupType) {
       case "movePopup":
         this.view.addEventListener('mousemove',(e:any)=>{
-          if(e.overlay){
+          if(e.overlay && e.overlay.attributes && e.overlay.attributes.popupWindow){
             let overlay = e.overlay;
             let content = overlay.attributes.popupWindow;
             let center = e.overlay.getPosition();
@@ -533,9 +617,9 @@ export class OverlayBaidu {
         break;
       case "moveTooltip":
         this.view.addEventListener('mousemove',(e:any)=>{
-          if(e.overlay){
+          if(e.overlay && e.overlay.attributes && e.overlay.attributes.tooltipWindow){
             let overlay = e.overlay;
-            let content = overlay.attributes.popupWindow;
+            let content = overlay.attributes.tooltipWindow;
             let center = e.overlay.getPosition();
 
             if (this.tooltip) {

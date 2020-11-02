@@ -19,12 +19,13 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays
+  IDrawOverlays, IDrawOverlaysDelete
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
 import {JurisdictionPolice} from './widgets/JurisdictionPolice/bd/JurisdictionPolice';
 import {Utils} from '@/plugin/gis-viewer/Utils';
+import DrawOverlaysBD from "@/plugin/gis-viewer/widgets/DrawOverlays/bd/DrawOverlaysBD";
 
 declare let BMap: any;
 
@@ -40,6 +41,7 @@ export default class MapAppBaidu implements IMapContainer {
     // const apiRoot = mapConfig.baidu_api.substring(0, apiUrl.lastIndexOf('/'));
     const mapV = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/mapv.js';
     const heatMap = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/Heatmap_min.js';
+    const drawManager = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/DrawingManager_min.js';
     const cluster1 = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/TextIconOverlay.js'
     const cluster2 = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/MarkerClusterer.js';
     await Utils.loadScripts([
@@ -47,10 +49,13 @@ export default class MapAppBaidu implements IMapContainer {
       mapV,
     ]).then(()=>{               //heatMap需要BMap
       Utils.loadScripts([
-          heatMap,
-          cluster1,
-          cluster2
-      ])
+        heatMap,
+        cluster1,
+        cluster2,
+        drawManager,
+      ]).then(()=>{
+        console.log('scripts Loaded!');
+      });
     })
 
     view = new BMap.Map(mapContainer);
@@ -273,7 +278,7 @@ export default class MapAppBaidu implements IMapContainer {
   public async startRealTrackPlayback() :Promise<any>{}
   public pausePlayback(){}
   public goOnPlayback(){}
-  public async startDrawOverlays():Promise<any>{}
+  // public async startDrawOverlays():Promise<any>{}
   public async showTooltip(param:Vue.Component):Promise<any>{
     const overlay = OverlayBaidu.getInstance(this.view);
     return await overlay.showToolTip(param);
@@ -318,9 +323,33 @@ export default class MapAppBaidu implements IMapContainer {
   public async initializeRouteSelect(params: ISelectRouteParam) {}
   public async showSelectedRoute(params: ISelectRouteResult) {}
 
-  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
-  public async stopDrawOverlays(): Promise<void> {}
-  public async getDrawOverlays(): Promise<IResult> {
-    return {status: 0, message: ''};
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
+    const drawOverlays = DrawOverlaysBD.getInstance(this.view);
+    return await drawOverlays.startDrawOverlays(params);
   }
+  public async stopDrawOverlays(params:any): Promise<IResult> {
+    const drawOverlays = DrawOverlaysBD.getInstance(this.view);
+    return await drawOverlays.stopDrawOverlays(params);
+  }
+  public async getDrawOverlays(): Promise<IResult> {
+    const drawOverlays = DrawOverlaysBD.getInstance(this.view);
+    return await drawOverlays.getDrawOverlays();
+  }
+  public async deleteDrawOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
+    const drawOverlays = DrawOverlaysBD.getInstance(this.view);
+    return await drawOverlays.deleteDrawOverlays(params);
+  }
+  public async hideOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
+    const overlays = OverlayBaidu.getInstance(this.view);
+    return await overlays.hideOverlays(params);
+  }
+  public async showOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
+    const overlays = OverlayBaidu.getInstance(this.view);
+    return await overlays.showOverlays(params);
+  }
+  public async findOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
+    const overlays = OverlayBaidu.getInstance(this.view);
+    return await overlays.findOverlays(params);
+  }
+
 }

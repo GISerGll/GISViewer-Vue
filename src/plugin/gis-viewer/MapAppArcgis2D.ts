@@ -670,10 +670,10 @@ export default class MapAppArcGIS2D {
     const heatmap = HeatMap.getInstance(this.view);
     return await heatmap.deleteHeatMap();
   }
-  public async startDrawOverlays(params: IDrawOverlayParameter):Promise<IResult>{
-    const drawOverlay = Draw2D.getInstance(this.view);
-    return await drawOverlay.startDrawOverlays(params);
-  }
+  // public async startDrawOverlays(params: IDrawOverlayParameter):Promise<IResult>{
+  //   const drawOverlay = Draw2D.getInstance(this.view);
+  //   return await drawOverlay.startDrawOverlays(params);
+  // }
   public async startTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
       const trackPlayback = TrackPlayback.getInstance(this.view);
       return await trackPlayback.startTrackPlayback(params);
@@ -829,7 +829,7 @@ export default class MapAppArcGIS2D {
     const drawoverlay = DrawOverlays.getInstance(this.view);
     return await drawoverlay.startDrawOverlays(params);
   }
-  public async stopDrawOverlays(): Promise<void> {
+  public async stopDrawOverlays(): Promise<IResult> {
     const drawoverlay = DrawOverlays.getInstance(this.view);
     return await drawoverlay.stopDrawOverlays();
   }
@@ -837,4 +837,7 @@ export default class MapAppArcGIS2D {
     const drawoverlay = DrawOverlays.getInstance(this.view);
     return await drawoverlay.getDrawOverlays();
   }
+  public async hideOverlays(params:IDrawOverlayParameter):Promise<any> {}
+  public async showOverlays(params:IDrawOverlayParameter):Promise<any> {}
+  public async findOverlays(params:IFindParameter):Promise<any> {}
 }

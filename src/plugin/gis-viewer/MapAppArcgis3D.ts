@@ -19,7 +19,7 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays
+  IDrawOverlays, IDrawOverlaysDelete
 } from '@/types/map';
 import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
 import {RasterStretchRenderer} from 'esri/rasterRenderers';
@@ -518,7 +518,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async startRealTrackPlayback() :Promise<any>{}
   public pausePlayback(){}
   public goOnPlayback(){}
-  public async startDrawOverlays():Promise<any>{}
+  // public async startDrawOverlays():Promise<any>{}
   public async showTooltip():Promise<any>{}
   public async closeTooltip():Promise<any>{}
   public async findLayerFeature():Promise<any>{}
@@ -578,4 +578,27 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public showDgeneOutPoint(params: any) {}
   public changeDgeneOut() {}
   public async arcgisLoadGDLayer(){}
+
+  public async initializeRouteSelect(params: ISelectRouteParam) {}
+  public async showSelectedRoute(params: ISelectRouteResult) {}
+
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
+  public async deleteDrawOverlays(params: IDrawOverlaysDelete): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public async stopDrawOverlays(): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public async getDrawOverlays(): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public async hideOverlays(params:IDrawOverlaysDelete):Promise<IResult> {
+    return {status:0, message:''}
+  }
+  public async showOverlays(params:IDrawOverlaysDelete):Promise<IResult> {
+    return {status:0, message:''}
+  }
+  public async findOverlays(params:IFindParameter):Promise<IResult> {
+    return {status:0, message:''}
+  }
 }

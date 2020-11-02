@@ -262,9 +262,7 @@ export default class SelectRoute2D {
     this.selectedTrafficSignalIdArray = [];
 
     this.mouseMoveHandler = this.view.on("pointer-move", async (event: any) => {
-      const result = await this.view.hitTest(event, {
-        include: this.allRoadLayer,
-      });
+      const result = await this.view.hitTest(event);
       if (result.results.length > 0) {
         const graphic = result.results[0].graphic;
         const point = this.view.toMap(event);

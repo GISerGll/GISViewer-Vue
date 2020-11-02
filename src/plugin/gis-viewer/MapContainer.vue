@@ -68,8 +68,8 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays
-  IEditFenceLabel
+  IDrawOverlays,
+  IEditFenceLabel, IDrawOverlaysDelete
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -221,9 +221,9 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async closeTooltip() :Promise<IResult>{
     return await this.mapContainer.closeTooltip();
   }
-  public async startDrawOverlays(param: IDrawOverlayParameter):Promise<IResult>{
-    return this.mapContainer.startDrawOverlays(param)
-  }
+  // public async startDrawOverlays(param: IDrawOverlayParameter):Promise<IResult>{
+  //   return this.mapContainer.startDrawOverlays(param)
+  // }
   public async startTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
     return await this.mapContainer.startTrackPlayback(params);
   }
@@ -339,13 +339,25 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
-    return await this.mapContainer.startDrawOverlays(params);
+    await this.mapContainer.startDrawOverlays(params);
   }
-  public async stopDrawOverlays(): Promise<void> {
-    return await this.mapContainer.stopDrawOverlays();
+  public async stopDrawOverlays(params:any): Promise<IResult> {
+    return this.mapContainer.stopDrawOverlays(params);
   }
   public async getDrawOverlays(): Promise<IResult> {
     return await this.mapContainer.getDrawOverlays();
+  }
+  public async deleteDrawOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
+    return await this.mapContainer.deleteDrawOverlays(params);
+  }
+  public async hideOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
+    return await this.mapContainer.hideOverlays(params);
+  }
+  public async showOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
+    return await this.mapContainer.showOverlays(params);
+  }
+  public async findOverlays(params:IFindParameter): Promise<IResult> {
+    return await this.mapContainer.findOverlays(params);
   }
 }
 </script>

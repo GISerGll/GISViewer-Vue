@@ -30,7 +30,7 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays
+  IDrawOverlays, IDrawOverlaysDelete
 } from '@/types/map';
 
 @Component({
@@ -109,9 +109,9 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async findFeature(params: IFindParameter) {
     return await this.mapApp.findFeature(params);
   }
-  public async showToolTip(param:Vue.Component) :Promise<IResult>{
-    return await this.mapApp.showToolTip(param);
-  }
+  // public async showToolTip(param:Vue.Component) :Promise<IResult>{
+  //   return await this.mapApp.showToolTip(param);
+  // }
   public showRoad() {}
   public hideRoad() {}
   public showStreet() {}
@@ -143,9 +143,9 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public hideMigrateChart() {
     this.mapApp.hideMigrateChart();
   }
-  public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
-    return await this.mapApp.startDrawOverlays(params);
-  }
+  // public async startDrawOverlays(params:IDrawOverlayParameter):Promise<IResult> {
+  //   return await this.mapApp.startDrawOverlays(params);
+  // }
   public async startTrackPlayback(params: ITrackPlaybackParameter):Promise<IResult>{
         return await this.mapApp.startTrackPlayback(params);
   }
@@ -237,11 +237,23 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
     return await this.mapApp.startDrawOverlays(params);
   }
-  public async stopDrawOverlays(): Promise<void> {
+  public async stopDrawOverlays(): Promise<IResult> {
     return await this.mapApp.stopDrawOverlays();
   }
   public async getDrawOverlays(): Promise<IResult> {
     return await this.mapApp.getDrawOverlays();
+  }
+  public async hideOverlays(params:IDrawOverlaysDelete):Promise<IResult> {
+    return {status:0, message:''}
+  }
+  public async deleteDrawOverlays(params:IDrawOverlaysDelete):Promise<IResult> {
+    return this.mapApp.deleteOverlays(params)
+  }
+  public async showOverlays(params:IDrawOverlaysDelete):Promise<IResult> {
+    return {status:0, message:''}
+  }
+  public async findOverlays(params:IFindParameter): Promise<IResult> {
+    return this.mapApp.findOverlays(params)
   }
 }
 </script>

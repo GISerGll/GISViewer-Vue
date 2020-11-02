@@ -56,7 +56,7 @@ export class Draw2D {
             drawType:drawType,
             generateId:params.generateId,
             type:params.type,
-            clearLastResults:params.clearLastResults
+            clearLastResults:params.clearLastResult
         }
         console.log(drawPropObj);
 
@@ -137,7 +137,7 @@ export class Draw2D {
 
         const isGenerateId = drawProperties.generateId;
         const type = drawProperties.type || "points";
-        const clearLastResults = drawProperties.clearLastResults || false;
+        const clearLastResults = drawProperties.clearLastResult || false;
 
         let graphic = new Graphic({
             geometry: point,

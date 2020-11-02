@@ -5,7 +5,7 @@ import {
   IOverlayDelete,
   IFindParameter,
   ILayerConfig,
-  IDrawOverlays
+  IDrawOverlays, IDrawOverlaysDelete
 } from '@/types/map';
 import axios from 'axios';
 import {loadModules} from 'esri-loader';
@@ -219,4 +219,5 @@ export class DrawOverlays {
       });
     });
   }
+
 }

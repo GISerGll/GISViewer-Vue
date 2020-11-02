@@ -12,7 +12,6 @@ export class Utils {
     return new Promise((resolve) => {
       Promise.all(promises).then((e) => {
         resolve(e);
-        console.log('scripts Loaded!');
       });
     });
   }

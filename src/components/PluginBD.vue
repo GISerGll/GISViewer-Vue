@@ -4,20 +4,25 @@
       <!--      <button @click="btn_loadMap">加载地图</button>-->
       <button @click="btn_setMapCenter">居中</button>
       <button @click="btn_setMapCenterAndLevel">放大居中</button>
-      <button @click="btn_findFeature">定位居中</button><br>
+      <button @click="btn_findFeature">定位居中</button>
+      <button @click="btn_findOverlays">查找覆盖物</button><br>
       <button @click="btn_showLayer">显示图层</button>
       <button @click="btn_hideLayer">隐藏图层</button>
       <button @click="btn_switchLayer">切换底图</button><br>
       <button @click="btn_addOverlays_pt">添加点</button>
       <button @click="btn_addOverlays_line">添加线</button>
       <button @click="btn_addOverlays_polygon">添加面</button>
-      <button @click="btn_deleteOverlays">删除覆盖物</button>
+      <button @click="btn_hideOverlays">隐藏</button>
+      <button @click="btn_showOverlays">显示</button>
+      <button @click="btn_deleteOverlays">删除</button>
       <button @click="btn_closeToolTip">关闭VUE弹窗</button><br>
       <button @click="btn_drawPoints">撒点</button>
       <button @click="btn_drawLines">画线</button>
       <button @click="btn_drawPolygons">画多边形</button>
       <button @click="btn_drawCircles">画圆</button>
-      <button @click="btn_drawRects">画矩形</button><br>
+      <button @click="btn_drawRects">画矩形</button>
+      <button @click="btn_stopDrawOverlays">停止绘画</button>
+      <button @click="btn_getDrawOverlays">获取绘制结果</button><br>
       <button @click="btn_startTrackPlayback">轨迹回放</button><br>
       <button @click="btn_startRealTrackPlayback">实际轨迹回放</button>
       <button @click="btn_pausePlayback">暂停</button>
@@ -97,7 +102,17 @@
       let map = this.$refs.gisViewer as any;
       const result = await map.findFeature({
         layerName:"police",
-        level:18,
+        level:14,
+        ids:["test001","test002"],
+        centerResult:true
+      })
+      console.log(result);
+    }
+    private async btn_findOverlays(){
+      let map = this.$refs.gisViewer as any;
+      const result = await map.findFeature({
+        layerName:"police",
+        level:14,
         ids:["test001","test002"],
         centerResult:true
       })
@@ -147,10 +162,10 @@
         ],
         showPopup: false,
         autoPopup: false,
-        defaultInfoTemplate: {
-          title: '1212',
-          content: '<div>name:{name}<br/><button>{name}</button></div>'
-        },
+        // defaultInfoTemplate: {
+        //   title: '1212',
+        //   content: '<div>name:{name}<br/><button>{name}</button></div>'
+        // },
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       });
       console.log(obj)
@@ -244,13 +259,28 @@
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       })
     }
+    private async btn_hideOverlays(){
+      let map = this.$refs.gisViewer as any;
+      const results = await map.hideOverlays({
+        types:['alarmPoints','police']
+      });
+      console.log(results)
+    }
+    private async btn_showOverlays(){
+      let map = this.$refs.gisViewer as any;
+      const results = await map.showOverlays({
+        types:['alarmPoints','police']
+      });
+      console.log(results)
+    }
     private async btn_deleteOverlays(){
       let map = this.$refs.gisViewer as any;
-      const obj = await map.deleteOverlays({
-        types:["police"],
-        ids:["test001"]
-      })
-      console.log(obj);
+      // const obj = await map.deleteOverlays({
+      //   types:["police"],
+      //   ids:["test001"]
+      // })
+      map.deleteOverlays();
+      // console.log(obj);
     }
     private async btn_showToolTip(){
       let map = this.$refs.gisViewer as any;
@@ -265,36 +295,29 @@
       const img:any = await this.loadImageAsync("assets/image/Anchor.png");
       const result = await map.startDrawOverlays({
         defaultSymbol: {
-          //symbol for 2d
-          type: 'point-2d',
-          // primitive: "square",
-          url: 'assets/image/Anchor.png',
-          size:  img ? [0.5 * img.width,0.5 * img.height] : [12,12],
+          url: 'assets/image/a.png',
+          size:  [24,24],
         },
         drawType:"point",
-        type:"points",
         generateId:true,
-        clearLastResults:true,
-        showPopup:true
+        type:"alarmPoints",
+        clearLastResult:false
       })
 
-      let resultArray = result.result;
-      resultArray.then((value:any) =>{
-        console.log(value);
-      })
+      // let resultArray = result.result;
+      // resultArray.then((value:any) =>{
+      //   console.log(value);
+      // })
     }
     private async btn_drawLines(){
       let map = this.$refs.gisViewer as any;
-      const result = await map.startDrawOverlays({
+      map.startDrawOverlays({
+        defaultSymbol:{
+          width:3
+        },
         drawType:"polyline",
         type:"lines",
-        id:true,
-        showPopup:true
-      })
-
-      var resultArray = result.result;
-      resultArray.then((value:any) =>{
-        console.log(value);
+        clearLastResult:false
       })
     }
     private async btn_drawPolygons(){
@@ -302,20 +325,37 @@
       const result = await map.startDrawOverlays({
         drawType:"polygon",
         type:"polygons",
-        id:true,
+        generateId:true,
         showPopup:true
       })
 
-      var resultArray = result.result;
-      resultArray.then((value:any) =>{
-        console.log(value);
-      })
     }
     private async btn_drawCircles(){
-
+      let map = this.$refs.gisViewer as any;
+      const result = await map.startDrawOverlays({
+        drawType:"circle",
+        type:"circles",
+        generateId:true,
+        showPopup:true
+      })
     }
     private async btn_drawRects(){
-
+      let map = this.$refs.gisViewer as any;
+      const result = await map.startDrawOverlays({
+        drawType:"rectangle",
+        type:"rectangles",
+        generateId:true,
+        showPopup:true
+      })
+    }
+    private async btn_stopDrawOverlays(){
+      let map = this.$refs.gisViewer as any;
+      const results = await map.stopDrawOverlays();
+    }
+    private async btn_getDrawOverlays(){
+      let map = this.$refs.gisViewer as any;
+      const results = await map.getDrawOverlays();
+      console.log(results.result);
     }
     private async btn_startTrackPlayback(){
       let map = this.$refs.gisViewer as any;
@@ -577,7 +617,9 @@
             fields: {
               name: '测试2',
               featureid: '0002',
-              popupWindow: { type:"normal" ,value1:"这是一个信息弹窗",value2:"随意测试一下"}}
+              popupWindow: true,
+              tooltipWindow:true
+            }
           },
           {
             id: 'test002',
@@ -585,7 +627,9 @@
             fields: {
               name: '测试3',
               featureid: '0003',
-              popupWindow: { type:"alarm" ,value1:"这是一个警告弹窗",value2:"随意测试一下"}}
+              popupWindow: true,
+              tooltipWindow:true
+            }
           },
           {
             id: 'test003',
@@ -593,7 +637,9 @@
             fields: {
               name: '测试4',
               featureid: '0001',
-              popupWindow: { type:"suspicious",value1:"这是一个正常弹窗",value2:"这是一个正常弹窗"}}
+              popupWindow: true,
+              tooltipWindow:true
+            }
           }
         ],
         showPopup: true,
