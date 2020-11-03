@@ -298,6 +298,12 @@ export interface ISelectRouteResult {
   };
   signalInfo: {
     // 信号机信息
-    signals: Array<{ id: string; name: string; x: number; y: number }>;
+    signals: Array<{
+      id: string;
+      name: string;
+      x: number;
+      y: number;
+      distance: number;
+    }>;
   };
 }

@@ -2,6 +2,7 @@ import { ISelectRouteParam, ISelectRouteResult } from "@/types/map";
 import { loadModules } from "esri-loader";
 import along from "@turf/along";
 import length from "@turf/length";
+import distance from "@turf/distance";
 import * as turf from "@turf/helpers";
 import { debounce } from "ts-debounce-throttle";
 
@@ -35,7 +36,9 @@ export default class SelectRoute2D {
   private mouseMoveHandler: any;
 
   /** 搜索信号机的缓冲距离 */
-  private readonly bufferDistance = 20;
+  private readonly bufferDistance = 30;
+
+  private geometryEngineAsync!: __esri.geometryEngineAsync;
 
   /** 将Link设为路径起点 */
   private beginRouteButton = {
@@ -176,17 +179,37 @@ export default class SelectRoute2D {
     });
 
     const signals = [];
+    // 上一个信号机的坐标
+    let lastSignalX = 0,
+      lastSignalY = 0;
     for (let i = 0; i < this.selectedTrafficSignalIdArray.length; i++) {
       const id = this.selectedTrafficSignalIdArray[i];
       const signalGraphic = await this.getTrafficSignalById(id);
       if (signalGraphic) {
         const { FSTR_DESC: name } = signalGraphic.attributes;
+        const signalX = (signalGraphic.geometry as __esri.Point).x;
+        const signalY = (signalGraphic.geometry as __esri.Point).y;
+
+        const signalDistance =
+          i === 0
+            ? distance(
+                turf.point([signalX, signalY]),
+                turf.point([firstPoint.x, firstPoint.y])
+              )
+            : distance(
+                turf.point([signalX, signalY]),
+                turf.point([lastSignalX, lastSignalY])
+              );
+
         signals.push({
           id,
           name,
-          x: (signalGraphic.geometry as __esri.Point).x,
-          y: (signalGraphic.geometry as __esri.Point).y,
+          x: signalX,
+          y: signalY,
+          distance: signalDistance * 1000,
         });
+        lastSignalX = signalX;
+        lastSignalY = signalY;
       }
     }
 
@@ -493,7 +516,7 @@ export default class SelectRoute2D {
 
         candidateLink.symbol = {
           type: "simple-line",
-          style: isInCross ? "short-dot" : "solid",
+          // style: isInCross ? "short-dot" : "solid",
           color: "dodgerblue",
           width: 4,
         } as any;
@@ -505,9 +528,9 @@ export default class SelectRoute2D {
         this.candidateLinkLayer.add(candidateLink);
         geometryToUnion.push(candidateLink.geometry);
 
-        if (isInCross) {
-          this.showNextLink(endLinkIds, true);
-        }
+        // if (isInCross) {
+        //   this.showNextLink(endLinkIds, true);
+        // }
       });
 
       // 调整地图显示范围，能显示全部候选link
