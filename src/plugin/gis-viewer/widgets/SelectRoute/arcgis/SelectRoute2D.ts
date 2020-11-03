@@ -2,7 +2,7 @@ import { ISelectRouteParam, ISelectRouteResult } from "@/types/map";
 import { loadModules } from "esri-loader";
 import along from "@turf/along";
 import length from "@turf/length";
-import { lineString } from "@turf/helpers";
+import * as turf from "@turf/helpers";
 import { debounce } from "ts-debounce-throttle";
 
 export default class SelectRoute2D {
@@ -14,8 +14,10 @@ export default class SelectRoute2D {
   private allLinkLayer!: __esri.FeatureLayer;
   /** 显示已选定Link的图层 */
   private selectedLinkLayer!: __esri.GraphicsLayer;
-  /** 显示候选Link的图层 */
+  /** 显示待选Link的图层 */
   private candidateLinkLayer!: __esri.GraphicsLayer;
+  /** 搜索候选link时的起点link id */
+  private startLinkId: string = "";
   /** 已选定的Link graphic */
   private selectedLinkGraphicArray: Array<__esri.Graphic> = [];
 
@@ -429,6 +431,7 @@ export default class SelectRoute2D {
     // 显示候选link
     this.candidateLinkLayer.removeAll();
     if (!isLastLink) {
+      this.startLinkId = graphic.attributes["ID"];
       this.showNextLink(graphic.attributes["EROADID"]);
     }
   }
@@ -454,8 +457,12 @@ export default class SelectRoute2D {
     this.addSelectedLink(removeGraphics[0]);
   }
 
-  /** 显示多条待选link */
-  private async showNextLink(linkIds: string) {
+  /**
+   * 显示多条待选link
+   * @param linkIds 后续linkId，逗号分隔
+   * @param isIterator 是否迭代
+   * */
+  private async showNextLink(linkIds: string, isIterator: boolean = false) {
     // 去掉最后的逗号，否则split时会多一个空元素
     if (linkIds.substring(linkIds.length - 1, linkIds.length) === ",") {
       linkIds = linkIds.substring(0, linkIds.length - 1);
@@ -472,23 +479,24 @@ export default class SelectRoute2D {
     }
 
     const geometryToUnion: Array<__esri.Geometry> = [];
-    if (linkGraphicArray.length === 1) {
-      // 如果只有一个后续link直接添加
+    if (!isIterator && linkGraphicArray.length === 1) {
+      // 用户选择的（非迭代）的情况下，如果只有一个后续link直接添加
+      // 迭代的情况下，需要用户选择分支，不能直接添加
       const linkGraphic = linkGraphicArray[0];
       this.addSelectedLink(linkGraphic);
     } else {
       // 有多个后续link时需要同时显示，让用户选择
       linkGraphicArray.forEach((linkGraphic) => {
         const candidateLink = linkGraphic.clone();
-        const linkKind = linkGraphic.attributes.KIND;
-        console.log(linkKind, this.isCrossLink(linkKind));
+        const { KIND: linkKind, EROADID: endLinkIds } = linkGraphic.attributes;
+        const isInCross = this.isCrossLink(linkKind);
+
         candidateLink.symbol = {
           type: "simple-line",
-          style: this.isCrossLink(linkKind) ? "short-dash" : "solid",
+          style: isInCross ? "short-dot" : "solid",
           color: "dodgerblue",
           width: 4,
         } as any;
-        console.log(candidateLink.symbol);
         candidateLink.popupTemplate = {
           ...this.popupTemplate,
           actions: [this.addLinkButton, this.endRouteButton],
@@ -496,6 +504,10 @@ export default class SelectRoute2D {
 
         this.candidateLinkLayer.add(candidateLink);
         geometryToUnion.push(candidateLink.geometry);
+
+        if (isInCross) {
+          this.showNextLink(endLinkIds, true);
+        }
       });
 
       // 调整地图显示范围，能显示全部候选link
@@ -690,10 +702,10 @@ export default class SelectRoute2D {
       totalPath.push(...path);
     });
 
-    const line = lineString(totalPath);
+    const line = turf.lineString(totalPath);
     let currentLength = lengthPerFrame;
     const totalLength = length(line, { units: "meters" });
-    const pointArray: Array<Array<number>> = [];
+    const pointArray: Array<Array<number>> = [totalPath[0]];
     // 使用turf.along，将path按照每帧前进距离分割
     while (currentLength < totalLength) {
       const point = along(line, currentLength, {
@@ -747,7 +759,7 @@ export default class SelectRoute2D {
         this.selectedTrafficSignalLayer.graphics.forEach((graphic) => {
           const signalPoint = graphic.geometry as __esri.Point;
           const distance = length(
-            lineString([
+            turf.lineString([
               pointArray[currentIndex],
               [signalPoint.x, signalPoint.y],
             ]),
@@ -763,7 +775,7 @@ export default class SelectRoute2D {
       } else {
         // 在信号机范围内时只检测和当前信号机的距离
         const distance = length(
-          lineString([
+          turf.lineString([
             pointArray[currentIndex],
             [nearSignalPoint.x, nearSignalPoint.y],
           ]),
