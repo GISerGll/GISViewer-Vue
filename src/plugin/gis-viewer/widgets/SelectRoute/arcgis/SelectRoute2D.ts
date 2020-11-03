@@ -209,7 +209,7 @@ export default class SelectRoute2D {
           name,
           x: signalX,
           y: signalY,
-          distance: signalDistance * 1000,
+          distance: Math.round(signalDistance * 100000) / 100,
         });
         lastSignalX = signalX;
         lastSignalY = signalY;
