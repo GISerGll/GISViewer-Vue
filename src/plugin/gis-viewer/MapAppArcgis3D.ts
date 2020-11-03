@@ -601,4 +601,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async findOverlays(params:IFindParameter):Promise<IResult> {
     return {status:0, message:''}
   }
+  public async backgroundGeometrySearch(params:IGeometrySearchParameter): Promise<IResult> {
+    return {message:'',status:0}
+  }
 }

@@ -121,10 +121,15 @@ export default class DrawOverlaysBD{
 
     drawingManager.setDrawingMode(drawMode);
     drawingManager.open();
-    drawingManager.addEventListener('overlaycomplete', (results:any)=>{
-      this.onDrawComplete(results);
-    });
+    let promise = new Promise((resolve => {
+      drawingManager.addEventListener('overlaycomplete', (results:any)=>{
+        this.onDrawComplete(results);
+        resolve();
+      });
+    }))
+
     this.drawingManager = drawingManager;
+    await promise;
 
     return {
       status:0,
@@ -188,7 +193,9 @@ export default class DrawOverlaysBD{
   }
 
   public async stopDrawOverlays():Promise<IResult>{
-    this.drawingManager.close();
+    if(this.drawingManager){
+      this.drawingManager.close();
+    }
     this.drawingType = null;
 
     return {
@@ -224,7 +231,7 @@ export default class DrawOverlaysBD{
             points.push([point.lng,point.lat]);
           }
           exceptPtObj.geometry = {
-            [key]:points
+            points
           }
           exceptPtObj.type = overlay.type;
           exceptPtObj.id = overlay.id ? overlay.id : null

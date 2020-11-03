@@ -54,6 +54,7 @@ import ToolTip from './widgets/Overlays/arcgis/ToolTip';
 import {Cluster2D} from './widgets/Cluster/arcgis/Cluster2D';
 import SelectRoute2D from '@/plugin/gis-viewer/widgets/SelectRoute/arcgis/SelectRoute2D';
 import {DrawOverlays} from './widgets/DrawOverlays/arcgis/DrawOverlays';
+import GeometrySearchBD from "@/plugin/gis-viewer/widgets/GeometrySearch/bd/GeometrySearchBD";
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
@@ -840,4 +841,7 @@ export default class MapAppArcGIS2D {
   public async hideOverlays(params:IDrawOverlayParameter):Promise<any> {}
   public async showOverlays(params:IDrawOverlayParameter):Promise<any> {}
   public async findOverlays(params:IFindParameter):Promise<any> {}
+  public async backgroundGeometrySearch(params:IGeometrySearchParameter): Promise<IResult> {
+    return {message:'',status:0}
+  }
 }

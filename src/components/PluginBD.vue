@@ -23,6 +23,7 @@
       <button @click="btn_drawRects">画矩形</button>
       <button @click="btn_stopDrawOverlays">停止绘画</button>
       <button @click="btn_getDrawOverlays">获取绘制结果</button><br>
+      <button @click="btn_startGeometrySearch">绘制多边形搜索</button><br>
       <button @click="btn_startTrackPlayback">轨迹回放</button><br>
       <button @click="btn_startRealTrackPlayback">实际轨迹回放</button>
       <button @click="btn_pausePlayback">暂停</button>
@@ -355,7 +356,16 @@
     private async btn_getDrawOverlays(){
       let map = this.$refs.gisViewer as any;
       const results = await map.getDrawOverlays();
-      console.log(results.result);
+      console.log(JSON.parse(results.result)["circle"][0].geometry.points);
+    }
+
+    private async btn_startGeometrySearch(){
+      let map = this.$refs.gisViewer as any;
+      const results = await map.startGeometrySearch({
+        drawType:"polygon"
+      });
+
+      console.log(JSON.parse(results.result));
     }
     private async btn_startTrackPlayback(){
       let map = this.$refs.gisViewer as any;

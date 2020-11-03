@@ -226,6 +226,7 @@ export interface IMapContainer {
   deleteDrawOverlays: (params:IDrawOverlaysDelete) => Promise<IResult>;
   getDrawOverlays: () => Promise<IResult>;
   arcgisLoadGDLayer: () => void;
+  backgroundGeometrySearch: (params:IGeometrySearchParameter) => Promise<IResult>;
 }
 export interface IPopUpTemplate {
   title?: string;

@@ -147,7 +147,7 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
-    return {status: 0, message: ''};
+    return this.mapApp.startGeometrySearch(params);
   }
   public clearGeometrySearch() {}
   public async showDgene(params: any): Promise<IResult> {
@@ -187,6 +187,9 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
   }
   public async findOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
     return this.mapApp.findOverlays(params)
+  }
+  public async backgroundGeometrySearch(params:IGeometrySearchParameter): Promise<IResult> {
+    return await this.mapApp.backgroundGeometrySearch(params);
   }
 
 }

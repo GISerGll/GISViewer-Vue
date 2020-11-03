@@ -26,6 +26,7 @@ import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
 import {JurisdictionPolice} from './widgets/JurisdictionPolice/bd/JurisdictionPolice';
 import {Utils} from '@/plugin/gis-viewer/Utils';
 import DrawOverlaysBD from "@/plugin/gis-viewer/widgets/DrawOverlays/bd/DrawOverlaysBD";
+import GeometrySearchBD from "@/plugin/gis-viewer/widgets/GeometrySearch/bd/GeometrySearchBD";
 
 declare let BMap: any;
 
@@ -44,6 +45,7 @@ export default class MapAppBaidu implements IMapContainer {
     const drawManager = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/DrawingManager_min.js';
     const cluster1 = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/TextIconOverlay.js'
     const cluster2 = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/MarkerClusterer.js';
+    const geometryUtil = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/GeoUtils.js';
     await Utils.loadScripts([
       apiUrl,
       mapV,
@@ -53,6 +55,7 @@ export default class MapAppBaidu implements IMapContainer {
         cluster1,
         cluster2,
         drawManager,
+        geometryUtil
       ]).then(()=>{
         console.log('scripts Loaded!');
       });
@@ -301,7 +304,8 @@ export default class MapAppBaidu implements IMapContainer {
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
-    return {status: 0, message: ''};
+    const geometrySearch = GeometrySearchBD.getInstance(this.view);
+    return await geometrySearch.startGeometrySearch(params);
   }
   public clearGeometrySearch() {}
   public async showDgene(params: any): Promise<IResult> {
@@ -350,6 +354,10 @@ export default class MapAppBaidu implements IMapContainer {
   public async findOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
     const overlays = OverlayBaidu.getInstance(this.view);
     return await overlays.findOverlays(params);
+  }
+  public async backgroundGeometrySearch(params:IGeometrySearchParameter): Promise<IResult> {
+    const geometrySearch = GeometrySearchBD.getInstance(this.view);
+    return await geometrySearch.backgroundGeometrySearch(params);
   }
 
 }
