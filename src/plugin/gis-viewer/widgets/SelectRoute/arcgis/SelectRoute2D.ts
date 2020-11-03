@@ -190,6 +190,9 @@ export default class SelectRoute2D {
         const signalX = (signalGraphic.geometry as __esri.Point).x;
         const signalY = (signalGraphic.geometry as __esri.Point).y;
 
+        /**
+         * @todo 使用路径上的距离
+         */
         const signalDistance =
           i === 0
             ? distance(
