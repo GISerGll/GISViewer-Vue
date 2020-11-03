@@ -359,6 +359,9 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async findOverlays(params:IFindParameter): Promise<IResult> {
     return await this.mapContainer.findOverlays(params);
   }
+  public async backgroundGeometrySearch(params:IGeometrySearchParameter): Promise<IResult> {
+    return await this.mapContainer.backgroundGeometrySearch(params);
+  }
 }
 </script>
 
