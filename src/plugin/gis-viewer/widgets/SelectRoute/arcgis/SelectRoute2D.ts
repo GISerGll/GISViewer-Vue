@@ -38,8 +38,6 @@ export default class SelectRoute2D {
   /** 搜索信号机的缓冲距离 */
   private readonly bufferDistance = 30;
 
-  private geometryEngineAsync!: __esri.geometryEngineAsync;
-
   /** 将Link设为路径起点 */
   private beginRouteButton = {
     title: "开始",
@@ -47,10 +45,17 @@ export default class SelectRoute2D {
     className: "esri-icon-play",
   } as __esri.ActionButton;
 
-  /** 将Link设为路径终点 */
-  private endRouteButton = {
+  /** 待选路段上的终点按钮 */
+  private endRouteInCandidateLinkButton = {
     title: "结束",
-    id: "endRoute",
+    id: "endRouteInCandidateLink",
+    className: "esri-icon-check-mark",
+  } as __esri.ActionButton;
+
+  /** 已选路段上的终点按钮 */
+  private endRouteInSelectedLinkButton = {
+    title: "结束",
+    id: "endRouteInSelectedLink",
     className: "esri-icon-check-mark",
   } as __esri.ActionButton;
 
@@ -153,7 +158,7 @@ export default class SelectRoute2D {
           break;
         }
 
-        case "endRoute": {
+        case "endRouteInCandidateLink": {
           const { FID } = this.view.popup.selectedFeature.attributes;
           const selectedGraphic = await this.getLinkGraphicByFID(FID);
           await this.addSelectedLink(selectedGraphic.clone(), true);
@@ -161,6 +166,18 @@ export default class SelectRoute2D {
           this.view.zoom -= 1;
 
           this.emitRouteResult();
+          break;
+        }
+
+        case "endRouteInSelectedLink": {
+          const { FID } = this.view.popup.selectedFeature.attributes;
+          const selectedGraphic = await this.getLinkGraphicByFID(FID);
+          this.reSelectLink(selectedGraphic.attributes["ID"], true);
+          this.candidateLinkLayer.removeAll();
+          await this.view.goTo(this.selectedLinkGraphicArray);
+          this.view.zoom -= 1;
+          this.emitRouteResult();
+
           break;
         }
       }
@@ -209,7 +226,7 @@ export default class SelectRoute2D {
           name,
           x: signalX,
           y: signalY,
-          distance: Math.round(signalDistance * 100000) / 100,
+          distance: Number((signalDistance * 1000).toFixed(2)),
         });
         lastSignalX = signalX;
         lastSignalY = signalY;
@@ -443,7 +460,7 @@ export default class SelectRoute2D {
     } as any;
     graphic.popupTemplate = {
       ...this.popupTemplate,
-      actions: [this.reSelectNextLinkButton, this.endRouteButton],
+      actions: [this.reSelectNextLinkButton, this.endRouteInSelectedLinkButton],
     } as any;
     this.selectedLinkLayer.add(graphic);
     this.selectedLinkGraphicArray.push(graphic);
@@ -451,8 +468,10 @@ export default class SelectRoute2D {
     const center = (graphic.geometry as __esri.Polyline).extent.center;
     this.view.goTo(center);
 
-    // 搜索周边信号机
-    await this.searchTrafficSignal(graphic.geometry);
+    // 在快速路上不搜索周边信号机
+    if (!this.isExpressway(graphic.attributes["KIND"])) {
+      await this.searchTrafficSignal(graphic.geometry);
+    }
 
     // 显示候选link
     this.candidateLinkLayer.removeAll();
@@ -463,7 +482,7 @@ export default class SelectRoute2D {
   }
 
   /** 删除此link后的选定link，重新显示待选lilnk */
-  private reSelectLink(linkId: string) {
+  private reSelectLink(linkId: string, isLast: boolean = false) {
     let linkIndex = 0;
     for (let i = 0; i < this.selectedLinkGraphicArray.length; i++) {
       const linkGraphic = this.selectedLinkGraphicArray[i];
@@ -472,15 +491,27 @@ export default class SelectRoute2D {
         break;
       }
     }
-    // 要删除的link
-    const removeGraphics = this.selectedLinkGraphicArray.slice(linkIndex);
-    this.selectedLinkGraphicArray = this.selectedLinkGraphicArray.slice(
-      0,
-      linkIndex
-    );
-    this.selectedLinkLayer.removeMany(removeGraphics);
-    // 重新添加用户点击的link，显示待选link
-    this.addSelectedLink(removeGraphics[0]);
+
+    if (!isLast) {
+      // 继续选择后续，把当前点击的link移除
+      // 要删除的link
+      const removeGraphics = this.selectedLinkGraphicArray.slice(linkIndex);
+      this.selectedLinkGraphicArray = this.selectedLinkGraphicArray.slice(
+        0,
+        linkIndex
+      );
+      this.selectedLinkLayer.removeMany(removeGraphics);
+      // 重新添加用户点击的link，显示待选link
+      this.addSelectedLink(removeGraphics[0]);
+    } else if (linkIndex !== this.selectedLinkGraphicArray.length - 1) {
+      // 不继续选择，不用移除当前点击的link
+      const removeGraphics = this.selectedLinkGraphicArray.slice(linkIndex + 1);
+      this.selectedLinkGraphicArray = this.selectedLinkGraphicArray.slice(
+        0,
+        linkIndex
+      );
+      this.selectedLinkLayer.removeMany(removeGraphics);
+    }
   }
 
   /**
@@ -525,7 +556,7 @@ export default class SelectRoute2D {
         } as any;
         candidateLink.popupTemplate = {
           ...this.popupTemplate,
-          actions: [this.addLinkButton, this.endRouteButton],
+          actions: [this.addLinkButton, this.endRouteInCandidateLinkButton],
         } as any;
 
         this.candidateLinkLayer.add(candidateLink);
@@ -561,12 +592,30 @@ export default class SelectRoute2D {
    * @param linkKind 道路属性
    */
   private isCrossLink(linkKind: string): boolean {
+    // 每个属性为四位16进制，2位道路等级+2位道路属性
+    // 交叉点内link的道路属性是0x04
     // 交叉点内link会有两个属性，属性1|属性2
     // 属性1继承主路的属性，属性2是把属性1的最后两位改为0x04
     const kindArray = linkKind.split("|");
     for (let i = 0; i < kindArray.length; i++) {
       const kind = kindArray[i];
       if (kind.endsWith("04")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * 是否为快速路
+   * @param linkKind 道路属性
+   */
+  private isExpressway(linkKind: string): boolean {
+    // 快速路的道路等级为0x01
+    const kindArray = linkKind.split("|");
+    for (let i = 0; i < kindArray.length; i++) {
+      const kind = kindArray[i];
+      if (kind.startsWith("01")) {
         return true;
       }
     }
