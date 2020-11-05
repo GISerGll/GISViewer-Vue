@@ -70,7 +70,7 @@ export default class HeatImage2D {
     }
     this.heatmapInstance = heatmapInstance;
 
-    //heatDiv.style.display = 'none';
+    heatDiv.style.display = 'none';
     let image = new Image();
     image.src = imageOpt.url;
     image.width = imageOpt.width;
@@ -92,6 +92,7 @@ export default class HeatImage2D {
     await loadModules([
       'esri/views/2d/layers/BaseLayerView2D',
       'esri/layers/BaseDynamicLayer',
+      'esri/layers/MapImageLayer',
       'esri/geometry/Point',
       'esri/geometry/SpatialReference',
       'esri/layers/GraphicsLayer',
@@ -102,6 +103,7 @@ export default class HeatImage2D {
       ([
         BaseLayerView2D,
         BaseDynamicLayer,
+        MapImageLayer,
         Point,
         SpatialReference,
         GraphicsLayer,

@@ -65,6 +65,7 @@ export default class ImageOverlays {
       geometry: geometry,
       symbol: symbol as any
     });
+    highGraphic.isclick = false;
     customLayer.minScale = params.minScale || 0;
     customLayer.maxScale = params.maxScale || 0;
     customLayer.add(highGraphic);

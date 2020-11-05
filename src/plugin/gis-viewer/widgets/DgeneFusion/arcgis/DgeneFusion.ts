@@ -40,10 +40,10 @@ export class DgeneFusion {
   private rotateState: string = 'auto';
   private setting: any = {
     isLocal: true, // isLocal?apiBase = 'static/api':apiBase = 'project/api/'+id
-    url: 'http://10.31.251.205/20200930/static/api/',
+    url: 'http://10.31.251.205/20201102/static/api/',
     api: {
       // http://fusion.dgene.com/admin/project/v2/11
-      apiBase: 'http://10.31.251.205/20200930/static/api/',
+      apiBase: 'http://10.31.251.205/20201102/static/api/',
       // apiBase: '/v2/11',
       file: '/file',
       scene: '/scene',

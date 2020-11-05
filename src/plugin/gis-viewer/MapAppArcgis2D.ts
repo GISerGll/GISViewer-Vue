@@ -153,9 +153,10 @@ export default class MapAppArcGIS2D {
           for (let field in attributes) {
             let fieldArr: string[] = field.toString().split('.');
             let newfield = fieldArr.pop() as string;
-            attributes[newfield] = attributes[field]
-              ? attributes[field].toString().replace('Null', '')
-              : '';
+            attributes[newfield] =
+              attributes[field] !== undefined
+                ? attributes[field].toString().replace('Null', '')
+                : '';
           }
         } else {
           //dynamic
@@ -194,9 +195,7 @@ export default class MapAppArcGIS2D {
       const response = await view.hitTest(event);
       if (
         response.results.length > 0 &&
-        response.results[0].graphic.layer &&
-        (response.results[0].graphic.layer as any).label !== 'gzzx' &&
-        (response.results[0].graphic.layer as any).label !== 'flower'
+        (response.results[0].graphic as any).isclick !== false
       ) {
         // response.results.forEach((result) => {
         //   //}
@@ -534,6 +533,8 @@ export default class MapAppArcGIS2D {
             case 'image':
               const heat = ImageOverlays.getInstance(view);
               heat.addImage(layerConfig);
+              // const heat = HeatImage2D.getInstance(view);
+              // heat.addImage({images: layerConfig, points: []});
               break;
           }
           // if (layer) {
