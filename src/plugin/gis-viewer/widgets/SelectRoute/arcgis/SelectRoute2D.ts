@@ -19,6 +19,7 @@ export default class SelectRoute2D {
   private candidateLinkLayer!: __esri.GraphicsLayer;
   /** 搜索候选link时的起点link id */
   private startLinkId: string = "";
+  private iteratorLinkIdArray: Array<string> = [];
   /** 已选定的Link graphic */
   private selectedLinkGraphicArray: Array<__esri.Graphic> = [];
 
@@ -211,12 +212,13 @@ export default class SelectRoute2D {
          * @todo 使用路径上的距离
          */
         const signalDistance =
-          i === 0
+          i === 0 // 第一个信号机计算与路径起点的距离
             ? distance(
                 turf.point([signalX, signalY]),
                 turf.point([firstPoint.x, firstPoint.y])
               )
             : distance(
+                // 其他信号机计算与上一个信号机的距离
                 turf.point([signalX, signalY]),
                 turf.point([lastSignalX, lastSignalY])
               );
@@ -477,6 +479,7 @@ export default class SelectRoute2D {
     this.candidateLinkLayer.removeAll();
     if (!isLastLink) {
       this.startLinkId = graphic.attributes["ID"];
+      this.iteratorLinkIdArray = [];
       this.showNextLink(graphic.attributes["EROADID"]);
     }
   }
@@ -529,6 +532,9 @@ export default class SelectRoute2D {
 
     for (let i = 0; i < linkIdArray.length; i++) {
       const linkId = linkIdArray[i];
+      if (this.iteratorLinkIdArray.includes(linkId)) {
+        continue;
+      }
       const linkGraphic = await this.getLinkGraphicByLinkId(linkId);
       if (linkGraphic) {
         linkGraphicArray.push(linkGraphic);
@@ -550,21 +556,24 @@ export default class SelectRoute2D {
 
         candidateLink.symbol = {
           type: "simple-line",
-          // style: isInCross ? "short-dot" : "solid",
+          style: isInCross ? "short-dot" : "solid",
           color: "dodgerblue",
           width: 4,
         } as any;
-        candidateLink.popupTemplate = {
-          ...this.popupTemplate,
-          actions: [this.addLinkButton, this.endRouteInCandidateLinkButton],
-        } as any;
+        if (!isInCross) {
+          candidateLink.popupTemplate = {
+            ...this.popupTemplate,
+            actions: [this.addLinkButton, this.endRouteInCandidateLinkButton],
+          } as any;
+        }
 
         this.candidateLinkLayer.add(candidateLink);
+        this.iteratorLinkIdArray.push(linkGraphic.attributes["ID"]);
         geometryToUnion.push(candidateLink.geometry);
 
-        // if (isInCross) {
-        //   this.showNextLink(endLinkIds, true);
-        // }
+        if (isInCross) {
+          this.showNextLink(endLinkIds, true);
+        }
       });
 
       // 调整地图显示范围，能显示全部候选link
