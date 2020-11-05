@@ -58,7 +58,7 @@ export class FindFeature {
     let ids = params.ids || [];
     let level = params.level || 0;
     let centerResult = params.centerResult !== false;
-    let layerIds = params.layerids || undefined;
+    let layerIds = params.layerIds || undefined;
     let showPopUp = params.showPopUp !== false;
 
     this.view.map.allLayers.forEach((layer: any) => {
