@@ -154,7 +154,7 @@ export default class MapAppArcGIS2D {
             let fieldArr: string[] = field.toString().split('.');
             let newfield = fieldArr.pop() as string;
             attributes[newfield] =
-              attributes[field] !== undefined
+              attributes[field] !== undefined && attributes[field] !== null
                 ? attributes[field].toString().replace('Null', '')
                 : '';
           }
