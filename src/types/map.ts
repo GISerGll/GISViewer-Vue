@@ -267,7 +267,8 @@ export interface IFindParameter {
   level?: number;
   centerResult?: boolean;
   showPopUp?: boolean;
-  layerids?: Array<string>;
+  layerIds?: Array<string>;
+  callback?: boolean
 }
 export interface IOverlayDelete {
   types?: Array<string>;

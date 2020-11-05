@@ -27,6 +27,8 @@ import {JurisdictionPolice} from './widgets/JurisdictionPolice/bd/JurisdictionPo
 import {Utils} from '@/plugin/gis-viewer/Utils';
 import DrawOverlaysBD from "@/plugin/gis-viewer/widgets/DrawOverlays/bd/DrawOverlaysBD";
 import GeometrySearchBD from "@/plugin/gis-viewer/widgets/GeometrySearch/bd/GeometrySearchBD";
+import mapStyleConfig from "@/config/mapStyleConfig";
+
 
 declare let BMap: any;
 
@@ -46,6 +48,7 @@ export default class MapAppBaidu implements IMapContainer {
     const cluster1 = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/TextIconOverlay.js'
     const cluster2 = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/MarkerClusterer.js';
     const geometryUtil = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/GeoUtils.js';
+
     await Utils.loadScripts([
       apiUrl,
       mapV,
@@ -55,7 +58,7 @@ export default class MapAppBaidu implements IMapContainer {
         cluster1,
         cluster2,
         drawManager,
-        geometryUtil
+        geometryUtil,
       ]).then(()=>{
         console.log('scripts Loaded!');
       });
@@ -111,21 +114,6 @@ export default class MapAppBaidu implements IMapContainer {
     this.view = view;
     this.view.gisServer = gisUrl;
   }
-  private async loadOtherScripts(scriptUrls: string[]): Promise<any> {
-    let promises = scriptUrls.map((url) => {
-      return new Promise((resolve, reject) => {
-        const scriptElement = document.createElement('script');
-        scriptElement.src = url;
-        scriptElement.onload = resolve;
-        document.body.appendChild(scriptElement);
-      });
-    });
-    return new Promise((resolve) => {
-      Promise.all(promises).then((e) => {
-        resolve(e);
-      });
-    });
-  }
   //得到url中的ip和port
   private getIpPort(url: string): string {
     let urls = url.split('/');
@@ -155,10 +143,32 @@ export default class MapAppBaidu implements IMapContainer {
           visible: layer.visible !== false
         });
         break;
+      case '百度标准地图':
+        var tilelayer = new BMap.TileLayer();         // 创建地图层实例
+        tilelayer.getTilesUrl=function (point:any, level:any) {
+          if (!point || level < 0) {
+            return null;
+          }
+          var row = point.x;
+          var col = point.y;
+          // var url = '//mapsv0.bdimg.com/tile/?udt=' + '20190102'
+          //     + '&qt=tile&styles=' + 'pl' + '&x=' + row + '&y=' + col + '&z=' + level;
+          var url = '//maponline0.bdimg.com/tile/?udt=' + '20190102'
+              + '&qt=tile&styles=' + 'pl' + '&x=' + row + '&y=' + col + '&z=' + level;
+          // var url_ = 'http://maponline0.bdimg.com/tile/?qt=vtile&x=394&y=146&z=11&styles=pl&scaler=2&udt=20201022&from=jsapi2_0'
+          return url;
+        };
+        view.addTileLayer(tilelayer);
+        break;
+      case 'styleJson':
+        debugger;
+        const jsonStyle = layer.url
+        view.setMapStyle({
+          styleJson:jsonStyle
+        });
+        break;
         default:
-
-            break;
-
+          break;
     }
   }
   public setMapStyle(param: string) {

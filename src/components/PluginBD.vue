@@ -104,32 +104,33 @@
       const result = await map.findFeature({
         layerName:"police",
         level:14,
-        ids:["test001","test002"],
-        centerResult:true
+        ids:['test001'],
+        centerResult:true,
+        callback:true
       })
-      console.log(result);
+
     }
     private async btn_findOverlays(){
       let map = this.$refs.gisViewer as any;
       const result = await map.findFeature({
-        layerName:"police",
+        layerName:"simplePolygon",
         level:14,
-        ids:["test001","test002"],
+        ids:['testPolygon001'],
         centerResult:true
       })
       console.log(result);
     }
     private async btn_addOverlays_pt() {
       let map = this.$refs.gisViewer as any;
-      const img= await this.loadImageAsync("assets/image/Anchor.png");
+
       const obj =  await map.addOverlays({
         type: 'police',
         defaultSymbol: {
           //symbol for 2d
-          type: 'point-2d',
+          type: 'point',
           // primitive: "square",
           url: 'assets/image/a.png',
-          size:  (img as Object)? [(img as any).width,(img as any).height] : [12,12],
+          size: [24,24],
           // color: "red",
           // outline: {
           //   color: "white",
@@ -173,9 +174,8 @@
     }
     private async btn_addOverlays_line() {
       let path1 = [  // first path
-        [87.597,43.817],
-        [87.597,43.824],
-        [87.597,43.834]
+        [102.267,27.881],
+        [102.267,27.885]
       ];
 
       let path2 = [
@@ -183,24 +183,34 @@
         [87.577,43.824],
         [87.577,43.834]];
       let map = this.$refs.gisViewer as any;
-      await map.addOverlays({
-        type: 'simpleLine',
+      const results = await map.addOverlays({
+        type: 'polyline',
         defaultSymbol: {
           //symbol for 2d
-          type: 'line-2d',
+          type: 'polyline',
           // primitive: "square",
           color:[255,0,0,0.5],
-          width:2
+          size:[]
           // width: 10
         },
         overlays: [
           {
             id: 'testPath001',
             geometry: {paths:path1},
+            symbol: {
+              type: 'polyline',
+              color:'orange',
+              width:10
+            },
             fields: {name: '测试1', featureid: '0002'}
           },
           {
             id: 'testPath002',
+            symbol: {
+              type: 'polyline',
+              color:'red',
+              width:10
+            },
             geometry: {paths:path2},
             fields: {name: '测试2', featureid: '0002'}
           }
@@ -214,15 +224,16 @@
         },
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       })
+      console.log(results);
 
     }
     private async btn_addOverlays_polygon(){
-      let rings1 = [[
+      let rings1 = [
         [87.597,43.824],
         [87.617,43.824],
         [87.617,43.814],
-        [87.597,43.814]]];
-      let rings2 = [[[87.716, 43.842],[87.716, 43.839],[87.715, 43.836],[87.714, 43.833],[87.713, 43.830],[87.711, 43.827],[87.708, 43.824],
+        [87.597,43.814]];
+      let rings2 = [[87.716, 43.842],[87.716, 43.839],[87.715, 43.836],[87.714, 43.833],[87.713, 43.830],[87.711, 43.827],[87.708, 43.824],
         [87.705, 43.822],[87.702, 43.819],[87.699, 43.817],[87.695, 43.816],[87.691, 43.814],[87.687, 43.813],[87.683, 43.812],
         [87.678, 43.812],[87.674, 43.812],[87.670, 43.812],[87.665, 43.812],[87.661, 43.813],[87.657, 43.814],[87.653, 43.816],
         [87.649, 43.817],[87.646, 43.819],[87.643, 43.822],[87.640, 43.824],[87.638, 43.827],[87.636, 43.830],[87.634, 43.833],
@@ -230,18 +241,22 @@
         [87.638, 43.857],[87.640, 43.860],[87.643, 43.862],[87.646, 43.865],[87.649, 43.867],[87.653, 43.868],[87.657, 43.870],
         [87.661, 43.871],[87.665, 43.872],[87.670, 43.872],[87.674, 43.872],[87.678, 43.872],[87.683, 43.872],[87.687, 43.871],
         [87.691, 43.870],[87.695, 43.868],[87.699, 43.867],[87.702, 43.865],[87.705, 43.862],[87.708, 43.860],[87.711, 43.857],
-        [87.713, 43.854],[87.714, 43.851],[87.715, 43.848],[87.716, 43.845],[87.716, 43.842]]]
+        [87.713, 43.854],[87.714, 43.851],[87.715, 43.848],[87.716, 43.845],[87.716, 43.842]]
       let map = this.$refs.gisViewer as any;
 
       await map.addOverlays({
         type: 'simplePolygon',
         defaultSymbol: {
-          type: 'polygon-2d',
-          color:[255,0,0,0.5],
+          type: 'polygon',
+          color:'red',
+          outline:{
+            color:'black',
+            width:2
+          }
         },
         overlays: [
           {
-            id: 'testPplygon001',
+            id: 'testPolygon001',
             geometry: {rings:rings1},
             fields: {name: '测试1', featureid: '0001'}
           },
@@ -314,7 +329,7 @@
       let map = this.$refs.gisViewer as any;
       map.startDrawOverlays({
         defaultSymbol:{
-          width:3
+          width:1
         },
         drawType:"polyline",
         type:"lines",
@@ -557,7 +572,7 @@
         type: 'police',
         defaultSymbol: {
           //symbol for 2d
-          type: 'point-2d',
+          type: 'point',
           // primitive: "square",
           url: 'assets/image/a.png',
           size:  [24,24],
@@ -566,7 +581,10 @@
           {
             id: 'test001',
             geometry: {x: 102.2687, y: 27.8843},
-            fields: {name: '测试2', featureid: '0002'}
+            fields: {name: '测试2', featureid: '0002'},
+            symbol: {
+              type:'point'
+            }
           },
           {
             id: 'test002',
@@ -601,7 +619,7 @@
         type: 'police',
         defaultSymbol: {
           //symbol for 2d
-          type: 'point-2d',
+          type: 'point',
           // primitive: "square",
           url: 'assets/image/Anchor.png',
           size: [25, 25],
@@ -663,8 +681,6 @@
         // },
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       });
-
-      // await map.showToolTip(Parent);
     }
     private showGisDeviceInfo(type: string, id: string) {
       console.log(type, id);

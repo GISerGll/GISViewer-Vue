@@ -46,19 +46,20 @@ export class OverlayBaidu {
     (OverlayBaidu.intances as any) = null;
   }
   private async createOverlayLayer() {}
-  private getMarker(overlay: any, symbol: any): any {
+  private getMarker(overlay: any, symbol: any, type?:string): any {
     let marker: any;
     let geometry = overlay.geometry;
-    let type: any;
-    if (symbol) {
-      type = symbol.type;
+    if(!type){
+      type = symbol.type
     }
+
     switch (type) {
       case 'polyline':
-        marker = new BMap.Polyline(this.getGeometry(geometry.paths[0]), symbol);
+        marker = new BMap.Polyline(this.getGeometry(geometry.paths), symbol);
+        console.log(marker);
         break;
       case 'polygon':
-        marker = new BMap.Polygon(this.getGeometry(geometry.rings[0]), symbol);
+        marker = new BMap.Polygon(this.getGeometry(geometry.rings), symbol);
         break;
       case 'extent':
         break;
@@ -69,12 +70,12 @@ export class OverlayBaidu {
           {strokeColor: 'blue', strokeWeight: 2, strokeOpacity: 0.5}
         ); //创建圆
         break;
-      case 'point':
-      default:
+      case 'point' || 'marker':
         marker = new BMap.Marker(
-          new BMap.Point(geometry.x, geometry.y),
-          symbol
+            new BMap.Point(geometry.x, geometry.y),
+            symbol
         );
+      default:
         break;
     }
     return marker;
@@ -88,33 +89,41 @@ export class OverlayBaidu {
     }
     return features;
   }
-  private makeSymbol(symbol: IPointSymbol | undefined): object | undefined {
-    if (!symbol) return undefined;
+  private makeSymbol(symbol: IPointSymbol | undefined,defaultSymbol?:any): object | undefined {
+    if (!symbol) {
+      return undefined;
+    }
 
-    let marker;
+    let overlaySymbol;
     let myIcon;
     let size;
     let xoffset;
     let yoffset;
 
+    if(!symbol.type && !defaultSymbol.type){
+      console.error('either defaultSymbol or overlay.symbol must exits!')
+      return undefined;
+    }else if(!symbol.type && defaultSymbol.type){
+      symbol.type = defaultSymbol.type
+    }
+
     switch (symbol.type) {
       case 'polyline':
-        marker = {strokeColor: symbol.color, strokeWeight: symbol.size};
+        overlaySymbol = {strokeColor: symbol.color, strokeWeight: symbol.width};
         break;
       case 'polygon' || 'extent' || 'circle':
         if (!symbol.outline) return undefined;
-        marker = {
+        overlaySymbol = {
           strokeColor: symbol.outline.color,
           strokeWeight: symbol.outline.size,
           fillColor: symbol.color
         };
         break;
-      case 'point':
-      default:
+      case 'point' || 'marker':
         if (symbol.size) {
           size = new BMap.Size(
-            symbol.size instanceof Array ? symbol.size[0] : symbol.size,
-            symbol.size instanceof Array ? symbol.size[1] : symbol.size
+              symbol.size instanceof Array ? symbol.size[0] : symbol.size,
+              symbol.size instanceof Array ? symbol.size[1] : symbol.size
           );
         }
         if (symbol.width) {
@@ -123,13 +132,14 @@ export class OverlayBaidu {
         xoffset = symbol.xoffset || 0;
         yoffset = symbol.yoffset || 0;
 
-        myIcon = new BMap.Icon(symbol.url, size, {
+        myIcon = new BMap.Icon(symbol.url || defaultSymbol.url, size, {
           imageSize: size
         });
-        marker = {icon: myIcon, offset: new BMap.Size(xoffset, yoffset)};
+        overlaySymbol = {icon: myIcon, offset: new BMap.Size(xoffset, yoffset)};
+      default:
         break;
     }
-    return marker;
+    return overlaySymbol;
   }
   /**根据graphic的属性生成弹出框*/
   private getInfoWindowContent(graphic: any): any {
@@ -173,12 +183,9 @@ export class OverlayBaidu {
     }
     return tipContent;
   }
-  // private _showGisDeviceInfo(type: string, id: string) {
-  //   this.showGisDeviceInfo(type, id);
-  // }
+
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
-    const _this = this;
-    const defaultSymbol = this.makeSymbol(params.defaultSymbol);
+    const defaultSymbol = params.defaultSymbol;
     const defaultType = params.type;
     const defaultButtons = params.defaultButtons;
       //默认弹窗样式
@@ -212,11 +219,22 @@ export class OverlayBaidu {
     let addCount = 0;
     for (let i = 0; i < params.overlays.length; i++) {
       const overlay = params.overlays[i];
-      const overlaySymbol = this.makeSymbol(overlay.symbol);
+      const overlaySymbol = this.makeSymbol(overlay.symbol || defaultSymbol,defaultSymbol);
       const fields = overlay.fields;
       const buttons = overlay.buttons || defaultButtons;
 
-      let graphic = this.getMarker(overlay, overlaySymbol || defaultSymbol);
+      const type = overlay.symbol && overlay.symbol.type ? overlay.symbol.type :
+          defaultSymbol && defaultSymbol.type ? defaultSymbol.type : undefined;
+      if(!type){
+        break ;
+      }
+      let graphic = this.getMarker(overlay, overlaySymbol,type);
+      if(!graphic){
+        return {
+          message:'请检查overlay输入是否正确!',
+          status:0
+        }
+      }
       graphic.attributes = fields;
       graphic.buttons = buttons;
       graphic.id = overlay.id;
@@ -273,32 +291,62 @@ export class OverlayBaidu {
     let level = params.level || this.view.getZoom();
     let overlays = this.overlays;
     let centerResult = params.centerResult;
+    const callback = params.callback || false;
+    const callbackResults = [];
     let _this = this;
 
     for(let overlay of overlays){
-      await overlayAnimation(overlay);
-    }
-
-    async function overlayAnimation(overlay:any) {
       if (type == overlay.type && ids.indexOf(overlay.id) >= 0) {
-        if (centerResult) {
-          let center = overlay.getPosition();
-          if (center.lat !== null && center.lng !== null) {
-            await _this.view.centerAndZoom(overlay.getPosition(), level);
-          }
+        await overlayAnimation(overlay);
+        let geometry = overlay.point ? overlay.point : overlay.points ?
+            overlay.points : null;
+        if(callback){
+          let result:any = {};
+          ({
+            attributes:result.attributes,
+            id:result.id,
+            type:result.type
+          } = overlay)
+
+          result.geometry = geometry;
+          callbackResults.push(result);
         }
-        overlay.setAnimation(2);
-        await sleep();
-        overlay.setAnimation(0);
       }
     }
 
+    async function overlayAnimation(overlay:any) {
+        if(overlay instanceof BMap.Marker){
+          if (centerResult) {
+            let center = overlay.getPosition();
+            if (center.lat !== null && center.lng !== null) {
+              await _this.view.centerAndZoom(center, level);
+            }
+          }
+          overlay.setAnimation(2);
+          await sleep();
+          overlay.setAnimation(0);
+        }else {
+          if(centerResult){
+            let center = overlay.getBounds().getCenter();
+            if (center.lat !== null && center.lng !== null) {
+              await _this.view.centerAndZoom(center, level);
+            }
+          }
+        }
+    }
     async function sleep() {
       return new Promise((resolve)=>{
         setTimeout(()=>{
           resolve();
         },3000)
       })
+    }
+
+    console.log(callbackResults);
+    return {
+      message:'成功调用改方法',
+      status:0,
+      result:`${JSON.stringify(callbackResults)}`
     }
   }
   public async hideOverlays(params:IOverlayDelete): Promise<IResult> {
@@ -374,7 +422,7 @@ export class OverlayBaidu {
     const defaultType = params.type;
     const zoom = params.zoom;
     const distance = params.distance;
-    const defaultSymbol = this.makeSymbol(params.defaultSymbol);
+    const defaultSymbol:any = this.makeSymbol(params.defaultSymbol);
     const defaultVisible = params.defaultVisible;
     const defaultTooltip = params.defaultTooltip;
 
