@@ -524,7 +524,7 @@ export default class SelectRoute2D {
    * */
   private async showNextLink(linkIds: string, isIterator: boolean = false) {
     // 去掉最后的逗号，否则split时会多一个空元素
-    if (linkIds.substring(linkIds.length - 1, linkIds.length) === ",") {
+    if (linkIds.endsWith(",")) {
       linkIds = linkIds.substring(0, linkIds.length - 1);
     }
     const linkIdArray = linkIds.split(",");
@@ -537,7 +537,25 @@ export default class SelectRoute2D {
       }
       const linkGraphic = await this.getLinkGraphicByLinkId(linkId);
       if (linkGraphic) {
-        linkGraphicArray.push(linkGraphic);
+        // 如果此路段的所有后续路段都已在待选路段中，说明进入了循环，跳过
+        let endLinkIds: string = linkGraphic.attributes["EROADID"];
+        if (endLinkIds.endsWith(",")) {
+          endLinkIds = endLinkIds.substring(0, endLinkIds.length - 1);
+        }
+        const endLinkIdArray = endLinkIds.split(",");
+        let isAllCandidate = true;
+        for (let i = 0; i < endLinkIdArray.length; i++) {
+          const endLinkId = endLinkIdArray[i];
+          if (!this.iteratorLinkIdArray.includes(endLinkId)) {
+            isAllCandidate = false;
+            break;
+          }
+        }
+        if (!isAllCandidate) {
+          linkGraphicArray.push(linkGraphic);
+        } else {
+          continue;
+        }
       }
     }
 
@@ -571,6 +589,8 @@ export default class SelectRoute2D {
         this.iteratorLinkIdArray.push(linkGraphic.attributes["ID"]);
         geometryToUnion.push(candidateLink.geometry);
 
+        // 路口中的link需要迭代，直到走出路口
+        // 让用户选择主路link，而不是路口中过渡link
         if (isInCross) {
           this.showNextLink(endLinkIds, true);
         }
