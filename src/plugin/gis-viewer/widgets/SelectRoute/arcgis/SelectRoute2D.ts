@@ -19,7 +19,7 @@ export default class SelectRoute2D {
   private candidateLinkLayer!: __esri.GraphicsLayer;
   /** 搜索候选link时的起点link id */
   private startLinkId: string = "";
-  private iteratorLinkIdArray: Array<string> = [];
+  private iteratorLinkIdArray: Array<__esri.Graphic> = [];
   /** 已选定的Link graphic */
   private selectedLinkGraphicArray: Array<__esri.Graphic> = [];
 
@@ -455,6 +455,29 @@ export default class SelectRoute2D {
     graphic: __esri.Graphic,
     isLastLink: boolean = false
   ) {
+    const index = this.candidateLinkLayer.graphics.findIndex(
+      (linkGraphic) => linkGraphic.attributes["ID"] === graphic.attributes["ID"]
+    );
+    console.log(index, this.candidateLinkLayer.graphics.length);
+    for (let i = 0; i < index; i++) {
+      const candidateLinkGraphic = this.candidateLinkLayer.graphics.getItemAt(
+        i
+      );
+      const linkId: string = candidateLinkGraphic.attributes["ID"];
+      if (linkId === graphic.attributes["ID"]) {
+        break;
+      }
+      if (this.isCrossLink(candidateLinkGraphic.attributes["KIND"])) {
+        const selectedLinkGraphic = candidateLinkGraphic.clone();
+        selectedLinkGraphic.symbol = {
+          type: "simple-line",
+          color: "red",
+          width: 4,
+        } as any;
+        this.selectedLinkLayer.add(selectedLinkGraphic);
+        this.selectedLinkGraphicArray.push(selectedLinkGraphic);
+      }
+    }
     graphic.symbol = {
       type: "simple-line",
       color: "red",
@@ -480,7 +503,7 @@ export default class SelectRoute2D {
     if (!isLastLink) {
       this.startLinkId = graphic.attributes["ID"];
       this.iteratorLinkIdArray = [];
-      this.showNextLink(graphic.attributes["EROADID"]);
+      this.showNextLink(graphic);
     }
   }
 
@@ -519,10 +542,14 @@ export default class SelectRoute2D {
 
   /**
    * 显示多条待选link
-   * @param linkIds 后续linkId，逗号分隔
+   * @param currentGraphic 当前Graphic
    * @param isIterator 是否迭代
    * */
-  private async showNextLink(linkIds: string, isIterator: boolean = false) {
+  private async showNextLink(
+    currentGraphic: __esri.Graphic,
+    isIterator: boolean = false
+  ) {
+    let linkIds: string = currentGraphic.attributes["EROADID"];
     // 去掉最后的逗号，否则split时会多一个空元素
     if (linkIds.endsWith(",")) {
       linkIds = linkIds.substring(0, linkIds.length - 1);
@@ -532,12 +559,16 @@ export default class SelectRoute2D {
 
     for (let i = 0; i < linkIdArray.length; i++) {
       const linkId = linkIdArray[i];
-      if (this.iteratorLinkIdArray.includes(linkId)) {
+      if (
+        this.candidateLinkLayer.graphics.find(
+          (graphic) => graphic.attributes["ID"] === linkId
+        )
+      ) {
         continue;
       }
       const linkGraphic = await this.getLinkGraphicByLinkId(linkId);
       if (linkGraphic) {
-        // 如果此路段的所有后续路段都已在待选路段中，说明进入了循环，跳过
+        // 如果此路段的所有后续路段都已在待选路段中，说明这个分支进入了循环，跳过
         let endLinkIds: string = linkGraphic.attributes["EROADID"];
         if (endLinkIds.endsWith(",")) {
           endLinkIds = endLinkIds.substring(0, endLinkIds.length - 1);
@@ -546,7 +577,11 @@ export default class SelectRoute2D {
         let isAllCandidate = true;
         for (let i = 0; i < endLinkIdArray.length; i++) {
           const endLinkId = endLinkIdArray[i];
-          if (!this.iteratorLinkIdArray.includes(endLinkId)) {
+          if (
+            !this.candidateLinkLayer.graphics.find(
+              (graphic) => graphic.attributes["ID"] === endLinkId
+            )
+          ) {
             isAllCandidate = false;
             break;
           }
@@ -569,7 +604,7 @@ export default class SelectRoute2D {
       // 有多个后续link时需要同时显示，让用户选择
       linkGraphicArray.forEach((linkGraphic) => {
         const candidateLink = linkGraphic.clone();
-        const { KIND: linkKind, EROADID: endLinkIds } = linkGraphic.attributes;
+        const linkKind: string = linkGraphic.attributes["KIND"];
         const isInCross = this.isCrossLink(linkKind);
 
         candidateLink.symbol = {
@@ -586,13 +621,13 @@ export default class SelectRoute2D {
         }
 
         this.candidateLinkLayer.add(candidateLink);
-        this.iteratorLinkIdArray.push(linkGraphic.attributes["ID"]);
+        // this.iteratorLinkIdArray.push(linkGraphic);
         geometryToUnion.push(candidateLink.geometry);
 
         // 路口中的link需要迭代，直到走出路口
         // 让用户选择主路link，而不是路口中过渡link
         if (isInCross) {
-          this.showNextLink(endLinkIds, true);
+          this.showNextLink(linkGraphic, true);
         }
       });
 
@@ -610,11 +645,6 @@ export default class SelectRoute2D {
       }
     }
   }
-
-  /**
-   * 遇到交叉点的转接link时，继续往前搜索，找到第一个主路设为待选link
-   */
-  private async showNextLinkForCross(linkId: string) {}
 
   /**
    * 是否为交叉点内link
