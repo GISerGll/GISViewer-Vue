@@ -18,7 +18,7 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays, IDrawOverlaysDelete, IDrawOverlayParameter
+  IDrawOverlays, IDrawOverlaysDelete, IDrawOverlayParameter, IPolylineRangingParameter
 } from '@/types/map';
 import {OverlayGaode} from '@/plugin/gis-viewer/widgets/Overlays/gd/OverlayGaode';
 import {JurisdictionPoliceGD} from './widgets/JurisdictionPolice/gd/JurisdictionPoliceGD';
@@ -391,4 +391,5 @@ export default class MapAppGaode implements IMapContainer {
   public async backgroundGeometrySearch(params:IGeometrySearchParameter): Promise<IResult> {
     return {message:'',status:0}
   }
+  public async polylineRanging(params:IPolylineRangingParameter): Promise<any>{}
 }

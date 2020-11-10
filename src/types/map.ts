@@ -227,6 +227,14 @@ export interface IMapContainer {
   getDrawOverlays: () => Promise<IResult>;
   arcgisLoadGDLayer: () => void;
   backgroundGeometrySearch: (params:IGeometrySearchParameter) => Promise<IResult>;
+  polylineRanging: (params: IPolylineRangingParameter) => Promise<IResult>;
+}
+export interface IPolylineRangingParameter {
+  lineSymbol?:IPolylineSymbol,        //测距线符号样式
+  callback?:boolean,                  //是否后台返回测距结果
+  unit?:string,                       //测距单位
+  secSymbol?:any                      //转折点symbol
+  closeSymbol?:any                    //结尾关闭点symbol
 }
 export interface IPopUpTemplate {
   title?: string;

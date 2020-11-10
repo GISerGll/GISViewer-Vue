@@ -19,7 +19,9 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays, IDrawOverlaysDelete
+  IDrawOverlays,
+  IDrawOverlaysDelete,
+    IPolylineRangingParameter
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -48,6 +50,7 @@ export default class MapAppBaidu implements IMapContainer {
     const cluster1 = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/TextIconOverlay.js'
     const cluster2 = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/MarkerClusterer.js';
     const geometryUtil = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/GeoUtils.js';
+    const rangingUtil = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/DistanceTool.js';
 
     await Utils.loadScripts([
       apiUrl,
@@ -59,6 +62,7 @@ export default class MapAppBaidu implements IMapContainer {
         cluster2,
         drawManager,
         geometryUtil,
+        rangingUtil
       ]).then(()=>{
         console.log('scripts Loaded!');
       });
@@ -368,6 +372,10 @@ export default class MapAppBaidu implements IMapContainer {
   public async backgroundGeometrySearch(params:IGeometrySearchParameter): Promise<IResult> {
     const geometrySearch = GeometrySearchBD.getInstance(this.view);
     return await geometrySearch.backgroundGeometrySearch(params);
+  }
+  public async polylineRanging(params:IPolylineRangingParameter): Promise<IResult> {
+    const drawOverlays = DrawOverlaysBD.getInstance(this.view);
+    return await drawOverlays.polylineRanging(params);
   }
 
 }

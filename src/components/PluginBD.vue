@@ -37,7 +37,8 @@
       <button @click="btn_addHeatMap">添加热力图</button>
       <button @click="btn_deleteHeatMap">删除热力图</button>
       <button @click="btn_addOverlaysCluster">添加聚合点</button>
-      <button @click="btn_deleteOverlaysCluster">删除聚合点</button>
+      <button @click="btn_deleteOverlaysCluster">删除聚合点</button><br>
+      <button @click="btn_polylineRanging">测距</button>
 
     </div>
     <gis-viewer
@@ -48,6 +49,7 @@
       @marker-click="showGisDeviceInfo"
       @map-click="mapClick"
     />
+
   </div>
 </template>
 <script lang="ts">
@@ -612,6 +614,10 @@
       let map = this.$refs.gisViewer as any;
       map.deleteAllOverlaysCluster();
     }
+    private async btn_polylineRanging(){
+      let map = this.$refs.gisViewer as any;
+      map.polylineRanging();
+    }
 
     private async mapLoaded() {
       let map = this.$refs.gisViewer as any;
@@ -622,7 +628,7 @@
           type: 'point',
           // primitive: "square",
           url: 'assets/image/Anchor.png',
-          size: [25, 25],
+          size: [50, 50],
           // anchor: 'center'
           // color: "red",
           // outline: {

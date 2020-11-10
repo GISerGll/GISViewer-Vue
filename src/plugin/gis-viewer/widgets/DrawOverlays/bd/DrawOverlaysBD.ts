@@ -1,8 +1,11 @@
 import {
   IResult,
   IDrawOverlaysDelete,
-  IDrawOverlayParameter, IFindParameter
+  IDrawOverlayParameter,
+  IFindParameter,
+  IPolylineRangingParameter
 } from '@/types/map';
+
 declare let BMapLib: any;
 declare let BMap: any;
 
@@ -395,5 +398,60 @@ export default class DrawOverlaysBD{
       status:0,
       result:`成功发现${findCount}个覆盖物`
     }
+  }
+
+  public async polylineRanging(params:IPolylineRangingParameter): Promise<IResult> {
+    const unit = params ? params.unit : undefined;
+    const lineSymbol = params ? params.lineSymbol : undefined;
+    const callback = params ?  params.callback : undefined;
+
+    let lineStroke,lineColor,opacity,lineStyle;
+    if(lineSymbol){
+      ({
+        width:lineStroke,
+        color:lineColor,
+        opacity:opacity,
+          style:lineStyle,
+      } = lineSymbol);
+    }
+
+    const pathStart = require('../../../../../assets/images/start.png')
+    const pathMid = require('../../../../../assets/images/mid.png');
+    const pathEnd = require('../../../../../assets/images/end.png')
+    const imageSize = new BMap.Size(19,30)                  //图片长宽
+    const imageExtend = new BMap.Size(19,60)
+    const myDistanceToolObject = new BMapLib.DistanceTool(this.view, {
+      lineStroke:lineStroke || 4,
+      lineColor:lineColor || '#87CEEB',
+      opacity:opacity || 1 ,
+      lineStyle:lineStyle || 'dashed',
+
+      secIcon:new BMap.Icon(pathMid,imageExtend,{
+        imageSize:imageSize
+      }),
+      startIcon:new BMap.Icon(pathStart,imageExtend,{
+        imageSize:imageSize
+      })
+    });
+
+    myDistanceToolObject.open();
+    myDistanceToolObject.addEventListener("addpoint", (e:any)=>{
+      this.onPointAdded(e);
+    });
+    myDistanceToolObject.addEventListener("drawend", (e:any)=>{
+      let ptOverlays = myDistanceToolObject._dots;
+      ptOverlays[ptOverlays.length-1].setIcon(new BMap.Icon(pathEnd,imageExtend,{
+        imageSize:imageSize
+      }));
+    })
+
+    return {
+      status:0,
+      message:'not complete'
+    }
+  }
+
+  private async onPointAdded(params:any): Promise<any>{
+
   }
 }

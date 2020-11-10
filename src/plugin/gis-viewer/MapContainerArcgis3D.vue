@@ -24,7 +24,7 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays, IDrawOverlayParameter, IDrawOverlaysDelete
+  IDrawOverlays, IDrawOverlayParameter, IDrawOverlaysDelete, IPolylineRangingParameter
 } from '@/types/map';
 
 @Component({
@@ -203,6 +203,9 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   }
   public async backgroundGeometrySearch(params:IGeometrySearchParameter): Promise<IResult> {
     return await this.mapApp.backgroundGeometrySearch(params);
+  }
+  public async polylineRanging(params:IPolylineRangingParameter): Promise<IResult>{
+    return await this.mapApp.polylineRanging(params);
   }
 }
 </script>

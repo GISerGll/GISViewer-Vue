@@ -23,7 +23,7 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays
+  IDrawOverlays, IPolylineRangingParameter
 } from '@/types/map';
 
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
@@ -844,4 +844,5 @@ export default class MapAppArcGIS2D {
   public async backgroundGeometrySearch(params:IGeometrySearchParameter): Promise<IResult> {
     return {message:'',status:0}
   }
+  public async polylineRanging(params:IPolylineRangingParameter): Promise<any>{}
 }

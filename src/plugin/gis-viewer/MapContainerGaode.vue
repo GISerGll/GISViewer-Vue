@@ -24,7 +24,7 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays, IDrawOverlaysDelete
+  IDrawOverlays, IDrawOverlaysDelete, IPolylineRangingParameter
 } from '@/types/map';
 
 @Component({
@@ -219,6 +219,9 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   }
   public async backgroundGeometrySearch(params:IGeometrySearchParameter): Promise<IResult> {
     return await this.mapApp.backgroundGeometrySearch(params);
+  }
+  public async polylineRanging(params:IPolylineRangingParameter): Promise<IResult>{
+    return await this.mapApp.polylineRanging(params);
   }
 }
 </script>

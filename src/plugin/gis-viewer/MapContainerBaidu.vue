@@ -23,7 +23,9 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays, IDrawOverlaysDelete
+  IDrawOverlays,
+  IDrawOverlaysDelete,
+    IPolylineRangingParameter,
 } from '@/types/map';
 @Component({
   name: 'MapAppBaidu'
@@ -190,6 +192,9 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
   }
   public async backgroundGeometrySearch(params:IGeometrySearchParameter): Promise<IResult> {
     return await this.mapApp.backgroundGeometrySearch(params);
+  }
+  public async polylineRanging(params:IPolylineRangingParameter): Promise<IResult> {
+    return await this.mapApp.polylineRanging(params);
   }
 
 }

@@ -19,7 +19,7 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays, IDrawOverlaysDelete
+  IDrawOverlays, IDrawOverlaysDelete, IPolylineRangingParameter
 } from '@/types/map';
 import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
 import {RasterStretchRenderer} from 'esri/rasterRenderers';
@@ -604,4 +604,5 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async backgroundGeometrySearch(params:IGeometrySearchParameter): Promise<IResult> {
     return {message:'',status:0}
   }
+  public async polylineRanging(params:IPolylineRangingParameter): Promise<any>{}
 }
