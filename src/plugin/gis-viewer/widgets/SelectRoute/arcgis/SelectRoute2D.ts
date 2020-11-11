@@ -11,6 +11,8 @@ export default class SelectRoute2D {
 
   private view!: __esri.MapView;
 
+  private geometryEngineAsync!: __esri.geometryEngineAsync;
+
   /** 显示全部路网的图层 */
   private allLinkLayer!: __esri.FeatureLayer;
   /** 显示已选定Link的图层 */
@@ -19,7 +21,7 @@ export default class SelectRoute2D {
   private candidateLinkLayer!: __esri.GraphicsLayer;
   /** 搜索候选link时的起点link id */
   private startLinkId: string = "";
-  private iteratorLinkIdArray: Array<Array<string>> = [];
+  private iteratorLinkGraphicArray: Array<Array<__esri.Graphic>> = [];
   /** 已选定的Link graphic */
   private selectedLinkGraphicArray: Array<__esri.Graphic> = [];
 
@@ -131,13 +133,14 @@ export default class SelectRoute2D {
           // 选好起点后路网不再能点击，只能点击候选link
           this.allLinkLayer.popupEnabled = false;
           this.mouseMoveHandler.remove();
-          this.selectedLinkGraphicArray = [];
 
           // popup.selectedFeature.attributes只包含popupTemplate中配置的字段
           // 只能用FID来查找ID
           const { FID } = this.view.popup.selectedFeature.attributes;
           const selectedGraphic = await this.getLinkGraphicByFID(FID);
-          this.addSelectedLink(selectedGraphic.clone());
+          const clonedGraphic = selectedGraphic.clone();
+          this.iteratorLinkGraphicArray = [[clonedGraphic]];
+          this.addSelectedLink(clonedGraphic);
 
           break;
         }
@@ -276,12 +279,19 @@ export default class SelectRoute2D {
     };
     type MapModules = [
       typeof import("esri/layers/GraphicsLayer"),
-      typeof import("esri/layers/FeatureLayer")
+      typeof import("esri/layers/FeatureLayer"),
+      typeof import("esri/geometry/geometryEngineAsync")
     ];
-    const [GraphicsLayer, FeatureLayer] = await (loadModules([
+    const [
+      GraphicsLayer,
+      FeatureLayer,
+      geometryEngineAsync,
+    ] = await (loadModules([
       "esri/layers/GraphicsLayer",
       "esri/layers/FeatureLayer",
+      "esri/geometry/geometryEngineAsync",
     ]) as Promise<MapModules>);
+    this.geometryEngineAsync = geometryEngineAsync;
 
     if (this.allLinkLayer) {
       this.allLinkLayer.popupEnabled = true;
@@ -394,15 +404,11 @@ export default class SelectRoute2D {
   /** 根据ID查找link Graphic */
   private async getLinkGraphicByLinkId(
     linkId: string
-  ): Promise<__esri.Graphic | void> {
+  ): Promise<__esri.Graphic> {
     const query = this.allLinkLayer.createQuery();
     query.where = `ID='${linkId}'`;
     const results = await this.allLinkLayer.queryFeatures(query);
-    if (results.features.length > 0) {
-      return results.features[0];
-    } else {
-      return;
-    }
+    return results.features[0];
   }
 
   /** 根据信号机id查找graphic */
@@ -422,11 +428,7 @@ export default class SelectRoute2D {
   /** 搜索指定点周边的信号机 */
   private async searchTrafficSignal(center: __esri.Geometry) {
     // 生成缓冲区
-    type MapModules = [typeof import("esri/geometry/geometryEngineAsync")];
-    const [geometryEngineAsync] = await (loadModules([
-      "esri/geometry/geometryEngineAsync",
-    ]) as Promise<MapModules>);
-    const buffer = (await geometryEngineAsync.geodesicBuffer(
+    const buffer = (await this.geometryEngineAsync.geodesicBuffer(
       center,
       this.bufferDistance,
       "meters"
@@ -454,35 +456,58 @@ export default class SelectRoute2D {
    * @param isLastLink 是否为最后一个link
    * */
   private async addSelectedLink(
-    graphic: __esri.Graphic,
+    clickedGraphic: __esri.Graphic,
     isLastLink: boolean = false
   ) {
-    graphic.symbol = {
-      type: "simple-line",
-      color: "red",
-      width: 4,
-    } as any;
-    graphic.popupTemplate = {
-      ...this.popupTemplate,
-      actions: [this.reSelectNextLinkButton, this.endRouteInSelectedLinkButton],
-    } as any;
-    this.selectedLinkLayer.add(graphic);
-    this.selectedLinkGraphicArray.push(graphic);
+    const geometryToUnion: Array<__esri.Geometry> = [];
 
-    const center = (graphic.geometry as __esri.Polyline).extent.center;
+    for (let i = 0; i < this.iteratorLinkGraphicArray.length; i++) {
+      const routeLinkGraphicArray = this.iteratorLinkGraphicArray[i];
+      if (
+        routeLinkGraphicArray[routeLinkGraphicArray.length - 1].attributes[
+          "ID"
+        ] === clickedGraphic.attributes["ID"]
+      ) {
+        routeLinkGraphicArray.forEach((graphic) => {
+          graphic.symbol = {
+            type: "simple-line",
+            color: "red",
+            width: 4,
+          } as any;
+          graphic.popupTemplate = {
+            ...this.popupTemplate,
+            actions: [
+              this.reSelectNextLinkButton,
+              this.endRouteInSelectedLinkButton,
+            ],
+          } as any;
+          this.selectedLinkLayer.add(graphic);
+          this.selectedLinkGraphicArray.push(graphic);
+          geometryToUnion.push(graphic.geometry);
+        });
+
+        break;
+      }
+    }
+
+    const unionedGeometry = await this.geometryEngineAsync.union(
+      geometryToUnion
+    );
+
+    const center = (unionedGeometry as __esri.Polyline).extent.center;
     this.view.goTo(center);
 
     // 在快速路上不搜索周边信号机
-    if (!this.isExpressway(graphic.attributes["KIND"])) {
-      await this.searchTrafficSignal(graphic.geometry);
+    if (!this.isExpressway(clickedGraphic.attributes["KIND"])) {
+      await this.searchTrafficSignal(unionedGeometry);
     }
 
     // 显示候选link
     this.candidateLinkLayer.removeAll();
     if (!isLastLink) {
-      this.startLinkId = graphic.attributes["ID"];
-      this.iteratorLinkIdArray = [];
-      this.showNextLink(graphic);
+      this.startLinkId = clickedGraphic.attributes["ID"];
+      this.iteratorLinkGraphicArray = [];
+      this.showNextLink(clickedGraphic);
     }
   }
 
@@ -535,10 +560,6 @@ export default class SelectRoute2D {
     }
     const linkIdArray = linkIds.split(",");
 
-    const selfLinkId: string = currentGraphic.attributes["ID"];
-    this.saveRouteInCross(selfLinkId, linkIdArray);
-    console.log(this.iteratorLinkIdArray);
-
     const linkGraphicArray: Array<__esri.Graphic> = [];
     for (let i = 0; i < linkIdArray.length; i++) {
       const linkId = linkIdArray[i];
@@ -576,6 +597,9 @@ export default class SelectRoute2D {
         }
       }
     }
+
+    const selfLinkId: string = currentGraphic.attributes["ID"];
+    this.saveRouteInCross(selfLinkId, linkGraphicArray);
 
     const geometryToUnion: Array<__esri.Geometry> = [];
     if (!isIterator && linkGraphicArray.length === 1) {
@@ -615,11 +639,7 @@ export default class SelectRoute2D {
 
       // 调整地图显示范围，能显示全部候选link
       if (geometryToUnion.length > 0) {
-        type MapModules = [typeof import("esri/geometry/geometryEngineAsync")];
-        const [geometryEngineAsync] = await (loadModules([
-          "esri/geometry/geometryEngineAsync",
-        ]) as Promise<MapModules>);
-        const unionGeometry = (await geometryEngineAsync.union(
+        const unionGeometry = (await this.geometryEngineAsync.union(
           geometryToUnion
         )) as __esri.Polyline;
         const center = unionGeometry.extent.center;
@@ -629,21 +649,27 @@ export default class SelectRoute2D {
   }
 
   /** 保存路口内递归的路径 */
-  private saveRouteInCross(selfLinkId: string, endLinkIds: Array<string>) {
-    for (let i = 0; i < this.iteratorLinkIdArray.length; i++) {
-      const routeIdArray = this.iteratorLinkIdArray[i];
-      if (routeIdArray[routeIdArray.length - 1] === selfLinkId) {
-        const newRouteLinks = endLinkIds.map((newLinkId) =>
-          routeIdArray.concat([newLinkId])
+  private async saveRouteInCross(
+    selfLinkId: string,
+    endLinkGraphicArray: Array<__esri.Graphic>
+  ) {
+    for (let i = 0; i < this.iteratorLinkGraphicArray.length; i++) {
+      const routeGraphicArray = this.iteratorLinkGraphicArray[i];
+      if (
+        routeGraphicArray[routeGraphicArray.length - 1].attributes["ID"] ===
+        selfLinkId
+      ) {
+        const newRouteLinks = endLinkGraphicArray.map((linkGraphic) =>
+          routeGraphicArray.concat([linkGraphic])
         );
-        this.iteratorLinkIdArray.splice(i, 1, ...newRouteLinks);
+        this.iteratorLinkGraphicArray.splice(i, 1, ...newRouteLinks);
         return;
       }
     }
 
     // 新link
-    this.iteratorLinkIdArray = this.iteratorLinkIdArray.concat(
-      endLinkIds.map((linkId) => [linkId])
+    this.iteratorLinkGraphicArray = this.iteratorLinkGraphicArray.concat(
+      endLinkGraphicArray.map((linkGraphic) => [linkGraphic])
     );
   }
 
