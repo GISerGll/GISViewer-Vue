@@ -19,7 +19,7 @@ export default class SelectRoute2D {
   private candidateLinkLayer!: __esri.GraphicsLayer;
   /** 搜索候选link时的起点link id */
   private startLinkId: string = "";
-  private iteratorLinkIdArray: Array<__esri.Graphic> = [];
+  private iteratorLinkIdArray: Array<Array<string>> = [];
   /** 已选定的Link graphic */
   private selectedLinkGraphicArray: Array<__esri.Graphic> = [];
 
@@ -163,6 +163,7 @@ export default class SelectRoute2D {
           const { FID } = this.view.popup.selectedFeature.attributes;
           const selectedGraphic = await this.getLinkGraphicByFID(FID);
           await this.addSelectedLink(selectedGraphic.clone(), true);
+
           await this.view.goTo(this.selectedLinkGraphicArray);
           this.view.zoom -= 1;
 
@@ -175,8 +176,10 @@ export default class SelectRoute2D {
           const selectedGraphic = await this.getLinkGraphicByFID(FID);
           this.reSelectLink(selectedGraphic.attributes["ID"], true);
           this.candidateLinkLayer.removeAll();
+
           await this.view.goTo(this.selectedLinkGraphicArray);
           this.view.zoom -= 1;
+
           this.emitRouteResult();
 
           break;
@@ -372,7 +375,6 @@ export default class SelectRoute2D {
     });
     if (result.results.length > 0) {
       const graphic = result.results[0].graphic;
-      console.log(graphic);
       const point = this.view.toMap(event);
       this.view.popup.open({
         location: point,
@@ -455,29 +457,6 @@ export default class SelectRoute2D {
     graphic: __esri.Graphic,
     isLastLink: boolean = false
   ) {
-    const index = this.candidateLinkLayer.graphics.findIndex(
-      (linkGraphic) => linkGraphic.attributes["ID"] === graphic.attributes["ID"]
-    );
-    console.log(index, this.candidateLinkLayer.graphics.length);
-    for (let i = 0; i < index; i++) {
-      const candidateLinkGraphic = this.candidateLinkLayer.graphics.getItemAt(
-        i
-      );
-      const linkId: string = candidateLinkGraphic.attributes["ID"];
-      if (linkId === graphic.attributes["ID"]) {
-        break;
-      }
-      if (this.isCrossLink(candidateLinkGraphic.attributes["KIND"])) {
-        const selectedLinkGraphic = candidateLinkGraphic.clone();
-        selectedLinkGraphic.symbol = {
-          type: "simple-line",
-          color: "red",
-          width: 4,
-        } as any;
-        this.selectedLinkLayer.add(selectedLinkGraphic);
-        this.selectedLinkGraphicArray.push(selectedLinkGraphic);
-      }
-    }
     graphic.symbol = {
       type: "simple-line",
       color: "red",
@@ -555,8 +534,12 @@ export default class SelectRoute2D {
       linkIds = linkIds.substring(0, linkIds.length - 1);
     }
     const linkIdArray = linkIds.split(",");
-    const linkGraphicArray: Array<__esri.Graphic> = [];
 
+    const selfLinkId: string = currentGraphic.attributes["ID"];
+    this.saveRouteInCross(selfLinkId, linkIdArray);
+    console.log(this.iteratorLinkIdArray);
+
+    const linkGraphicArray: Array<__esri.Graphic> = [];
     for (let i = 0; i < linkIdArray.length; i++) {
       const linkId = linkIdArray[i];
       if (
@@ -621,7 +604,6 @@ export default class SelectRoute2D {
         }
 
         this.candidateLinkLayer.add(candidateLink);
-        // this.iteratorLinkIdArray.push(linkGraphic);
         geometryToUnion.push(candidateLink.geometry);
 
         // 路口中的link需要迭代，直到走出路口
@@ -644,6 +626,25 @@ export default class SelectRoute2D {
         this.view.goTo(center);
       }
     }
+  }
+
+  /** 保存路口内递归的路径 */
+  private saveRouteInCross(selfLinkId: string, endLinkIds: Array<string>) {
+    for (let i = 0; i < this.iteratorLinkIdArray.length; i++) {
+      const routeIdArray = this.iteratorLinkIdArray[i];
+      if (routeIdArray[routeIdArray.length - 1] === selfLinkId) {
+        const newRouteLinks = endLinkIds.map((newLinkId) =>
+          routeIdArray.concat([newLinkId])
+        );
+        this.iteratorLinkIdArray.splice(i, 1, ...newRouteLinks);
+        return;
+      }
+    }
+
+    // 新link
+    this.iteratorLinkIdArray = this.iteratorLinkIdArray.concat(
+      endLinkIds.map((linkId) => [linkId])
+    );
   }
 
   /**
