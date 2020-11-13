@@ -1,13 +1,12 @@
 export let GisConfig = {
   arcgis_api: 'http://localhost:8090/arcgis_js_api/library/4.14',
-  theme: 'dark', //dark,vec
+  theme: 'custom', //dark,vec
   baseLayers: [
     {
       label: '深色',
       type: 'tiled',
       url:
-        'http://10.31.214.197:6080/arcgis/rest/services/GongXiang/ShangHai_base_PurplishBlue/MapServer',
-      //' https://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',
+        ' https://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',
       visible: true
     }
     // {
@@ -24,32 +23,32 @@ export let GisConfig = {
     // }
   ],
   operationallayers: [
-    {
-      label: '发布段',
-      type: 'dynamic',
-      url:
-        'http://10.31.214.197:6080/arcgis/rest/services/GongXiang/Shanghai_fbd/MapServer',
-      visible: true
-    },
-    {
-      type: 'image',
-      label: 'gzzx',
-      url: 'assets/mapIcons/JinBoHui/gzzx.svg',
-      geometry: {x: 13502790.77925912, y: 3657732.182986842},
-      width: 520,
-      height: 520,
-      minScale: 9028
-    },
-    {
-      type: 'image',
-      label: 'flower',
-      url: 'assets/mapIcons/JinBoHui/flower.png',
-      geometry: {x: 13502776.148697566, y: 3657684.599002632},
-      width: 350,
-      height: 350,
-      minScale: 72224,
-      maxScale: 9029
-    }
+    // {
+    //   label: '发布段',
+    //   type: 'dynamic',
+    //   url:
+    //     'http://10.31.214.197:6080/arcgis/rest/services/GongXiang/Shanghai_fbd/MapServer',
+    //   visible: true
+    // },
+    // {
+    //   type: 'image',
+    //   label: 'gzzx',
+    //   url: 'assets/mapIcons/JinBoHui/gzzx.svg',
+    //   geometry: {x: 13502790.77925912, y: 3657732.182986842},
+    //   width: 520,
+    //   height: 520,
+    //   minScale: 9028
+    // },
+    // {
+    //   type: 'image',
+    //   label: 'flower',
+    //   url: 'assets/mapIcons/JinBoHui/flower.png',
+    //   geometry: {x: 13502776.148697566, y: 3657684.599002632},
+    //   width: 350,
+    //   height: 350,
+    //   minScale: 72224,
+    //   maxScale: 9029
+    // }
     // {
     //   label: '点位',
     //   type: 'feature',
@@ -132,8 +131,8 @@ export let GisConfig = {
     // }
   ],
   options: {
-    center: [121.30171182632287, 31.190762819605983],
-    zoom: 5,
+    center: [121.452, 31.23],
+    zoom: 12,
     //viewingMode: 'global',
     // ground: {opacity: 1},
     // alphaCompositingEnabled: true,

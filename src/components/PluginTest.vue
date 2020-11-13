@@ -12,6 +12,7 @@
       @map-loaded="mapLoaded"
       @marker-click="showGisDeviceInfo"
       @map-click="mapClick"
+      @marker-mouse="mouseGisDeviceInfo"
       @select-route-finished="selectRouteFinished"
       @into-signal="intoSignal"
       @outof-signal="outofSignal"
@@ -64,7 +65,14 @@ export default class PluginTest extends Vue {
   private mapClick(pt: any) {
     console.log(pt);
   }
-
+  private mouseGisDeviceInfo(
+    event: any,
+    type: string,
+    id: string,
+    detail: any
+  ) {
+    console.log(event, type, id, detail);
+  }
   private selectRouteFinished(routeInfo: any) {
     console.log(routeInfo);
   }

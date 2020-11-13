@@ -42,6 +42,7 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     this.mapApp = new MapApp();
     await this.mapApp.initialize(this.mapConfig, this.mapId);
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
+    this.mapApp.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
     this.mapApp.mapClick = this.mapClick;
     this.mapApp.selectRouteFinished = this.selectedRouteFinished;
     this.mapApp.intoSignal = this.intoSignal;

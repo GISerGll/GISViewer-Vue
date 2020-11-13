@@ -337,9 +337,13 @@ export class GeometrySearch {
       //     attr: result.attributes
       //   };
       // });
+      let polygoncenter = searchGeometry.centroid || searchGeometry.center;
+      if (polygoncenter) {
+        polygoncenter = [polygoncenter.longitude, polygoncenter.latitude];
+      }
       let searchResults = {
-        center: center,
-        radius: radius,
+        center: center || polygoncenter,
+        radius: center ? radius : 0,
         searchResults: searchRses
       };
       if (clickHandle) {

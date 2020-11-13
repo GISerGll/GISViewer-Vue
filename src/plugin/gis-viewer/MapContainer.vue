@@ -15,6 +15,7 @@
       @map-loaded="mapLoaded"
       @map-click="mapClick"
       @marker-click="showGisDeviceInfo"
+      @marker-mouse="mouseGisDeviceInfo"
       @select-route-finished="selectedRouteFinished"
       @into-signal="intoSignal"
       @outof-signal="outofSignal"
