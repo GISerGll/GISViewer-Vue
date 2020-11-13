@@ -183,46 +183,60 @@ export default class MapAppArcGIS2D {
     view.on(['pointer-move'], async (event: any) => {
       const response = await view.hitTest(event);
       if (response.results.length > 0) {
-        if (!this.mouseoverlay) {
-          let result = response.results[0];
+        let result = response.results[0];
 
-          const graphic = result.graphic;
-          if (!graphic.attributes) {
-            return;
-          }
-          let {type, id} = graphic.attributes;
-          let label = graphic.layer ? (graphic.layer as any).label : '';
-          if (
-            graphic.layer &&
-            (graphic.layer.type == 'feature' ||
-              graphic.layer.type == 'graphics')
-          ) {
-            id =
-              graphic.attributes['DEVICEID'] ||
-              graphic.attributes['FEATUREID'] ||
-              graphic.attributes['SECTIONID'] ||
-              graphic.attributes['id'] ||
-              graphic.attributes['ID'] ||
-              undefined;
-            type =
-              graphic.attributes['DEVICETYPE'] ||
-              graphic.attributes['FEATURETYPE'] ||
-              graphic.attributes['FEATURETYP'] ||
-              graphic.attributes['type'] ||
-              graphic.attributes['TYPE'] ||
-              label ||
-              undefined;
-          }
-          //if (id) {
-          if (
-            graphic.attributes &&
-            (graphic.attributes.isCluster || graphic.attributes.isClusterText)
-          ) {
-            return;
-          }
+        const graphic = result.graphic;
+        if (!graphic.attributes) {
+          graphic.attributes = {};
+        }
+        let {type, id} = graphic.attributes;
+        let label = graphic.layer ? (graphic.layer as any).label : '';
+        if (
+          graphic.layer &&
+          (graphic.layer.type == 'feature' || graphic.layer.type == 'graphics')
+        ) {
+          id =
+            graphic.attributes['DEVICEID'] ||
+            graphic.attributes['FEATUREID'] ||
+            graphic.attributes['SECTIONID'] ||
+            graphic.attributes['id'] ||
+            graphic.attributes['ID'] ||
+            undefined;
+          type =
+            graphic.attributes['DEVICETYPE'] ||
+            graphic.attributes['FEATURETYPE'] ||
+            graphic.attributes['FEATURETYP'] ||
+            graphic.attributes['type'] ||
+            graphic.attributes['TYPE'] ||
+            label ||
+            undefined;
+        }
+        //if (id) {
+        if (
+          graphic.attributes &&
+          (graphic.attributes.isCluster || graphic.attributes.isClusterText)
+        ) {
+          return;
+        }
+        if (!this.mouseoverlay) {
           event.type = 'mouseover';
           this.mouseGisDeviceInfo(event, type, id, graphic.toJSON());
           this.mouseoverlay = {event, type, id, graphic: graphic.toJSON()};
+        } else {
+          if (
+            this.mouseoverlay &&
+            this.mouseoverlay.id !== id &&
+            this.mouseoverlay.type !== type
+          ) {
+            event.type = 'mouseout';
+            this.mouseGisDeviceInfo(
+              event,
+              this.mouseoverlay.type,
+              this.mouseoverlay.id,
+              this.mouseoverlay.graphic
+            );
+            this.mouseoverlay = undefined;
+          }
         }
       } else {
         if (this.mouseoverlay) {
