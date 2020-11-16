@@ -71,7 +71,7 @@ export default class PluginTest extends Vue {
     id: string,
     detail: any
   ) {
-    console.log(event, type, id, detail);
+    //console.log(event, type, id, detail);
   }
   private selectRouteFinished(routeInfo: any) {
     console.log(routeInfo);

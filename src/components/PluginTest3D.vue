@@ -48,8 +48,8 @@ export default class PluginTest3D extends Vue {
 <style scoped>
 #gisDiv {
   position: absolute;
-  width: 100px;
-  height: 100px;
+  width: 100%;
+  height: 100%;
   float: right;
   margin: 0 auto;
 }

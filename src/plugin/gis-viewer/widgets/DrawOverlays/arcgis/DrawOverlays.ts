@@ -112,7 +112,12 @@ export class DrawOverlays {
     this.sketchVM.on('create', (event: any) => {
       if (event.state === 'complete') {
         if (callback) {
-          callback(event.graphic.geometry);
+          let polygoncenter =
+            event.graphic.geometry.centroid || event.graphic.geometry.center;
+          if (polygoncenter) {
+            polygoncenter = [polygoncenter.longitude, polygoncenter.latitude];
+          }
+          callback({geometry: event.graphic.geometry, center: polygoncenter});
         }
       }
     });
@@ -184,7 +189,7 @@ export class DrawOverlays {
               color: [23, 145, 252, 0.4],
               outline: {
                 style: 'dash',
-                color: [255, 255, 0, 0.8],
+                color: [255, 0, 0, 0.8],
                 width: 2
               }
             };
