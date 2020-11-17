@@ -311,6 +311,9 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async stopDrawOverlays(): Promise<void> {
     return await this.mapContainer.stopDrawOverlays();
   }
+  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {
+    return await this.mapContainer.deleteDrawOverlays(params);
+  }
   public async getDrawOverlays(): Promise<IResult> {
     return await this.mapContainer.getDrawOverlays();
   }

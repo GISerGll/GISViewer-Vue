@@ -849,6 +849,10 @@ export default class MapAppArcGIS2D {
     const drawoverlay = DrawOverlays.getInstance(this.view);
     return await drawoverlay.stopDrawOverlays();
   }
+  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {
+    const drawoverlay = DrawOverlays.getInstance(this.view);
+    return await drawoverlay.deleteDrawOverlays(params);
+  }
   public async getDrawOverlays(): Promise<IResult> {
     const drawoverlay = DrawOverlays.getInstance(this.view);
     return await drawoverlay.getDrawOverlays();

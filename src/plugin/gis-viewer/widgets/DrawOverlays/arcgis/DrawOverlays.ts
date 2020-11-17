@@ -18,6 +18,10 @@ export class DrawOverlays {
   private view!: __esri.MapView | __esri.SceneView;
   private dataJsonMap: Map<string, any> = new Map();
   private sketchVM: any;
+  private _polySym: any;
+  private _lineSym: any;
+  private _id: string | undefined = undefined;
+  private _type: string | undefined = undefined;
 
   private constructor(view: __esri.MapView | __esri.SceneView) {
     this.view = view;
@@ -43,6 +47,7 @@ export class DrawOverlays {
   public stopDrawOverlays() {
     if (this.drawlayer) {
       this.drawlayer.removeAll();
+      this.view.map.remove(this.drawlayer);
       this.drawlayer = undefined;
     }
     if (this.sketchVM) {
@@ -52,17 +57,41 @@ export class DrawOverlays {
   }
   public async startDrawOverlays(params: IDrawOverlays): IPromise<void> {
     let repeat = params.repeat !== false;
+    let symbol = params.symbol || {};
+    let model = params.model || 'add';
+
+    this._id = params.id || undefined;
+    this._type = params.type || 'drawOverlays';
+    this._polySym = {
+      type: 'simple-fill', // autocasts as new SimpleMarkerSymbol()
+      color: symbol.color || [23, 145, 252, 0.4],
+      outline: {
+        style: symbol.outline ? symbol.outline.style || 'dash' : 'dash',
+        color: symbol.outline
+          ? symbol.outline.color || [255, 0, 0, 0.8]
+          : [255, 0, 0, 0.8],
+        width: symbol.outline ? symbol.outline.width || 2 : 2
+      }
+    };
+    this._lineSym = {
+      type: 'simple-line',
+      color: symbol.color || [255, 0, 0],
+      width: 2
+    };
     if (!repeat) {
       this.clear();
     }
     if (!this.sketchVM) {
       await this.createSketch(params);
     }
-    this.sketchVM.create('polygon');
+    if (model == 'add') {
+      this.sketchVM.create(params.drawType || 'polygon');
+    }
   }
   public async createSketch(params: any) {
     let callback = params.callback;
     let update = params.update !== false;
+
     type MapModules = [
       typeof import('esri/widgets/Sketch/SketchViewModel'),
       typeof import('esri/geometry/support/webMercatorUtils')
@@ -111,6 +140,14 @@ export class DrawOverlays {
     // listen to create event, only respond when event's state changes to complete
     this.sketchVM.on('create', (event: any) => {
       if (event.state === 'complete') {
+        event.graphic.attributes = {id: _this._id, type: _this._type};
+        event.graphic.id = _this._id;
+        event.graphic.type = _this._type;
+        if (event.graphic.geometry.type == 'polygon') {
+          event.graphic.symbol = _this._polySym;
+        } else if (event.graphic.geometry.type == 'polyline') {
+          event.graphic.symbol = _this._lineSym;
+        }
         if (callback) {
           let polygoncenter =
             event.graphic.geometry.centroid || event.graphic.geometry.center;
@@ -162,6 +199,48 @@ export class DrawOverlays {
     }
     return layer;
   }
+  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {
+    let _this = this;
+    let types = params.types || [];
+    let ids = params.ids || [];
+    return new Promise((resolve: any, reject: any) => {
+      if (params) {
+        let layer = _this.view.map.allLayers.find((baselayer: any) => {
+          return (
+            baselayer.type == 'graphics' && baselayer.label === 'drawOverlays'
+          );
+        });
+        if (!layer) {
+          resolve({status: 0, message: '', result: {}});
+        }
+        let overlayLayer = layer as __esri.GraphicsLayer;
+        for (let i = 0; i < overlayLayer.graphics.length; i++) {
+          let graphic: any = overlayLayer.graphics.getItemAt(i);
+          if (
+            //只判断type
+            (types.length > 0 &&
+              ids.length === 0 &&
+              types.indexOf(graphic.type) >= 0) ||
+            //只判断id
+            (types.length === 0 &&
+              ids.length > 0 &&
+              ids.indexOf(graphic.id) >= 0) ||
+            //type和id都要判断
+            (types.length > 0 &&
+              ids.length > 0 &&
+              types.indexOf(graphic.type) >= 0 &&
+              ids.indexOf(graphic.id) >= 0)
+          ) {
+            overlayLayer.remove(graphic);
+            i--;
+          }
+        }
+        resolve({status: 0, message: '', result: {}});
+      } else {
+        _this.sketchVM.delete();
+      }
+    });
+  }
   public async getDrawOverlays(): Promise<IResult> {
     let _this = this;
     return new Promise((resolve: any, reject: any) => {
@@ -176,23 +255,11 @@ export class DrawOverlays {
       let overlays: any[] = [];
       (layer as __esri.GraphicsLayer).graphics.forEach(
         (graphic: __esri.Graphic, index: number) => {
-          let symbol;
+          let symbol = graphic.symbol as any;
           if (graphic.geometry.type == 'polyline') {
-            symbol = {
-              type: 'simple-line',
-              color: [255, 255, 0],
-              width: 2
-            };
+            //symbol = _this._lineSym;
           } else if (graphic.geometry.type == 'polygon') {
-            symbol = {
-              type: 'simple-fill',
-              color: [23, 145, 252, 0.4],
-              outline: {
-                style: 'dash',
-                color: [255, 0, 0, 0.8],
-                width: 2
-              }
-            };
+            //symbol = _this._polySym;
           } else {
             //point
             symbol = {
@@ -209,9 +276,10 @@ export class DrawOverlays {
           overlays.push({
             geometry: graphic.geometry,
             fields: {
-              id: 'drawoverlay' + index.toString(),
-              type: 'drawOverlays'
+              id: graphic.attributes.id || 'drawoverlay' + index.toString(),
+              type: graphic.attributes.type || 'drawOverlays'
             },
+            id: graphic.attributes.id,
             symbol: symbol
           });
         }
