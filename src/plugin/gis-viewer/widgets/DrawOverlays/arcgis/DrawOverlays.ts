@@ -275,9 +275,36 @@ export class DrawOverlays {
         (graphic: __esri.Graphic, index: number) => {
           let symbol = graphic.symbol as any;
           if (graphic.geometry.type == 'polyline') {
-            //symbol = _this._lineSym;
+            symbol = {
+              type: symbol.type,
+              color: symbol.color,
+              width: symbol.width
+            };
           } else if (graphic.geometry.type == 'polygon') {
-            //symbol = _this._polySym;
+            symbol = {
+              type: symbol.type,
+              color: symbol.color
+                ? [
+                    symbol.color.r,
+                    symbol.color.g,
+                    symbol.color.b,
+                    symbol.color.a
+                  ]
+                : [23, 145, 252, 0.4],
+              outline: {
+                type: symbol.outline.type,
+                style: symbol.outline.style,
+                color: symbol.outline.color
+                  ? [
+                      symbol.outline.color.r,
+                      symbol.outline.color.g,
+                      symbol.outline.color.b,
+                      symbol.outline.color.a
+                    ]
+                  : [23, 145, 252, 0.4],
+                width: symbol.outline.width
+              }
+            };
           } else {
             //point
             symbol = {
