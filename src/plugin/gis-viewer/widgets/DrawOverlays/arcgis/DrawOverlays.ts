@@ -22,6 +22,7 @@ export class DrawOverlays {
   private _lineSym: any;
   private _id: string | undefined = undefined;
   private _type: string | undefined = undefined;
+  private _callback: any;
 
   private constructor(view: __esri.MapView | __esri.SceneView) {
     this.view = view;
@@ -59,6 +60,7 @@ export class DrawOverlays {
     let repeat = params.repeat !== false;
     let symbol = params.symbol || {};
     let model = params.model || 'add';
+    this._callback = params.callback || undefined;
 
     this._id = params.id || undefined;
     this._type = params.type || 'drawOverlays';
@@ -89,7 +91,6 @@ export class DrawOverlays {
     }
   }
   public async createSketch(params: any) {
-    let callback = params.callback;
     let update = params.update !== false;
 
     type MapModules = [
@@ -148,13 +149,30 @@ export class DrawOverlays {
         } else if (event.graphic.geometry.type == 'polyline') {
           event.graphic.symbol = _this._lineSym;
         }
-        if (callback) {
+        if (_this._callback) {
           let polygoncenter =
             event.graphic.geometry.centroid || event.graphic.geometry.center;
           if (polygoncenter) {
             polygoncenter = [polygoncenter.longitude, polygoncenter.latitude];
           }
-          callback({geometry: event.graphic.geometry, center: polygoncenter});
+          _this._callback({
+            geometry: event.graphic.geometry,
+            center: polygoncenter,
+            data: {
+              type: 'drawOverlays',
+              overlays: [
+                {
+                  geometry: event.graphic.geometry,
+                  fields: {
+                    id: event.graphic.attributes.id || undefined,
+                    type: event.graphic.attributes.type || 'drawOverlays'
+                  },
+                  id: event.graphic.attributes.id,
+                  symbol: event.graphic.symbol
+                }
+              ]
+            }
+          });
         }
       }
     });
