@@ -582,7 +582,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async initializeRouteSelect(params: ISelectRouteParam) {}
   public async showSelectedRoute(params: ISelectRouteResult) {}
 
-  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
+  public async startDrawOverlays(params: IDrawOverlays): Promise<any> {}
   public async deleteDrawOverlays(params: IDrawOverlaysDelete): Promise<IResult> {
     return {status: 0, message: ''};
   }

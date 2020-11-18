@@ -56,7 +56,6 @@ export class OverlayBaidu {
     switch (type) {
       case 'polyline':
         marker = new BMap.Polyline(this.getGeometry(geometry.paths), symbol);
-        console.log(marker);
         break;
       case 'polygon':
         marker = new BMap.Polygon(this.getGeometry(geometry.rings), symbol);
@@ -342,7 +341,6 @@ export class OverlayBaidu {
       })
     }
 
-    console.log(callbackResults);
     return {
       message:'成功调用改方法',
       status:0,

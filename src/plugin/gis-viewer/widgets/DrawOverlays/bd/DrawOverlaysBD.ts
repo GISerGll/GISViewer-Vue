@@ -19,8 +19,10 @@ export default class DrawOverlaysBD{
   private drawOverlays:Map<string,any> = new Map<string, any>();
   private drawingType!:any;
   private drawingManager!:any;
+  private drawCallback!:any;
+  private drawingPromise!:any
 
-  private static defaultLineSymbol:Object = {
+  public static defaultLineSymbol:Object = {
     strokeColor:'rgb(255,0,0)',    //边线颜色。
     fillColor:'rgb(0,144,255)',      //填充颜色。当参数为空时，圆形将没有填充效果。
     strokeWeight: 0.5,       //边线的宽度，以像素为单位。
@@ -28,7 +30,7 @@ export default class DrawOverlaysBD{
     fillOpacity: 0.6,      //填充的透明度，取值范围0 - 1。
     strokeStyle: 'solid' //边线的样式，solid或dashed。
   };
-  private static defaultPolygonSymbol:Object = {
+  public static defaultPolygonSymbol:Object = {
     strokeColor:"red",    //边线颜色。
     fillColor:"red",      //填充颜色。当参数为空时，圆形将没有填充效果。
     strokeWeight: 1,       //边线的宽度，以像素为单位。
@@ -36,18 +38,8 @@ export default class DrawOverlaysBD{
     fillOpacity: 0.6,      //填充的透明度，取值范围0 - 1。
     strokeStyle: 'solid' //边线的样式，solid或dashed。
   };
-  private static defaultPicMarkerSymbol:Object = {
-    icon:{
-      anchor:{
-        width:0,
-        height:0
-      },
-      size:{
-        width:24,
-        height:36
-      },
-      imageUrl:""
-    },
+  public static defaultPicMarkerSymbol:any = {
+    icon:{},
     enableDragging:false,
     offset: {
       width:0,
@@ -57,7 +49,7 @@ export default class DrawOverlaysBD{
     shadow:null,
     title:""
   };
-  private static defaultSimpleMarkerSymbol:Object = {
+  public static defaultSimpleMarkerSymbol:Object = {
     icon:{
       anchor:{
         width:0,
@@ -105,6 +97,7 @@ export default class DrawOverlaysBD{
     this.overlaysType = (typeof params.type === "string") ?  params.type : "drawOverlays";
     this.generateId = (typeof params.generateId === "boolean") ?  params.generateId : false;
     this.clearLastResult = (typeof params.clearLastResult === "boolean") ?  params.clearLastResult : false;
+    const callback = params.callback;
 
     let resultObj = null;
     resultObj = await this.processDefaultSymbol(drawType,defaultSymbol);
@@ -124,20 +117,25 @@ export default class DrawOverlaysBD{
 
     drawingManager.setDrawingMode(drawMode);
     drawingManager.open();
-    let promise = new Promise((resolve => {
-      drawingManager.addEventListener('overlaycomplete', (results:any)=>{
-        this.onDrawComplete(results);
-        resolve();
-      });
-    }))
+
+    drawingManager.addEventListener('overlaycomplete', async (results:any)=>{
+      const result = await this.onDrawComplete(results);
+      if(callback){
+        this.drawCallback(result);
+      }
+    });
+
+    if(this.drawingType === "point"){
+      this.view.addEventListener('rightclick',(event:any) => {
+        this.stopDrawOverlays();
+      })
+    }
 
     this.drawingManager = drawingManager;
-    await promise;
-
     return {
       status:0,
-      message:'成功调用该方法!',
-      result:'获取结果请调用"getDrawOverlays"或"stopDrawOverlays"'
+      message:'成功调用该方法!获取覆盖物请调用getDrawOverlays',
+      result:this.drawingPromise
     }
   }
 
@@ -198,6 +196,9 @@ export default class DrawOverlaysBD{
   public async stopDrawOverlays():Promise<IResult>{
     if(this.drawingManager){
       this.drawingManager.close();
+    }
+    if(this.drawingType === "point"){
+      this.view.removeEventListener('rightclick')
     }
     this.drawingType = null;
 
@@ -326,7 +327,8 @@ export default class DrawOverlaysBD{
   }
 
   private async onDrawComplete(results:any){
-    let overlay = results.overlay;
+    const overlay = results.overlay;
+    const returnObj:any = {};
     if(overlay instanceof BMap.Overlay) {
       const attributes: any = {};
       if (this.generateId) {
@@ -354,6 +356,13 @@ export default class DrawOverlaysBD{
       thisTypeOverlays.push(overlay);
       this.drawOverlays.set(drawingType,thisTypeOverlays);
     }
+
+    returnObj.id = overlay.id;
+    returnObj.type = overlay.type;
+    returnObj.attributes = overlay.attributes;
+    returnObj.geometry = JSON.parse(JSON.stringify(overlay.point || overlay.points));
+
+    return returnObj;
   }
 
   public async findOverlays(params:IFindParameter): Promise<IResult> {

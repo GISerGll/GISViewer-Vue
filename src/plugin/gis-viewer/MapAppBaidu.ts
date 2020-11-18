@@ -21,7 +21,7 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   IDrawOverlaysDelete,
-    IPolylineRangingParameter
+    IPolylineRangingParameter,
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -30,6 +30,7 @@ import {Utils} from '@/plugin/gis-viewer/Utils';
 import DrawOverlaysBD from "@/plugin/gis-viewer/widgets/DrawOverlays/bd/DrawOverlaysBD";
 import GeometrySearchBD from "@/plugin/gis-viewer/widgets/GeometrySearch/bd/GeometrySearchBD";
 import mapStyleConfig from "@/config/mapStyleConfig";
+import TrackPlaybackBD from "@/plugin/gis-viewer/widgets/TrackPlayback/bd/TrackPlaybackBD";
 
 
 declare let BMap: any;
@@ -39,6 +40,7 @@ export default class MapAppBaidu implements IMapContainer {
   public baseLayers: Array<any> = [];
   public showGisDeviceInfo: any;
   public mapClick: any;
+  public drawCallback: any;
 
   public async initialize(mapConfig: any, mapContainer: string): Promise<any> {
     const apiUrl = mapConfig.baidu_api; //"http://localhost:8090/baidu/BDAPI.js";
@@ -51,6 +53,7 @@ export default class MapAppBaidu implements IMapContainer {
     const cluster2 = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/MarkerClusterer.js';
     const geometryUtil = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/GeoUtils.js';
     const rangingUtil = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/DistanceTool.js';
+    const lushu = apiUrl.substring(0, apiUrl.lastIndexOf('/')) + '/LuShu.js'
 
     await Utils.loadScripts([
       apiUrl,
@@ -62,7 +65,8 @@ export default class MapAppBaidu implements IMapContainer {
         cluster2,
         drawManager,
         geometryUtil,
-        rangingUtil
+        rangingUtil,
+          lushu
       ]).then(()=>{
         console.log('scripts Loaded!');
       });
@@ -109,7 +113,9 @@ export default class MapAppBaidu implements IMapContainer {
       await view.removeEventListener("tilesLoaded");
       await view.addEventListener('click',(e:any)=>{
         if(e.overlay){
-          this.showGisDeviceInfo(e.overlay.id,e.overlay.type);
+          //e.overlay.id,e.overlay.type,JSON.stringify(e.overlay.type)
+          const geometry = JSON.parse(JSON.stringify(e.overlay.points || e.overlay.point))
+          this.showGisDeviceInfo(e.overlay.id,e.overlay.type,e.overlay.attributes,geometry);
         }
         this.mapClick(e.point);
       });
@@ -291,7 +297,10 @@ export default class MapAppBaidu implements IMapContainer {
 
   public showMigrateChart(params: any) {}
   public hideMigrateChart() {}
-  public async startTrackPlayback() :Promise<any>{}
+  public async startTrackPlayback() :Promise<any>{
+    const trackPlayBack = TrackPlaybackBD.getInstance(this.view);
+    return await trackPlayBack.startTrackPlayback();
+  }
   public async startRealTrackPlayback() :Promise<any>{}
   public pausePlayback(){}
   public goOnPlayback(){}
@@ -341,8 +350,9 @@ export default class MapAppBaidu implements IMapContainer {
   public async initializeRouteSelect(params: ISelectRouteParam) {}
   public async showSelectedRoute(params: ISelectRouteResult) {}
 
-  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
+  public async startDrawOverlays(params: IDrawOverlays): Promise<IResult> {
     const drawOverlays = DrawOverlaysBD.getInstance(this.view);
+    drawOverlays.drawCallback = this.drawCallback;
     return await drawOverlays.startDrawOverlays(params);
   }
   public async stopDrawOverlays(params:any): Promise<IResult> {

@@ -154,6 +154,7 @@ export interface IDrawOverlayParameter {
   type?: string;               //覆盖物类型, 用于按编号/类型删除
   generateId?: boolean;                 //是否随机生成覆盖物编号, 用于按编号/类型删除
   clearLastResult?: boolean;  //清除上一次绘画结果（调用一次方法只能存在一个graphic）
+  callback?: boolean
 }
 export interface IMapContainer {
   // addLayer: (param:ILayerConfig) => Promise<IResult>;
@@ -186,7 +187,7 @@ export interface IMapContainer {
   showStreet: () => void;
   hideStreet: () => void;
   locateStreet: (param: IStreetParameter) => void;
-  startDrawOverlays: (param: IDrawOverlays) => Promise<void>
+  startDrawOverlays: (param: IDrawOverlays) => Promise<IResult>
   startTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>
   startRealTrackPlayback: (param: ITrackPlaybackParameter) => Promise<IResult>
   pausePlayback: () => void;
@@ -299,12 +300,13 @@ export interface ITrackPlayback {
   endId?:number,
   movingLength?:number,
   time:number,
-  speed:number,
-  speedToString?:string,
+  speed:number,                  //小车实际速度，单位m/s
+  speedToString?:string,         //速度字符串形式，取三位小数
+  speedRatio?:number,            //各路段小车速度与最小速度的比率
   path:number[][],
   stage?:string
 }
-export interface ITrackPlaybackParameter{
+export interface ITrackPlaybackParameter {
   trackPoints:[{
     id?:string
     from:number[],
@@ -312,7 +314,26 @@ export interface ITrackPlaybackParameter{
     time?:number,
     stage?:string
   }]
+  moverType?:string                     //"constant" || "bySecond"
   trackLineSymbol?:IPolylineSymbol
+  autoStart?:Boolean
+  loop?:Boolean
+  repeatCount?:number
+  clearBefore?:Boolean
+  isCenter?:Boolean
+  isZoom?:Boolean
+  routeUrl?:string
+  canSuspend?:Boolean
+}
+export interface ITrackPlaybackBDParameter {
+  trackPoints:{
+    path:number[][],                        //该段路程坐标
+    time:number,                            //该段路程用时，单位s
+    trackLineSymbol?:IPolylineSymbol             //该段路的样式
+  }[],
+  moverType?:string                     //"constant" || "bySecond"
+  defaultLineSymbol?:IPolylineSymbol
+  defaultCarSymbol?:IPointSymbol
   autoStart?:Boolean
   loop?:Boolean
   repeatCount?:number

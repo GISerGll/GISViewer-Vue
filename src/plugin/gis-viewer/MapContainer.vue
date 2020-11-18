@@ -24,6 +24,7 @@
       @map-loaded="mapLoaded"
       @map-click="mapClick"
       @marker-click="showGisDeviceInfo"
+      @draw-complete="drawCallback"
     />
     <map-container-gaode
       ref="containerGaode"
@@ -146,6 +147,8 @@ export default class MapContainer extends Vue implements IMapContainer {
   ) {}
   @Emit('select-route-finished')
   public selectedRouteFinished(routeInfo: object) {}
+  @Emit('draw-complete')
+  private drawCallback(results:any) {}
 
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     return await this.mapContainer.addOverlays(params);
@@ -338,8 +341,8 @@ export default class MapContainer extends Vue implements IMapContainer {
     await this.mapContainer.showSelectedRoute(params);
   }
 
-  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
-    await this.mapContainer.startDrawOverlays(params);
+  public async startDrawOverlays(params: IDrawOverlays): Promise<IResult> {
+    return await this.mapContainer.startDrawOverlays(params);
   }
   public async stopDrawOverlays(params:any): Promise<IResult> {
     return this.mapContainer.stopDrawOverlays(params);

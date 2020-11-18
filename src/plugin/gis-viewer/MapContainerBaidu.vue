@@ -47,7 +47,7 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
   @Emit('map-click')
   public mapClick(point: object) {}
   @Emit('marker-click')
-  public showGisDeviceInfo(type: string, id: string, detail: any) {}
+  public showGisDeviceInfo(results:any) {}
   @Emit('marker-mouse')
   public mouseGisDeviceInfo(
     event: any,
@@ -55,6 +55,8 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
     id: string,
     detail: any
   ) {}
+  @Emit('draw-complete')
+  public drawCallback(result:any) {}
 
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     return await this.mapApp.addOverlays(params);
@@ -115,11 +117,13 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
     return {status: 0, message: ''};
   }
   public clearRouteSearch() {}
-  public async startTrackPlayback() :Promise<any>{}
+  public async startTrackPlayback() :Promise<any>{
+    return await this.mapApp.startTrackPlayback();
+  }
   public async startRealTrackPlayback() :Promise<any>{}
   public pausePlayback(){}
   public goOnPlayback(){}
-  // public async startDrawOverlays():Promise<any>{}
+
   public async showTooltip(param:Vue.Component):Promise<any>{
     return this.mapApp.showTooltip(param);
   }
@@ -169,7 +173,8 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
 
   public async initializeRouteSelect(params: ISelectRouteParam) {}
   public async showSelectedRoute(params: ISelectRouteResult) {}
-  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
+  public async startDrawOverlays(params: IDrawOverlays): Promise<IResult> {
+    this.mapApp.drawCallback = this.drawCallback;
     return this.mapApp.startDrawOverlays(params);
   }
   public async stopDrawOverlays(params:any): Promise<IResult> {

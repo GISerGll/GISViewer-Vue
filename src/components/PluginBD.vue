@@ -39,7 +39,7 @@
       <button @click="btn_addOverlaysCluster">添加聚合点</button>
       <button @click="btn_deleteOverlaysCluster">删除聚合点</button><br>
       <button @click="btn_polylineRanging">测距</button>
-
+      <button @click="btn_polylineRanging">测距</button>
     </div>
     <gis-viewer
       ref="gisViewer"
@@ -48,6 +48,7 @@
       @map-loaded="mapLoaded"
       @marker-click="showGisDeviceInfo"
       @map-click="mapClick"
+      @draw-complete="drawCallback"
     />
 
   </div>
@@ -311,7 +312,7 @@
     private async btn_drawPoints(){
       let map = this.$refs.gisViewer as any;
       const img:any = await this.loadImageAsync("assets/image/Anchor.png");
-      const result = await map.startDrawOverlays({
+      const results = map.startDrawOverlays({
         defaultSymbol: {
           url: 'assets/image/a.png',
           size:  [24,24],
@@ -319,9 +320,9 @@
         drawType:"point",
         generateId:true,
         type:"alarmPoints",
-        clearLastResult:false
+        clearLastResult:false,
+        callback:true
       })
-
       // let resultArray = result.result;
       // resultArray.then((value:any) =>{
       //   console.log(value);
@@ -329,12 +330,13 @@
     }
     private async btn_drawLines(){
       let map = this.$refs.gisViewer as any;
-      map.startDrawOverlays({
+      const results = await map.startDrawOverlays({
         defaultSymbol:{
           width:1
         },
         drawType:"polyline",
         type:"lines",
+        callback:true,
         clearLastResult:false
       })
     }
@@ -391,8 +393,32 @@
         [87.633242	,	43.867131],
         [87.60694	,	43.87012],
         [87.602538	,	43.881778]]
+
+      let trackPts_ = [
+        {
+          from:[87.633314	,	43.887925],
+          to:  [87.633242	,	43.867131],
+          time: 100
+        },
+        {
+          from:[87.633242	,	43.867131],
+          to:  [87.60694	,	43.87012],
+          time: 200,
+          stage: "alarm"
+        },
+        {
+          from:[87.60694	,	43.87012],
+          to:  [87.602538	,	43.881778],
+          time: 200
+        },
+        {
+          from:[87.602538	,	43.881778],
+          to:  [87.632538	,	43.781778],
+          time: 800
+        }
+      ]
       await map.startTrackPlayback({
-        trackPoints:trackPts
+        trackPoints:trackPts_
       })
     }
     private async btn_startRealTrackPlayback(){
@@ -688,11 +714,14 @@
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       });
     }
-    private showGisDeviceInfo(type: string, id: string) {
-      console.log(type, id);
+    private showGisDeviceInfo(type: string, id: string, attr:any, geometry) {
+      console.log(type, id,attr,geometry);
     }
     private mapClick(pt: object) {
-      console.log(pt);
+      // console.log(pt);
+    }
+    private drawCallback(results:any) {
+      console.log(results);
     }
   }
 </script>
