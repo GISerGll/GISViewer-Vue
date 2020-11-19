@@ -334,6 +334,7 @@ export interface ITrackPlaybackBDParameter {
   moverType?:string                     //"constant" || "bySecond"
   defaultLineSymbol?:IPolylineSymbol
   defaultCarSymbol?:IPointSymbol
+  moveTimes?:number
   autoStart?:Boolean
   loop?:Boolean
   repeatCount?:number
@@ -342,6 +343,7 @@ export interface ITrackPlaybackBDParameter {
   isZoom?:Boolean
   routeUrl?:string
   canSuspend?:Boolean
+  adjustPicRotation?:number               //在计算角度的基础上，适当调整图片的旋转角度
 }
 export interface routeParameter {
   start: IPointGeometry;

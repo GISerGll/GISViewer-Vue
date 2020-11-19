@@ -25,7 +25,7 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   IDrawOverlaysDelete,
-    IPolylineRangingParameter,
+  IPolylineRangingParameter, ITrackPlaybackParameter, ITrackPlaybackBDParameter,
 } from '@/types/map';
 @Component({
   name: 'MapAppBaidu'
@@ -117,8 +117,8 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
     return {status: 0, message: ''};
   }
   public clearRouteSearch() {}
-  public async startTrackPlayback() :Promise<any>{
-    return await this.mapApp.startTrackPlayback();
+  public async startTrackPlayback(params:ITrackPlaybackParameter) :Promise<any>{
+    return await this.mapApp.startTrackPlayback(params);
   }
   public async startRealTrackPlayback() :Promise<any>{}
   public pausePlayback(){}

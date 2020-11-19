@@ -21,7 +21,8 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   IDrawOverlaysDelete,
-    IPolylineRangingParameter,
+  IPolylineRangingParameter,
+  ITrackPlaybackParameter,
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -297,9 +298,9 @@ export default class MapAppBaidu implements IMapContainer {
 
   public showMigrateChart(params: any) {}
   public hideMigrateChart() {}
-  public async startTrackPlayback() :Promise<any>{
+  public async startTrackPlayback(params:ITrackPlaybackParameter) :Promise<any>{
     const trackPlayBack = TrackPlaybackBD.getInstance(this.view);
-    return await trackPlayBack.startTrackPlayback();
+    return await trackPlayBack.startTrackPlayback(params);
   }
   public async startRealTrackPlayback() :Promise<any>{}
   public pausePlayback(){}

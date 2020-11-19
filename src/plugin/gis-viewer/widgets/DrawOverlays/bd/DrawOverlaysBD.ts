@@ -134,8 +134,7 @@ export default class DrawOverlaysBD{
     this.drawingManager = drawingManager;
     return {
       status:0,
-      message:'成功调用该方法!获取覆盖物请调用getDrawOverlays',
-      result:this.drawingPromise
+      message:'成功调用该方法!获取覆盖物请调用getDrawOverlays'
     }
   }
 

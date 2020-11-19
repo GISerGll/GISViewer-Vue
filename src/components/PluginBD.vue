@@ -193,7 +193,6 @@
           type: 'polyline',
           // primitive: "square",
           color:[255,0,0,0.5],
-          size:[]
           // width: 10
         },
         overlays: [
@@ -387,6 +386,7 @@
       console.log(JSON.parse(results.result));
     }
     private async btn_startTrackPlayback(){
+
       let map = this.$refs.gisViewer as any;
       let trackPts = [
         [87.633314	,	43.887925],
@@ -396,25 +396,8 @@
 
       let trackPts_ = [
         {
-          from:[87.633314	,	43.887925],
-          to:  [87.633242	,	43.867131],
+          path:trackPts,
           time: 100
-        },
-        {
-          from:[87.633242	,	43.867131],
-          to:  [87.60694	,	43.87012],
-          time: 200,
-          stage: "alarm"
-        },
-        {
-          from:[87.60694	,	43.87012],
-          to:  [87.602538	,	43.881778],
-          time: 200
-        },
-        {
-          from:[87.602538	,	43.881778],
-          to:  [87.632538	,	43.781778],
-          time: 800
         }
       ]
       await map.startTrackPlayback({
@@ -714,8 +697,8 @@
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       });
     }
-    private showGisDeviceInfo(type: string, id: string, attr:any, geometry) {
-      console.log(type, id,attr,geometry);
+    private showGisDeviceInfo(type: string, id: string, attr:any) {
+      console.log(type, id,attr);
     }
     private mapClick(pt: object) {
       // console.log(pt);
