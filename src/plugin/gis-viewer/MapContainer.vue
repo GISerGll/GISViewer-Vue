@@ -70,7 +70,7 @@ import {
   ISelectRouteParam,
   ISelectRouteResult,
   IDrawOverlays,
-  IEditFenceLabel, IDrawOverlaysDelete, IPolylineRangingParameter
+  IEditFenceLabel, IDrawOverlaysDelete, IPolylineRangingParameter, IPicChangeParameter
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 
@@ -367,6 +367,9 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public async polylineRanging(params:IPolylineRangingParameter): Promise<IResult> {
     return await this.mapContainer.polylineRanging(params);
+  }
+  public async changePicById(params:IPicChangeParameter): Promise<IResult> {
+    return await this.mapContainer.changePicById(params);
   }
 }
 </script>

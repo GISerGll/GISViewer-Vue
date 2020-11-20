@@ -6,7 +6,8 @@ import {
   IPopUpTemplate,
   IOverlayClusterParameter,
   IOverlayDelete,
-  IFindParameter
+  IFindParameter,
+    IPicChangeParameter
 } from '@/types/map';
 import {Vue} from "vue-property-decorator";
 import ToolTipBaiDu from "@/plugin/gis-viewer/widgets/Overlays/bd/ToolTipBaiDu";
@@ -182,7 +183,6 @@ export class OverlayBaidu {
     }
     return tipContent;
   }
-
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     const defaultSymbol = params.defaultSymbol;
     const defaultType = params.type;
@@ -263,11 +263,6 @@ export class OverlayBaidu {
           mapView.openInfoWindow(infoWindow, e.point);
           // _this._showGisDeviceInfo(e.target.type, e.target.id);
         });
-      }
-
-
-      if (params.overlays.length == 1) {
-        this.view.panTo(graphic.getPosition());
       }
     }
 
@@ -938,6 +933,42 @@ export class OverlayBaidu {
       await this.listenOverlayMouseOver('moveTooltip',tooltipComponent)
     }else if(autoTooltip && tooltipComponent){
       await this.autoTooltip(tooltipComponent);
+    }
+  }
+  public async changePicById(params:IPicChangeParameter) :Promise<IResult> {
+    debugger;
+    const id = params.id;
+    const curPicUrl = params.pictureUrl;
+    const callback = params.callback || false;
+
+    let callbackResults:any = null;
+    let overlays = this.overlays;
+    for(let overlay of overlays){
+      if (id === overlay.id) {
+        const icon = overlay.getIcon();
+        icon.setImageUrl(curPicUrl);
+        overlay.setIcon(icon);
+
+        if(callback){
+          let geometry = overlay.point ? overlay.point : overlay.points ?
+              overlay.points : null;
+          let result:any = {};
+          ({
+            attributes:result.attributes,
+            id:result.id,
+            type:result.type
+          } = overlay)
+
+          result.geometry = JSON.parse(JSON.stringify(geometry));
+          callbackResults = result;
+        }
+      }
+    }
+
+    return {
+      message:'成功调用该方法',
+      status:0,
+      result:callback ? callbackResults : '获取该点位信息请在方法中加入callback属性'
     }
   }
 }

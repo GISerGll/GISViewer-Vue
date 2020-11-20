@@ -229,6 +229,12 @@ export interface IMapContainer {
   arcgisLoadGDLayer: () => void;
   backgroundGeometrySearch: (params:IGeometrySearchParameter) => Promise<IResult>;
   polylineRanging: (params: IPolylineRangingParameter) => Promise<IResult>;
+  changePicById: (params: IPicChangeParameter) => Promise<IResult>;
+}
+export interface IPicChangeParameter {
+  id:string,
+  pictureUrl:string,
+  callback?:boolean
 }
 export interface IPolylineRangingParameter {
   lineSymbol?:IPolylineSymbol,        //测距线符号样式

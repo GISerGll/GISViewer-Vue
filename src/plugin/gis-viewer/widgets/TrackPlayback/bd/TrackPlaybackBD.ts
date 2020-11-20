@@ -34,7 +34,7 @@ export default class TrackPlaybackBD {
     tempCache:{}
   };
   private allGraphics:any = []
-  private intervalTime: number = 100
+  private intervalTime: number = 500
   private canGo: Boolean = true
 
   private constructor(view: any) {

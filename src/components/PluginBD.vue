@@ -39,7 +39,7 @@
       <button @click="btn_addOverlaysCluster">添加聚合点</button>
       <button @click="btn_deleteOverlaysCluster">删除聚合点</button><br>
       <button @click="btn_polylineRanging">测距</button>
-      <button @click="btn_polylineRanging">测距</button>
+      <button @click="btn_changePicById">改变图片</button>
     </div>
     <gis-viewer
       ref="gisViewer"
@@ -176,10 +176,11 @@
       console.log(obj)
     }
     private async btn_addOverlays_line() {
-      let path1 = [  // first path
+      let path = [  // first path
         [102.267,27.881],
         [102.267,27.885]
-      ];
+      ]
+      let path1 = JSON.parse(JSON.stringify(path));
 
       let path2 = [
         [87.577,43.817],
@@ -191,9 +192,8 @@
         defaultSymbol: {
           //symbol for 2d
           type: 'polyline',
-          // primitive: "square",
-          color:[255,0,0,0.5],
-          // width: 10
+          color:'rgba(0,255,0,0.5)',
+          width: 10
         },
         overlays: [
           {
@@ -205,16 +205,6 @@
               width:10
             },
             fields: {name: '测试1', featureid: '0002'}
-          },
-          {
-            id: 'testPath002',
-            symbol: {
-              type: 'polyline',
-              color:'red',
-              width:10
-            },
-            geometry: {paths:path2},
-            fields: {name: '测试2', featureid: '0002'}
           }
         ],
         showPopup: false,
@@ -226,7 +216,6 @@
         },
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       })
-      console.log(results);
 
     }
     private async btn_addOverlays_polygon(){
@@ -627,6 +616,13 @@
       let map = this.$refs.gisViewer as any;
       map.polylineRanging();
     }
+    private async btn_changePicById(){
+      let map = this.$refs.gisViewer as any;
+      map.changePicById({
+        id:'test001',
+        pictureUrl:require('../assets/img_gis_tc_ldxx.png')
+      })
+    }
 
     private async mapLoaded() {
       let map = this.$refs.gisViewer as any;
@@ -697,8 +693,13 @@
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       });
     }
-    private showGisDeviceInfo(type: string, id: string, attr:any) {
+    private showGisDeviceInfo(id: string, type: string, attr:any) {
       console.log(type, id,attr);
+      let map = this.$refs.gisViewer as any;
+      map.changePicById({
+        id:id,
+        pictureUrl:require('../assets/logo.png')
+      })
     }
     private mapClick(pt: object) {
       // console.log(pt);

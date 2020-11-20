@@ -22,7 +22,7 @@ import {
   IDrawOverlays,
   IDrawOverlaysDelete,
   IPolylineRangingParameter,
-  ITrackPlaybackParameter,
+  ITrackPlaybackParameter, IPicChangeParameter,
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -387,6 +387,10 @@ export default class MapAppBaidu implements IMapContainer {
   public async polylineRanging(params:IPolylineRangingParameter): Promise<IResult> {
     const drawOverlays = DrawOverlaysBD.getInstance(this.view);
     return await drawOverlays.polylineRanging(params);
+  }
+  public async changePicById(params:IPicChangeParameter): Promise<IResult> {
+    const overlays = OverlayBaidu.getInstance(this.view);
+    return await overlays.changePicById(params);
   }
 
 }
