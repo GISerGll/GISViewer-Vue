@@ -656,7 +656,7 @@
             fields: {
               name: '测试2',
               featureid: '0002',
-              popupWindow: true,
+              popupWindow:  { type:sleep2() ,value1:"这是一个信息弹窗",value2:"随意测试一下" ,valuePromise:sleep2()},
               tooltipWindow:true
             }
           },
@@ -666,7 +666,7 @@
             fields: {
               name: '测试3',
               featureid: '0003',
-              popupWindow: true,
+              popupWindow: { type:sleep() ,value1:"这是一个警告弹窗",value2:"随意测试一下",valuePromise:sleep()},
               tooltipWindow:true
             }
           },
@@ -676,7 +676,7 @@
             fields: {
               name: '测试4',
               featureid: '0001',
-              popupWindow: true,
+              popupWindow: {type:sleep1(),value1:"这是一个正常弹窗",value2:"这是一个正常弹窗",valuePromise:sleep1()},
               tooltipWindow:true
             }
           }
@@ -691,7 +691,38 @@
         //   content: '<div>name:{name}<br/><button>{name}</button></div>'
         // },
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
+
       });
+
+      function sleep(){
+        let number = new Promise(resolve => {
+          setTimeout(function () {
+            resolve('normal');
+          },2000);
+        })
+
+        return number;
+      }
+
+      function sleep1(){
+        let number = new Promise(resolve => {
+          setTimeout(function () {
+            resolve("suspicious");
+          },2000);
+        })
+
+        return number;
+      }
+
+      function sleep2(){
+        let number = new Promise(resolve => {
+          setTimeout(function () {
+            resolve('alarm');
+          },2000);
+        })
+
+        return number;
+      }
     }
     private showGisDeviceInfo(id: string, type: string, attr:any) {
       console.log(type, id,attr);

@@ -564,7 +564,7 @@ export class OverlayBaidu {
     this.view.removeEventListener('click');
     switch (popupType) {
       case "showPopup":
-        this.view.addEventListener('click',(e:any)=>{
+        this.view.addEventListener('click',async (e:any)=>{
           if(e.overlay && e.overlay.attributes && e.overlay.attributes.popupWindow){
             let overlay = e.overlay;
             let content = overlay.attributes.popupWindow;
@@ -573,6 +573,9 @@ export class OverlayBaidu {
             if (this.popup) {
               this.popup.remove();
               this.popup = null;
+            }
+            if(content.hasOwnProperty('valuePromise')){
+              content.valuePromise = await content.valuePromise;
             }
             this.popup = new ToolTipBaiDu(
                 this.view,
@@ -585,7 +588,7 @@ export class OverlayBaidu {
 
         break;
       case "showTooltip":
-        this.view.addEventListener('click',(e:any)=>{
+        this.view.addEventListener('click',async (e:any)=>{
           if(e.overlay&& e.overlay.attributes && e.overlay.attributes.tooltipWindow){
             let overlay = e.overlay;
             let content = overlay.attributes.popupWindow;
@@ -594,6 +597,9 @@ export class OverlayBaidu {
             if (this.tooltip) {
               this.tooltip.remove();
               this.tooltip = null;
+            }
+            if(content.hasOwnProperty('valuePromise')){
+              content.valuePromise = await content.valuePromise;
             }
             this.tooltip = new ToolTipBaiDu(
                 this.view,
@@ -631,7 +637,7 @@ export class OverlayBaidu {
     this.view.removeEventListener('mousemove');
     switch (popupType) {
       case "movePopup":
-        this.view.addEventListener('mousemove',(e:any)=>{
+        this.view.addEventListener('mousemove',async (e:any)=>{
           if(e.overlay && e.overlay.attributes && e.overlay.attributes.popupWindow){
             let overlay = e.overlay;
             let content = overlay.attributes.popupWindow;
@@ -640,6 +646,9 @@ export class OverlayBaidu {
             if (this.popup) {
               this.popup.remove();
               this.popup = null;
+            }
+            if(content.hasOwnProperty('valuePromise')){
+              content.valuePromise = await content.valuePromise;
             }
             this.popup = new ToolTipBaiDu(
                 this.view,
@@ -657,7 +666,7 @@ export class OverlayBaidu {
 
         break;
       case "moveTooltip":
-        this.view.addEventListener('mousemove',(e:any)=>{
+        this.view.addEventListener('mousemove',async (e:any)=>{
           if(e.overlay && e.overlay.attributes && e.overlay.attributes.tooltipWindow){
             let overlay = e.overlay;
             let content = overlay.attributes.tooltipWindow;
@@ -667,6 +676,10 @@ export class OverlayBaidu {
               this.tooltip.remove();
               this.tooltip = null;
             }
+            if(content.hasOwnProperty('valuePromise')){
+              content.valuePromise = await content.valuePromise;
+            }
+
             this.tooltip = new ToolTipBaiDu(
                 this.view,
                 popup,
@@ -771,6 +784,10 @@ export class OverlayBaidu {
         }
 
         let center =  overlay.getPosition();
+        if(content.hasOwnProperty('valuePromise')){
+          content.valuePromise = await content.valuePromise;
+        }
+
         let _popup = new ToolTipBaiDu(
             this.view,
             popup,
@@ -795,6 +812,9 @@ export class OverlayBaidu {
         }
 
         let center =  overlay.getPosition();
+        if(content.hasOwnProperty('valuePromise')){
+          content.valuePromise = await content.valuePromise;
+        }
         let _popup = new ToolTipBaiDu(
             this.view,
             popup,
@@ -843,6 +863,10 @@ export class OverlayBaidu {
         }
 
         let center =  overlay.getPosition();
+        if(content.hasOwnProperty('valuePromise')){
+          content.valuePromise = await content.valuePromise;
+        }
+
         let _popup = new ToolTipBaiDu(
             this.view,
             tooltip,
@@ -867,6 +891,9 @@ export class OverlayBaidu {
         }
 
         let center =  overlay.getPosition();
+        if(content.hasOwnProperty('valuePromise')){
+          content.valuePromise = await content.valuePromise;
+        }
         let _tooltip = new ToolTipBaiDu(
             this.view,
             tooltip,
@@ -936,7 +963,6 @@ export class OverlayBaidu {
     }
   }
   public async changePicById(params:IPicChangeParameter) :Promise<IResult> {
-    debugger;
     const id = params.id;
     const curPicUrl = params.pictureUrl;
     const callback = params.callback || false;

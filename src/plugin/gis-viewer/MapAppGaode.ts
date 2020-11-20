@@ -18,7 +18,7 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays, IDrawOverlaysDelete, IDrawOverlayParameter, IPolylineRangingParameter
+  IDrawOverlays, IDrawOverlaysDelete, IDrawOverlayParameter, IPolylineRangingParameter, IPicChangeParameter
 } from '@/types/map';
 import {OverlayGaode} from '@/plugin/gis-viewer/widgets/Overlays/gd/OverlayGaode';
 import {JurisdictionPoliceGD} from './widgets/JurisdictionPolice/gd/JurisdictionPoliceGD';
@@ -30,6 +30,7 @@ import {DrawSteet} from './widgets/DrawStreet/gd/DrawStreet';
 import Route from './widgets/Route/Route';
 import RoutePoint from './widgets/XinKong/RoutePoint';
 import {GeometrySearchGD} from './widgets/GeometrySearch/gd/GeometrySearchGD';
+import {OverlayBaidu} from "@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu";
 
 export default class MapAppGaode implements IMapContainer {
   public view!: AMap.Map;
@@ -392,4 +393,5 @@ export default class MapAppGaode implements IMapContainer {
     return {message:'',status:0}
   }
   public async polylineRanging(params:IPolylineRangingParameter): Promise<any>{}
+  public async changePicById(params:IPicChangeParameter): Promise<any> {}
 }

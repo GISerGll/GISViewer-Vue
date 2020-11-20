@@ -207,6 +207,9 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public async polylineRanging(params:IPolylineRangingParameter): Promise<IResult>{
     return await this.mapApp.polylineRanging(params);
   }
+  public async changePicById(params:any): Promise<IResult> {
+    return await this.mapApp.changePicById(params);
+  }
 }
 </script>
 

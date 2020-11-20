@@ -1,7 +1,7 @@
 <template>
-  <normal-tooltip v-if="type==='normal'" ref="normal" ></normal-tooltip>
-  <alarm-tooltip v-else-if="type==='alarm'" ref="alarm"></alarm-tooltip>
-  <SuspiciousTooltip v-else-if="type==='suspicious'" ref="suspicious"></SuspiciousTooltip>
+  <normal-tooltip v-if="valuePromise==='normal'" ref="normal" ></normal-tooltip>
+  <alarm-tooltip v-else-if="valuePromise==='alarm'" ref="alarm"></alarm-tooltip>
+  <SuspiciousTooltip v-else-if="valuePromise==='suspicious'" ref="suspicious"></SuspiciousTooltip>
   <normal-tooltip v-else></normal-tooltip>
 </template>
 
@@ -18,11 +18,11 @@
             SuspiciousTooltip
         },
         props:{
-            type:{
-                type:String,
-                default:"normal"
-            },
-            value1:{
+            // type:{
+            //     type:String,
+            //     default:"normal"
+            // },
+            valuePromise:{
                 type:String,
                 default:"no value"
             },

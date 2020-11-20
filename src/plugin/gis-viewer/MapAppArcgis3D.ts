@@ -19,7 +19,7 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays, IDrawOverlaysDelete, IPolylineRangingParameter
+  IDrawOverlays, IDrawOverlaysDelete, IPolylineRangingParameter, IPicChangeParameter
 } from '@/types/map';
 import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
 import {RasterStretchRenderer} from 'esri/rasterRenderers';
@@ -605,4 +605,5 @@ export default class MapAppArcGIS3D implements IMapContainer {
     return {message:'',status:0}
   }
   public async polylineRanging(params:IPolylineRangingParameter): Promise<any>{}
+  public async changePicById(params:IPicChangeParameter): Promise<any> {}
 }
