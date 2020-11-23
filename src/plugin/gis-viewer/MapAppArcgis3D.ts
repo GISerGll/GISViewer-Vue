@@ -88,31 +88,30 @@ export default class MapAppArcGIS3D implements IMapContainer {
 
     let map: __esri.Map | __esri.WebScene;
 
-    if (mapConfig.baseLayers) {
-      const baseLayers: __esri.Collection = new Collection();
-      baseLayers.addMany(
-        mapConfig.baseLayers.map((layerConfig: ILayerConfig) => {
-          if (layerConfig.type === "tiled") {
-            delete layerConfig.type;
-            return new TileLayer(layerConfig);
-          } else if (layerConfig.type === "webtiled") {
-            return new WebTileLayer({
-              urlTemplate: layerConfig.url,
-              subDomains: layerConfig.subDomains || undefined,
-            });
-          }
-        })
-      );
-      const basemap: __esri.Basemap = new Basemap({
-        baseLayers,
-      });
+    const baseLayers: __esri.Collection = new Collection();
+    baseLayers.addMany(
+      mapConfig.baseLayers.map((layerConfig: ILayerConfig) => {
+        if (layerConfig.type === "tiled") {
+          delete layerConfig.type;
+          return new TileLayer(layerConfig);
+        } else if (layerConfig.type === "webtiled") {
+          return new WebTileLayer({
+            urlTemplate: layerConfig.url,
+            subDomains: layerConfig.subDomains || undefined,
+          });
+        }
+      })
+    );
+    const basemap: __esri.Basemap = new Basemap({
+      baseLayers,
+    });
+    if (mapConfig.webScene) {
+      map = new WebScene({ ...mapConfig.webScene, basemap });
+    } else {
       map = new Map({
         basemap,
         ground: mapConfig.options.ground,
       });
-    } else {
-      console.log(mapConfig.webScene);
-      map = new WebScene(mapConfig.webScene);
     }
 
     const view: __esri.SceneView = new SceneView({
@@ -124,10 +123,13 @@ export default class MapAppArcGIS3D implements IMapContainer {
       this.createLayer(view, mapConfig.operationallayers);
     }
     view.ui.remove("attribution");
-    view.ui.remove("zoom");
-    view.ui.remove("compass");
-    view.ui.remove("navigation-toggle");
+    // view.ui.remove("zoom");
+    // view.ui.remove("compass");
+    // view.ui.remove("navigation-toggle");
+
     view.on("click", async (event) => {
+      // console.log(this.view.camera);
+
       if (event.mapPoint) {
         let mp = event.mapPoint;
         this.mapClick({
@@ -335,7 +337,8 @@ export default class MapAppArcGIS3D implements IMapContainer {
       typeof import("esri/layers/support/LabelClass"),
       typeof import("esri/Color"),
       typeof import("esri/symbols/Font"),
-      typeof import("esri/symbols/TextSymbol")
+      typeof import("esri/symbols/TextSymbol"),
+      typeof import("esri/layers/SceneLayer")
     ];
     const [
       FeatureLayer,
@@ -347,6 +350,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
       Color,
       Font,
       TextSymbol,
+      SceneLayer,
     ] = await (loadModules([
       "esri/layers/FeatureLayer",
       "esri/layers/WebTileLayer",
@@ -357,6 +361,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
       "esri/Color",
       "esri/symbols/Font",
       "esri/symbols/TextSymbol",
+      "esri/layers/SceneLayer",
     ]) as Promise<MapModules>);
     let map = view.map;
     map.addMany(
@@ -385,6 +390,9 @@ export default class MapAppArcGIS3D implements IMapContainer {
             case "json":
               const drawlayer = DrawLayer.getInstance(view);
               drawlayer.addDrawLayer(layerConfig);
+              break;
+            case "scene":
+              layer = new SceneLayer(layerConfig);
               break;
           }
           // if (layer) {
