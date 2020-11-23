@@ -21,17 +21,14 @@
   </div>
 </template>
 <script lang="ts">
-import {Vue, Component, Prop} from 'vue-property-decorator';
-import axios from 'axios';
-import MapConfig from './MapConfig';
-import PluginGd from './PluginGD.vue';
-import PluginTest3d from './PluginTest3D.vue';
-import Test from './Test.vue';
+import { Vue, Component, Prop } from "vue-property-decorator";
+import axios from "axios";
+import MapConfig from "./MapConfig";
 @Component
 export default class PluginTest extends Vue {
   private cg = new MapConfig();
   private mapConfig = this.cg.mapConfig;
-  private mapConfig2 = this.cg.mapConfig;
+
   private async mapLoaded() {
     this.cg.mapLoaded(this.$refs.gisViewer);
   }
@@ -44,17 +41,19 @@ export default class PluginTest extends Vue {
   private btn_test3() {
     this.cg.btn_test3(this.$refs.gisViewer);
   }
+
   private layerLoaded() {
-    console.log('layer loaded');
+    console.log("layer loaded");
   }
+
   private showGisDeviceInfo(type: string, id: string, detail: any) {
     console.log(type, id, detail);
-    if (type == 'model3d') {
+    if (type == "model3d") {
       (this.$refs.gisViewer as any).showDgene({
         duration: 0,
         callback: (e: any) => {
           //console.log(e);
-        }
+        },
       });
     }
     // (this.$refs.gisViewer as any).showCustomTip({
@@ -78,11 +77,11 @@ export default class PluginTest extends Vue {
   }
 
   private intoSignal(id: string) {
-    console.log('Into: ' + id);
+    console.log("Into: " + id);
   }
 
   private outofSignal(id: string) {
-    console.log('Outof: ' + id);
+    console.log("Outof: " + id);
   }
 }
 </script>

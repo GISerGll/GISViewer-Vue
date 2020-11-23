@@ -16,14 +16,13 @@
   </div>
 </template>
 <script lang="ts">
-import {Vue, Component, Prop} from 'vue-property-decorator';
-import axios from 'axios';
-import MapConfig from './MapConfig';
+import { Vue, Component, Prop } from "vue-property-decorator";
+import axios from "axios";
+import MapConfig from "./MapConfig";
 @Component
 export default class PluginTest3D extends Vue {
   private cg = new MapConfig();
   private mapConfig = this.cg.mapConfig;
-  private mapConfig2 = this.cg.mapConfig;
   private async mapLoaded() {
     this.cg.mapLoaded(this.$refs.gisViewer);
   }
