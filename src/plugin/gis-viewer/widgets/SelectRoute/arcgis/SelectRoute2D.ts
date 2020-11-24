@@ -1,4 +1,8 @@
-import { ISelectRouteParam, ISelectRouteResult } from "@/types/map";
+import {
+  ISelectRouteHitTest,
+  ISelectRouteParam,
+  ISelectRouteResult,
+} from "@/types/map";
 import { loadModules } from "esri-loader";
 import along from "@turf/along";
 import length from "@turf/length";
@@ -963,4 +967,7 @@ export default class SelectRoute2D {
     }
     this.playRouteLayer.removeAll();
   }
+
+  public async routeHitArea(params: ISelectRouteHitTest) {}
+  public async areaHitRoute(params: ISelectRouteHitTest) {}
 }

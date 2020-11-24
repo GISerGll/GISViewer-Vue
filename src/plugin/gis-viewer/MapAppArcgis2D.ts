@@ -18,6 +18,7 @@ import {
   ISelectRouteParam,
   ISelectRouteResult,
   IDrawOverlays,
+  ISelectRouteHitTest,
 } from "@/types/map";
 import { OverlayArcgis2D } from "@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis2D";
 import { FindFeature } from "./widgets/FindFeature/arcgis/FindFeature";
@@ -224,7 +225,12 @@ export default class MapAppArcGIS2D {
         if (!this.mouseoverlay) {
           event.type = "mouseover";
           this.mouseGisDeviceInfo(event, type, id, graphic.toJSON());
-          this.mouseoverlay = { event, type, id, graphic: graphic.toJSON() };
+          this.mouseoverlay = {
+            event,
+            type,
+            id,
+            graphic: graphic.toJSON(),
+          };
         } else {
           if (
             this.mouseoverlay &&
@@ -841,6 +847,16 @@ export default class MapAppArcGIS2D {
   public stopPlaySelectedRoute() {
     const selectRoute = SelectRoute2D.getInstance(this.view);
     selectRoute.stopPlaySelectedRoute();
+  }
+
+  public async routeHitArea(params: ISelectRouteHitTest) {
+    const selectRoute = SelectRoute2D.getInstance(this.view);
+    await selectRoute.routeHitArea(params);
+  }
+
+  public async areaHistRoute(params: ISelectRouteHitTest) {
+    const selectRoute = SelectRoute2D.getInstance(this.view);
+    await selectRoute.areaHitRoute(params);
   }
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {

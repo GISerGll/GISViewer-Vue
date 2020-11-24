@@ -17,9 +17,9 @@
   </div>
 </template>
 <script lang="ts">
-import {Vue, Component, Prop} from 'vue-property-decorator';
-import axios from 'axios';
-import MapConfig from './MapConfig';
+import { Vue, Component, Prop } from "vue-property-decorator";
+import axios from "axios";
+import MapConfig from "./MapConfig";
 @Component
 export default class PluginGD extends Vue {
   private cg = new MapConfig();

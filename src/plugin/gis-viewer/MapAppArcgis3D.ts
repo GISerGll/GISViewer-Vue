@@ -89,22 +89,25 @@ export default class MapAppArcGIS3D implements IMapContainer {
     let map: __esri.Map | __esri.WebScene;
 
     const baseLayers: __esri.Collection = new Collection();
-    baseLayers.addMany(
-      mapConfig.baseLayers.map((layerConfig: ILayerConfig) => {
-        if (layerConfig.type === "tiled") {
-          delete layerConfig.type;
-          return new TileLayer(layerConfig);
-        } else if (layerConfig.type === "webtiled") {
-          return new WebTileLayer({
-            urlTemplate: layerConfig.url,
-            subDomains: layerConfig.subDomains || undefined,
-          });
-        }
-      })
-    );
+    if (mapConfig.baseLayers) {
+      baseLayers.addMany(
+        mapConfig.baseLayers.map((layerConfig: ILayerConfig) => {
+          if (layerConfig.type === "tiled") {
+            delete layerConfig.type;
+            return new TileLayer(layerConfig);
+          } else if (layerConfig.type === "webtiled") {
+            return new WebTileLayer({
+              urlTemplate: layerConfig.url,
+              subDomains: layerConfig.subDomains || undefined,
+            });
+          }
+        })
+      );
+    }
     const basemap: __esri.Basemap = new Basemap({
       baseLayers,
     });
+
     if (mapConfig.webScene) {
       map = new WebScene({ ...mapConfig.webScene, basemap });
     } else {

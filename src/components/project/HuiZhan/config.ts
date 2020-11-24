@@ -25,12 +25,39 @@ export let GisConfig = {
         id: "5d50a53a2c60448b92beb6ea1d3d56dc",
       },
     },
+    {
+      label: "水域",
+      type: "feature",
+      url:
+        "https://services7.arcgis.com/fSYMnKC69N1CiYKt/arcgis/rest/services/ShangHai_Water_Polygon/FeatureServer",
+      renderer: {
+        type: "simple",
+        symbol: {
+          type: "polygon-3d",
+          symbolLayers: [
+            {
+              type: "water",
+              waveDirection: 260,
+              color: "#25427c",
+              waveStrength: "moderate",
+              waterbodySize: "medium",
+            },
+          ],
+        },
+      },
+    },
   ],
   options: {
     camera: {
       position: [121.58122964821716, 31.09996523429159, 9630],
       heading: 0,
       tilt: 50,
+    },
+    environment: {
+      lighting: {
+        waterReflectionEnabled: true,
+        directShadowsEnabled: true,
+      },
     },
   },
 };
