@@ -20,6 +20,7 @@ import {
   ISelectRouteParam,
   ISelectRouteResult,
   IDrawOverlays,
+  ISelectRouteHitTest,
 } from "@/types/map";
 import { OverlayArcgis3D } from "@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D";
 import { RasterStretchRenderer } from "esri/rasterRenderers";
@@ -567,6 +568,12 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async showSelectedRoute(params: ISelectRouteResult) {}
   public async playSelectedRoute(speed: number) {}
   public stopPlaySelectedRoute() {}
+  public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
+    return { status: -1, message: "" };
+  }
+  public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
+    return { status: -1, message: "" };
+  }
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
   public async stopDrawOverlays(): Promise<void> {}

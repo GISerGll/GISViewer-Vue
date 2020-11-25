@@ -1,4 +1,5 @@
 import {
+  IResult,
   ISelectRouteHitTest,
   ISelectRouteParam,
   ISelectRouteResult,
@@ -9,6 +10,7 @@ import length from "@turf/length";
 import distance from "@turf/distance";
 import * as turf from "@turf/helpers";
 import { debounce } from "ts-debounce-throttle";
+import { param } from "jquery";
 
 export default class SelectRoute2D {
   private static intances: Map<string, SelectRoute2D>;
@@ -44,6 +46,9 @@ export default class SelectRoute2D {
 
   /** 搜索信号机的缓冲距离 */
   private readonly bufferDistance = 30;
+
+  /** HistTest图层 */
+  private hitTestLayer!: __esri.GraphicsLayer;
 
   /** 将Link设为路径起点 */
   private beginRouteButton = {
@@ -296,6 +301,13 @@ export default class SelectRoute2D {
       "esri/geometry/geometryEngineAsync",
     ]) as Promise<MapModules>);
     this.geometryEngineAsync = geometryEngineAsync;
+
+    if (this.hitTestLayer) {
+      this.hitTestLayer.removeAll();
+    } else {
+      this.hitTestLayer = new GraphicsLayer();
+      this.view.map.add(this.hitTestLayer);
+    }
 
     if (this.allLinkLayer) {
       this.allLinkLayer.popupEnabled = true;
@@ -968,6 +980,142 @@ export default class SelectRoute2D {
     this.playRouteLayer.removeAll();
   }
 
-  public async routeHitArea(params: ISelectRouteHitTest) {}
-  public async areaHitRoute(params: ISelectRouteHitTest) {}
+  public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
+    this.hitTestLayer.removeAll();
+    this.selectedLinkLayer.removeAll();
+
+    const routeIds = params.routes[0].routeIds;
+    // 显示路径
+    await this.showSelectedRoute({ routeInfo: { ids: routeIds } });
+    const routeLine = await this.geometryEngineAsync.union(
+      this.selectedLinkGraphicArray.map((graphic) => graphic.geometry)
+    );
+
+    // 显示区域
+    type MapModules = [
+      typeof import("esri/Graphic"),
+      typeof import("esri/geometry/Polygon")
+    ];
+    const [Graphic, Polygon] = await (loadModules([
+      "esri/Graphic",
+      "esri/geometry/Polygon",
+    ]) as Promise<MapModules>);
+
+    const hittedAreaIdArray: Array<string> = [];
+    for (let i = 0; i < params.areas.length; i++) {
+      const area = params.areas[i];
+      const areaPolygon = new Polygon({ rings: [area.points] });
+
+      const hit = await this.geometryEngineAsync.intersects(
+        routeLine,
+        areaPolygon
+      );
+      if (hit) {
+        hittedAreaIdArray.push(area.id || "");
+
+        const areaGraphic = new Graphic({
+          geometry: areaPolygon,
+          attributes: { id: area.id },
+          symbol: {
+            type: "simple-fill",
+            color: [3, 169, 244, 0.5],
+            style: "solid",
+            outline: {
+              style: "dash",
+              color: [3, 169, 244],
+              width: 2,
+            },
+          } as any,
+        });
+        this.hitTestLayer.add(areaGraphic);
+
+        if (area.name) {
+          const areaLabel = new Graphic({
+            geometry: areaPolygon.centroid,
+            attributes: {},
+            symbol: {
+              type: "text",
+              text: area.name,
+              color: "white",
+              font: {
+                family: "yahei",
+                size: 12,
+              },
+            } as any,
+          });
+          this.hitTestLayer.add(areaLabel);
+        }
+      }
+    }
+
+    return { status: 0, message: "", result: hittedAreaIdArray };
+  }
+
+  public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
+    this.hitTestLayer.removeAll();
+    this.selectedLinkLayer.removeAll();
+
+    type MapModules = [
+      typeof import("esri/Graphic"),
+      typeof import("esri/geometry/Polygon")
+    ];
+    const [Graphic, Polygon] = await (loadModules([
+      "esri/Graphic",
+      "esri/geometry/Polygon",
+    ]) as Promise<MapModules>);
+
+    const area = params.areas[0];
+    const areaPolygon = new Polygon({ rings: [area.points] });
+    const areaGraphic = new Graphic({
+      geometry: areaPolygon,
+      attributes: { id: area.id },
+      symbol: {
+        type: "simple-fill",
+        color: [3, 169, 244, 0.5],
+        style: "solid",
+        outline: {
+          style: "dash",
+          color: [3, 169, 244],
+          width: 2,
+        },
+      } as any,
+    });
+    this.hitTestLayer.add(areaGraphic);
+    if (area.name) {
+      const areaLabel = new Graphic({
+        geometry: areaPolygon.centroid,
+        attributes: {},
+        symbol: {
+          type: "text",
+          text: area.name,
+          color: "white",
+          font: {
+            family: "yahei",
+            size: 12,
+          },
+        } as any,
+      });
+      this.hitTestLayer.add(areaLabel);
+    }
+
+    const hittedRouteIdArray: Array<string> = [];
+    for (let i = 0; i < params.routes.length; i++) {
+      const route = params.routes[i];
+      await this.showSelectedRoute({ routeInfo: { ids: route.routeIds } });
+      const routeLine = await this.geometryEngineAsync.union(
+        this.selectedLinkGraphicArray.map((graphic) => graphic.geometry)
+      );
+      const hit = await this.geometryEngineAsync.intersects(
+        routeLine,
+        areaPolygon
+      );
+      if (hit) {
+        hittedRouteIdArray.push(route.id || "");
+        this.hitTestLayer.addMany(this.selectedLinkLayer.graphics.toArray());
+      }
+      this.selectedLinkLayer.removeAll();
+    }
+
+    return { status: 0, message: "", result: hittedRouteIdArray };
+  }
 }

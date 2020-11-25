@@ -72,7 +72,7 @@ export default class MapAppArcGIS2D {
     //路由跳转是delete mapConfig属性导致报错
     let mapConfig = Utils.copyObject(gisConfig);
     const apiUrl =
-      mapConfig.arcgis_api || mapConfig.apiUrl || "https://js.arcgis.com/4.14/";
+      mapConfig.arcgis_api || mapConfig.apiUrl || "https://js.arcgis.com/4.17";
     setDefaultOptions({
       url: `${apiUrl}/init.js`,
     });
@@ -116,7 +116,7 @@ export default class MapAppArcGIS2D {
       "esri/core/Collection",
       "esri/config",
     ]) as Promise<MapModules>);
-    esriConfig.fontsUrl = apiUrl + "/font/";
+    esriConfig.fontsUrl = apiUrl + "/fonts/";
     let baseLayers: __esri.Collection = new Collection();
     if (mapConfig.baseLayers) {
       baseLayers.addMany(
@@ -849,14 +849,14 @@ export default class MapAppArcGIS2D {
     selectRoute.stopPlaySelectedRoute();
   }
 
-  public async routeHitArea(params: ISelectRouteHitTest) {
+  public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
     const selectRoute = SelectRoute2D.getInstance(this.view);
-    await selectRoute.routeHitArea(params);
+    return await selectRoute.routeHitArea(params);
   }
 
-  public async areaHistRoute(params: ISelectRouteHitTest) {
+  public async areaHitRoute(params: ISelectRouteHitTest) {
     const selectRoute = SelectRoute2D.getInstance(this.view);
-    await selectRoute.areaHitRoute(params);
+    return await selectRoute.areaHitRoute(params);
   }
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {

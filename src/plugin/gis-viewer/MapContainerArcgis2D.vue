@@ -207,11 +207,11 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   }
 
   public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
-    return { status: -1, message: "" };
+    return await this.mapApp.routeHitArea(params);
   }
 
   public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
-    return { status: -1, message: "" };
+    return await this.mapApp.areaHitRoute(params);
   }
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {

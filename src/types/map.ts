@@ -305,25 +305,30 @@ export interface ISelectRouteResult {
     startPoint?: [number, number];
     endPoint?: [number, number];
   };
-  signalInfo: {
+  signalInfo?: {
     // 信号机信息
     signals: Array<{
       id: string;
-      name: string;
-      x: number;
-      y: number;
-      distance: number;
+      name?: string;
+      x?: number;
+      y?: number;
+      distance?: number;
     }>;
   };
 }
 
 export interface ISelectRouteHitTest {
-  routes: {
-    id?: string;
-    routeIds: Array<string>;
-  };
-  areas: {
-    id?: string;
-    points: Array<Array<number>>;
-  };
+  routes: [
+    {
+      id?: string;
+      routeIds: Array<string>;
+    }
+  ];
+  areas: [
+    {
+      id?: string;
+      name?: string;
+      points: Array<Array<number>>;
+    }
+  ];
 }

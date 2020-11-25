@@ -307,7 +307,7 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
 
   public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
-    return this.mapContainer.routeHitArea(params);
+    return await this.mapContainer.routeHitArea(params);
   }
   public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
     return this.mapContainer.areaHitRoute(params);
