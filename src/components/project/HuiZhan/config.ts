@@ -26,6 +26,13 @@ export let GisConfig = {
       },
     },
     {
+      label: "地标建筑",
+      type: "scene",
+      portalItem: {
+        id: "3f695f7934964eb3b0942f853b048868",
+      },
+    },
+    {
       label: "水域",
       type: "feature",
       url:
