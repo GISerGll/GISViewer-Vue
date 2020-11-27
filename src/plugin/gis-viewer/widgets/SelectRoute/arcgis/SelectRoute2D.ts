@@ -727,7 +727,8 @@ export default class SelectRoute2D {
   /** 显示选择好的道路 */
   public async showSelectedRoute(
     params: ISelectRouteResult,
-    showRoute: boolean = true
+    showRoute: boolean = true,
+    moveMapCenter: boolean = true
   ) {
     this.allLinkLayer.popupEnabled = false;
     this.mouseMoveHandler.remove();
@@ -786,8 +787,10 @@ export default class SelectRoute2D {
       });
       this.selectedLinkLayer.add(lastGraphic);
 
-      await this.view.goTo(this.selectedLinkGraphicArray);
-      this.view.zoom -= 1;
+      if (moveMapCenter) {
+        await this.view.goTo(this.selectedLinkGraphicArray);
+        this.view.zoom -= 1;
+      }
     }
 
     if (params.signalInfo && showRoute) {
@@ -996,7 +999,11 @@ export default class SelectRoute2D {
 
     const routeIds = params.routes[0].routeIds;
     // 显示路径
-    await this.showSelectedRoute({ routeInfo: { ids: routeIds } }, showRoute);
+    await this.showSelectedRoute(
+      { routeInfo: { ids: routeIds } },
+      showRoute,
+      false
+    );
     const routeLine = await this.geometryEngineAsync.union(
       this.selectedLinkGraphicArray.map((graphic) => graphic.geometry)
     );
@@ -1121,7 +1128,8 @@ export default class SelectRoute2D {
       const route = params.routes[i];
       await this.showSelectedRoute(
         { routeInfo: { ids: route.routeIds } },
-        showRoute
+        showRoute,
+        false
       );
       const routeLine = await this.geometryEngineAsync.union(
         this.selectedLinkGraphicArray.map((graphic) => graphic.geometry)
