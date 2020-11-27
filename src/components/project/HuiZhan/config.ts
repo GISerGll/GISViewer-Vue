@@ -12,24 +12,24 @@ export let GisConfig = {
   ],
   operationallayers: [
     {
-      label: "建筑1",
+      label: "H51F010012建筑",
       type: "scene",
       portalItem: {
-        id: "8cc268198dc94d529b74b77f8b9623ec",
+        id: "605e1e69a82e4e129fdb271ac16d0a20",
       },
     },
     {
-      label: "建筑2",
+      label: "H51F010013建筑",
       type: "scene",
       portalItem: {
-        id: "5d50a53a2c60448b92beb6ea1d3d56dc",
+        id: "993738a7f5d544129b159a245c96c4db",
       },
     },
     {
       label: "地标建筑",
       type: "scene",
       portalItem: {
-        id: "3f695f7934964eb3b0942f853b048868",
+        id: "9730604ddbf945f78072d29f42eff070",
       },
     },
     {
