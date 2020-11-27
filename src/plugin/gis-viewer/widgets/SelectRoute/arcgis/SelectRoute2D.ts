@@ -735,7 +735,7 @@ export default class SelectRoute2D {
 
     const linkIds = params.routeInfo.ids;
 
-    this.selectedLinkLayer.removeAll();
+    // this.selectedLinkLayer.removeAll();
     this.selectedLinkGraphicArray = [];
     for (let i = 0; i < linkIds.length; i++) {
       const linkId = linkIds[i];
@@ -1142,7 +1142,7 @@ export default class SelectRoute2D {
         hittedRouteIdArray.push(route.id || "");
         this.hitTestLayer.addMany(this.selectedLinkLayer.graphics.toArray());
       }
-      this.selectedLinkLayer.removeAll();
+      // this.selectedLinkLayer.removeAll();
     }
 
     return { status: 0, message: "", result: hittedRouteIdArray };
