@@ -132,7 +132,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
     // view.ui.remove("navigation-toggle");
 
     view.on("click", async (event) => {
-      // console.log(this.view.camera);
+      console.log(this.view.camera);
 
       if (event.mapPoint) {
         let mp = event.mapPoint;
@@ -224,6 +224,14 @@ export default class MapAppArcGIS3D implements IMapContainer {
       }
     });
     await view.when();
+
+    if (mapConfig.viewAnimation) {
+      for (let i = 0; i < mapConfig.viewAnimation.length; i++) {
+        const animation = mapConfig.viewAnimation[i];
+        await view.goTo(animation.target, animation.option);
+      }
+    }
+
     this.view = view;
     (this.view as any).mapOptions = mapConfig.options;
   }
