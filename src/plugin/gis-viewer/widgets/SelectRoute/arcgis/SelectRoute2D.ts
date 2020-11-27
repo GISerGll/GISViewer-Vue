@@ -995,7 +995,7 @@ export default class SelectRoute2D {
     const showArea = !!params.showArea;
 
     this.hitTestLayer.removeAll();
-    this.selectedLinkLayer.removeAll();
+    // this.selectedLinkLayer.removeAll();
 
     const routeIds = params.routes[0].routeIds;
     // 显示路径
@@ -1076,7 +1076,7 @@ export default class SelectRoute2D {
     const showArea = !!params.showArea;
 
     this.hitTestLayer.removeAll();
-    this.selectedLinkLayer.removeAll();
+    // this.selectedLinkLayer.removeAll();
 
     type MapModules = [
       typeof import("esri/Graphic"),
