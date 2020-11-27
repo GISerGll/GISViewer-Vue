@@ -318,12 +318,14 @@ export interface ISelectRouteResult {
 }
 
 export interface ISelectRouteHitTest {
+  showRoute?: boolean;
   routes: [
     {
       id?: string;
       routeIds: Array<string>;
     }
   ];
+  showArea?: boolean;
   areas: [
     {
       id?: string;
