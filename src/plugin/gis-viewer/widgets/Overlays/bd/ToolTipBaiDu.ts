@@ -52,9 +52,9 @@ export default class ToolTip {
     this.view.addEventListener('zoomend', () => {
       this.changeText();
     });
-    this.view.addEventListener('mousemove', () => {
-      this.changeText();
-    });
+    // this.view.addEventListener('mousemove', () => {
+    //   this.changeText();
+    // });
 
 
   }
@@ -83,8 +83,8 @@ export default class ToolTip {
     this.view.removeEventListener('zoomend', () => {
       this.changeText();
     });
-    this.view.removeEventListener('mousemove', () => {
-      this.changeText();
-    });
+    // this.view.removeEventListener('mousemove', () => {
+    //   this.changeText();
+    // });
   }
 }

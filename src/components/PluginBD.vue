@@ -58,6 +58,7 @@
   import MapConfig from "@/config/config_baidu";
   import SimpleTooltip from "@/components/tooltips/simpleTooltip.vue";
   import Parent from "@/components/tooltips/Parent.vue";
+  import simpleTooltip from "@/components/tooltips/simpleTooltip.vue";
   @Component
   export default class PluginTest extends Vue {
     private baiduConfig = new MapConfig();
@@ -152,25 +153,26 @@
           {
             id: 'test001',
             geometry: {x: 102.2687, y: 27.8843},
-            fields: {name: '测试2', featureid: '0002'}
+            fields: {name: '测试2', featureid: '0002',popupWindow: true}
           },
           {
             id: 'test002',
             geometry: {x: 102.2687, y: 27.8853},
-            fields: {name: '测试3', featureid: '0003'}
+            fields: {name: '测试3', featureid: '0003',popupWindow: true,}
           },
           {
             id: 'test003',
             geometry: {x: 102.2607, y: 27.8813},
-            fields: {name: '测试4', featureid: '0001'}
+            fields: {name: '测试4', featureid: '0001',popupWindow: true}
           }
         ],
-        showPopup: false,
+        showPopup: true,
         autoPopup: false,
         // defaultInfoTemplate: {
         //   title: '1212',
         //   content: '<div>name:{name}<br/><button>{name}</button></div>'
         // },
+        popupComponent:simpleTooltip,
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       });
       console.log(obj)
@@ -282,11 +284,11 @@
     }
     private async btn_deleteOverlays(){
       let map = this.$refs.gisViewer as any;
-      // const obj = await map.deleteOverlays({
-      //   types:["police"],
-      //   ids:["test001"]
-      // })
-      map.deleteOverlays();
+      const obj = await map.deleteOverlays({
+        types:["simplePolygon"],
+        // ids:["test001"]
+      })
+      // map.deleteOverlays();
       // console.log(obj);
     }
     private async btn_showToolTip(){
@@ -651,41 +653,40 @@
         },
         overlays: [
           {
-            id: 'test001',
+            id: 'test004',
             geometry: {x: 102.267713, y: 27.881396},
             fields: {
               name: '测试2',
               featureid: '0002',
-              popupWindow:  { type:sleep2() ,value1:"这是一个信息弹窗",value2:"随意测试一下" ,valuePromise:sleep2()},
-              tooltipWindow:true
+              popupWindow: true,
+              // tooltipWindow:true
             }
           },
           {
-            id: 'test002',
+            id: 'test005',
             geometry: {x: 102.367713, y: 27.881396},
             fields: {
               name: '测试3',
               featureid: '0003',
               popupWindow: { type:sleep() ,value1:"这是一个警告弹窗",value2:"随意测试一下",valuePromise:sleep()},
-              tooltipWindow:true
+              // tooltipWindow:true
             }
           },
           {
-            id: 'test003',
+            id: 'test006',
             geometry: {x: 102.367713, y: 27.981396},
             fields: {
               name: '测试4',
               featureid: '0001',
-              popupWindow: {type:sleep1(),value1:"这是一个正常弹窗",value2:"这是一个正常弹窗",valuePromise:sleep1()},
-              tooltipWindow:true
+              popupWindow: {valuePromise:sleep1()},
             }
           }
         ],
         showPopup: true,
         autoPopup: false,
-        moveTooltip: true,
+        moveTooltip: false,
         popupComponent:Parent,
-        tooltipComponent:SimpleTooltip,
+        // tooltipComponent:SimpleTooltip,
         // defaultInfoTemplate: {
         //   title: '1212',
         //   content: '<div>name:{name}<br/><button>{name}</button></div>'

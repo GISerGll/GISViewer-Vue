@@ -25,6 +25,7 @@ export class OverlayBaidu {
   private tooltip:any;
   private popupTypes: Map<string, any> = new Map<string, any>();
   private tooltipTypes:Map<string, any> = new Map<string, any>();
+
   private popup:any;
 
   private constructor(view: any) {
@@ -216,6 +217,7 @@ export class OverlayBaidu {
       }
 
     let addCount = 0;
+      let overlays = [];
     for (let i = 0; i < params.overlays.length; i++) {
       const overlay = params.overlays[i];
       const overlaySymbol = this.makeSymbol(overlay.symbol || defaultSymbol,defaultSymbol);
@@ -243,6 +245,7 @@ export class OverlayBaidu {
       let title: any;
       let content: string = '';
 
+      overlays.push(graphic);
       this.overlays.push(graphic);
       this.view.addOverlay(graphic);
       addCount++;
@@ -265,12 +268,11 @@ export class OverlayBaidu {
         });
       }
     }
-
     //处理弹窗逻辑,弹窗优先级popup->tooltip,动作优先级show->move->auto
     //冲突关系：同类冲突，例如autpPopup和movePopup冲突，autoTooltip和moveTooltip冲突
     //示意：假如同时存在autoPopup和showPopup为true，认为两者冲突，则autoPopup为false
     if(!defaultInfoTemplate){
-      await this.processPopupAndTooltip(popupAndTooltip,componentsObj);
+      await this.processPopupAndTooltip(overlays,popupAndTooltip,componentsObj);
     }
 
     return {
@@ -547,7 +549,7 @@ export class OverlayBaidu {
       message:'成功删除所有聚合点'
     }
   }
-  private async listenOverlayClick(popupType:string,popup:Vue.Component):Promise<IResult>{
+  private async listenOverlayClick(popupType:string,popup:Vue.Component,overlays:any[]):Promise<IResult>{
     if(!popupType){
       return {
         status:0,
@@ -561,14 +563,17 @@ export class OverlayBaidu {
       }
     }
 
-    this.view.removeEventListener('click');
     switch (popupType) {
       case "showPopup":
-        this.view.addEventListener('click',async (e:any)=>{
-          if(e.overlay && e.overlay.attributes && e.overlay.attributes.popupWindow){
-            let overlay = e.overlay;
-            let content = overlay.attributes.popupWindow;
-            let center = e.overlay.getPosition();
+        overlays.forEach((ptOverlay:any) => {
+          ptOverlay.addEventListener('click',async (e:any) => {
+            let fields = e.target.attributes;
+            let content = null;
+            if(!fields){
+              return ;
+            }
+            content = fields.popupWindow;
+            let center = e.target.getPosition();
 
             if (this.popup) {
               this.popup.remove();
@@ -583,16 +588,19 @@ export class OverlayBaidu {
                 content,
                 center
             );
-          }
+          })
         });
-
         break;
       case "showTooltip":
-        this.view.addEventListener('click',async (e:any)=>{
-          if(e.overlay&& e.overlay.attributes && e.overlay.attributes.tooltipWindow){
-            let overlay = e.overlay;
-            let content = overlay.attributes.popupWindow;
-            let center = e.overlay.getPosition();
+        overlays.forEach((ptOverlay:any) => {
+          ptOverlay.addEventListener('click',async (e:any) => {
+            let fields = e.target.attributes;
+            let content = null;
+            if(!fields){
+              return ;
+            }
+            content = fields.tooltipWindow;
+            let center = e.target.getPosition();
 
             if (this.tooltip) {
               this.tooltip.remove();
@@ -607,7 +615,7 @@ export class OverlayBaidu {
                 content,
                 center
             );
-          }
+          })
         });
         break;
       default:
@@ -911,7 +919,7 @@ export class OverlayBaidu {
       }
     }
   }
-  private async processPopupAndTooltip(popAndTip:any,componentsObj:any){
+  private async processPopupAndTooltip(overlays:any[],popAndTip:any,componentsObj:any){
     let showPopup = popAndTip.showPopup;
     let showTooltip = popAndTip.showTooltip;
     let moveTooltip = popAndTip.moveTooltip;
@@ -945,7 +953,7 @@ export class OverlayBaidu {
     }
 
     if(showPopup && popupComponent){
-      await this.listenOverlayClick('showPopup',popupComponent);
+      await this.listenOverlayClick('showPopup',popupComponent,overlays);
     }else if(movePopup && popupComponent){
       await this.listenOverlayMouseOver('movePopup',popupComponent);
     }else if(autoPopup && popupComponent){
@@ -955,7 +963,7 @@ export class OverlayBaidu {
     }
 
     if(showTooltip && tooltipComponent){
-      await this.listenOverlayClick('showTooltip',tooltipComponent)
+      await this.listenOverlayClick('showTooltip',tooltipComponent,overlays)
     }else if(moveTooltip && tooltipComponent){
       await this.listenOverlayMouseOver('moveTooltip',tooltipComponent)
     }else if(autoTooltip && tooltipComponent){
