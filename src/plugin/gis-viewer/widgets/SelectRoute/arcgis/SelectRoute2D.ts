@@ -136,68 +136,70 @@ export default class SelectRoute2D {
 
     this.view.popup.on('trigger-action', async (event) => {
       this.view.popup.close();
+      if (this.allLinkLayer) {
+        switch (event.action.id) {
+          case 'beginRoute': {
+            // 选好起点后路网不再能点击，只能点击候选link
+            if (this.allLinkLayer) {
+              this.allLinkLayer.popupEnabled = false;
+            }
+            if (this.mouseMoveHandler) {
+              this.mouseMoveHandler.remove();
+            }
 
-      switch (event.action.id) {
-        case 'beginRoute': {
-          // 选好起点后路网不再能点击，只能点击候选link
-          if (this.allLinkLayer) {
-            this.allLinkLayer.popupEnabled = false;
+            // popup.selectedFeature.attributes只包含popupTemplate中配置的字段
+            // 只能用FID来查找ID
+            const {FID} = this.view.popup.selectedFeature.attributes;
+            const selectedGraphic = await this.getLinkGraphicByFID(FID);
+            const clonedGraphic = selectedGraphic.clone();
+            this.iteratorLinkGraphicArray = [[clonedGraphic]];
+            this.addSelectedLink(clonedGraphic);
+
+            break;
           }
 
-          this.mouseMoveHandler.remove();
+          case 'addLink': {
+            const {FID} = this.view.popup.selectedFeature.attributes;
+            const selectedGraphic = await this.getLinkGraphicByFID(FID);
+            this.addSelectedLink(selectedGraphic.clone());
+            break;
+          }
 
-          // popup.selectedFeature.attributes只包含popupTemplate中配置的字段
-          // 只能用FID来查找ID
-          const {FID} = this.view.popup.selectedFeature.attributes;
-          const selectedGraphic = await this.getLinkGraphicByFID(FID);
-          const clonedGraphic = selectedGraphic.clone();
-          this.iteratorLinkGraphicArray = [[clonedGraphic]];
-          this.addSelectedLink(clonedGraphic);
+          case 'reSelectNextLink': {
+            const {FID} = this.view.popup.selectedFeature.attributes;
+            const selectedGraphic = await this.getLinkGraphicByFID(FID);
 
-          break;
-        }
+            //从已选定link中移除当前及之后link
+            this.reSelectLink(selectedGraphic.attributes['ID']);
 
-        case 'addLink': {
-          const {FID} = this.view.popup.selectedFeature.attributes;
-          const selectedGraphic = await this.getLinkGraphicByFID(FID);
-          this.addSelectedLink(selectedGraphic.clone());
-          break;
-        }
+            break;
+          }
 
-        case 'reSelectNextLink': {
-          const {FID} = this.view.popup.selectedFeature.attributes;
-          const selectedGraphic = await this.getLinkGraphicByFID(FID);
+          case 'endRouteInCandidateLink': {
+            const {FID} = this.view.popup.selectedFeature.attributes;
+            const selectedGraphic = await this.getLinkGraphicByFID(FID);
+            await this.addSelectedLink(selectedGraphic.clone(), true);
 
-          //从已选定link中移除当前及之后link
-          this.reSelectLink(selectedGraphic.attributes['ID']);
+            await this.view.goTo(this.selectedLinkGraphicArray);
+            this.view.zoom -= 1;
 
-          break;
-        }
+            this.emitRouteResult();
+            break;
+          }
 
-        case 'endRouteInCandidateLink': {
-          const {FID} = this.view.popup.selectedFeature.attributes;
-          const selectedGraphic = await this.getLinkGraphicByFID(FID);
-          await this.addSelectedLink(selectedGraphic.clone(), true);
+          case 'endRouteInSelectedLink': {
+            const {FID} = this.view.popup.selectedFeature.attributes;
+            const selectedGraphic = await this.getLinkGraphicByFID(FID);
+            this.reSelectLink(selectedGraphic.attributes['ID'], true);
+            this.candidateLinkLayer.removeAll();
 
-          await this.view.goTo(this.selectedLinkGraphicArray);
-          this.view.zoom -= 1;
+            await this.view.goTo(this.selectedLinkGraphicArray);
+            this.view.zoom -= 1;
 
-          this.emitRouteResult();
-          break;
-        }
+            this.emitRouteResult();
 
-        case 'endRouteInSelectedLink': {
-          const {FID} = this.view.popup.selectedFeature.attributes;
-          const selectedGraphic = await this.getLinkGraphicByFID(FID);
-          this.reSelectLink(selectedGraphic.attributes['ID'], true);
-          this.candidateLinkLayer.removeAll();
-
-          await this.view.goTo(this.selectedLinkGraphicArray);
-          this.view.zoom -= 1;
-
-          this.emitRouteResult();
-
-          break;
+            break;
+          }
         }
       }
     });
@@ -736,7 +738,9 @@ export default class SelectRoute2D {
     if (this.allLinkLayer) {
       this.allLinkLayer.popupEnabled = false;
     }
-    this.mouseMoveHandler.remove();
+    if (this.mouseMoveHandler) {
+      this.mouseMoveHandler.remove();
+    }
 
     const linkIds = params.routeInfo.ids;
 
