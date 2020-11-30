@@ -52,6 +52,14 @@ export let GisConfig = {
       definitionExpression: "Height >= 10",
     },
     {
+      label: "H51F011011",
+      type: "scene",
+      portalItem: {
+        id: "a366bd80fb454a0d9936ee9821dbd3aa",
+      },
+      definitionExpression: "Height >= 10",
+    },
+    {
       label: "H51F011012建筑",
       type: "scene",
       portalItem: {
