@@ -9,11 +9,15 @@ import {resolve, reject} from 'esri/core/promiseUtils';
 import {loadModules, utils} from 'esri-loader';
 import {Utils} from '@/plugin/gis-viewer/Utils';
 import {FindFeature} from '../../FindFeature/arcgis/FindFeature';
+import Axios from 'axios';
+import ToolTip from '../../Overlays/arcgis/ToolTip';
 export class LayerDefinition {
   private static intances: Map<string, any>;
   private view!: any;
-  private searchOverlays: any;
-  private _mapClick: any;
+  private className: string = 'layerdefinition';
+  private queryUrl: string =
+    'http://139.224.210.229:9093/yangpu-api/traffic/getList';
+  private labels: Array<string> = new Array<string>();
 
   private constructor(view: any) {
     this.view = view;
@@ -36,38 +40,39 @@ export class LayerDefinition {
   public async startLayerDefinition(
     params: IDefinitionParameter
   ): Promise<void> {
-    type MapModules = [
-      typeof import('esri/geometry/Point'),
-      typeof import('esri/geometry/Circle'),
-      typeof import('esri/geometry/Geometry'),
-      typeof import('esri/Graphic'),
-      typeof import('esri/geometry/support/webMercatorUtils')
-    ];
-    const [
-      Point,
-      Circle,
-      Geometry,
-      Graphic,
-      webMercatorUtils
-    ] = await (loadModules([
-      'esri/geometry/Point',
-      'esri/geometry/Circle',
-      'esri/geometry/Geometry',
-      'esri/Graphic',
-      'esri/geometry/support/webMercatorUtils'
-    ]) as Promise<MapModules>);
-
     let layerName = params.layerName || '';
 
     let searchNames = params.searchNames || [];
+    let url = params.url || this.queryUrl;
 
     let layer = this.getLayer(layerName);
     if (layer === undefined) {
       return;
     }
-    this.doLayerDefinition({
-      layer: layer,
-      searchNames: searchNames
+    let _this = this;
+    this.queryLayerData(url).then((data: any) => {
+      _this.doLayerDefinition({
+        layer: layer,
+        searchNames: searchNames,
+        data: data
+      });
+    });
+  }
+  public queryLayerData(url: string | undefined): Promise<any> {
+    let data = [];
+    return new Promise((resolve, reject) => {
+      if (url) {
+        Axios.post(url, {}).then((res: any) => {
+          //todo
+          let obj: any = {};
+          res.data.data.forEach((item: any) => {
+            obj[item['deptName']] = item.totalScore;
+          });
+          resolve(obj);
+        });
+      } else {
+        resolve([]);
+      }
     });
   }
   private getLayer(layerName: string): any {
@@ -117,6 +122,34 @@ export class LayerDefinition {
     const query = queryLayer.createQuery();
     query.where = express;
     const results = await queryLayer.queryFeatures(query);
+    this.showLabel(results.features, option.data);
     this.view.goTo({target: results.features});
+  }
+  private async clearLabel() {
+    this.labels.forEach((id: string) => {
+      ToolTip.clear(this.view, id);
+    }, this);
+  }
+  private async showLabel(featues: any[], data: any) {
+    this.clearLabel();
+    featues.forEach((graphic: any, index: number) => {
+      let name = graphic.attributes.Name;
+      let customtool = new ToolTip(
+        this.view,
+        {
+          id: index,
+          className: this.className,
+          content:
+            '<span style=\'color:white;font-size:14px;font-weight:bold;font-family:"Microsoft YaHei"\' >' +
+            name +
+            '</span><br/>' +
+            '<span style=\'color:white;font-size:14px;font-weight:bold;font-family:"Microsoft YaHei"\' >' +
+            data[name] +
+            '</span>'
+        },
+        graphic
+      );
+      this.labels.push(index.toString());
+    }, this);
   }
 }

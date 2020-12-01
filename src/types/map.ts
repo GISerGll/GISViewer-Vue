@@ -243,6 +243,7 @@ export interface IFindParameter {
 export interface IDefinitionParameter {
   layerName: string;
   searchNames: Array<string>;
+  url?: string;
 }
 export interface IOverlayDelete {
   types?: Array<string>;
