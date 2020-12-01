@@ -23,13 +23,13 @@ export let GisConfig = {
     // }
   ],
   operationallayers: [
-    // {
-    //   label: '发布段',
-    //   type: 'dynamic',
-    //   url:
-    //     'http://10.31.214.197:6080/arcgis/rest/services/GongXiang/Shanghai_fbd/MapServer',
-    //   visible: true
-    // },
+    {
+      label: '派出所',
+      type: 'dynamic',
+      url:
+        'http://172.30.30.1:6080/arcgis/rest/services/YangPu/YangPu_paichusuo/MapServer',
+      visible: true
+    }
     // {
     //   type: 'image',
     //   label: 'gzzx',

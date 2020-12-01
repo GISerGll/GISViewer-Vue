@@ -1,4 +1,4 @@
-import { setDefaultOptions, loadCss, loadModules } from "esri-loader";
+import {setDefaultOptions, loadCss, loadModules} from 'esri-loader';
 import {
   ILayerConfig,
   IOverlayParameter,
@@ -21,23 +21,24 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   ISelectRouteHitTest,
-} from "@/types/map";
-import { OverlayArcgis3D } from "@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D";
-import { RasterStretchRenderer } from "esri/rasterRenderers";
-import { FindFeature } from "./widgets/FindFeature/arcgis/FindFeature";
-import { HeatMap } from "./widgets/HeatMap/arcgis/HeatMap";
-import { HeatMap3D } from "./widgets/HeatMap/arcgis/HeatMap3D";
-import ToolTip from "./widgets/Overlays/arcgis/ToolTip";
-import { Cluster } from "./widgets/Cluster/arcgis/Cluster";
-import { DrawLayer } from "./widgets/DrawLayer/arcgis/DrawLayer";
-import { MigrateChart } from "./widgets/MigrateChart/arcgis/MigrateChart";
-import { HeatImage } from "./widgets/HeatMap/arcgis/HeatImage";
-import HeatImage2D from "./widgets/HeatMap/arcgis/HeatImage2D";
-import HeatImageGL from "./widgets/HeatMap/arcgis/HeatImageGL";
-import HeatImage3D from "./widgets/HeatMap/arcgis/HeatImage3D";
-import { GeometrySearch } from "./widgets/GeometrySearch/arcgis/GeometrySearch";
-import { Bar3DChart } from "./widgets/MigrateChart/arcgis/Bar3DChart";
-import { Utils } from "./Utils";
+  IDefinitionParameter
+} from '@/types/map';
+import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
+import {RasterStretchRenderer} from 'esri/rasterRenderers';
+import {FindFeature} from './widgets/FindFeature/arcgis/FindFeature';
+import {HeatMap} from './widgets/HeatMap/arcgis/HeatMap';
+import {HeatMap3D} from './widgets/HeatMap/arcgis/HeatMap3D';
+import ToolTip from './widgets/Overlays/arcgis/ToolTip';
+import {Cluster} from './widgets/Cluster/arcgis/Cluster';
+import {DrawLayer} from './widgets/DrawLayer/arcgis/DrawLayer';
+import {MigrateChart} from './widgets/MigrateChart/arcgis/MigrateChart';
+import {HeatImage} from './widgets/HeatMap/arcgis/HeatImage';
+import HeatImage2D from './widgets/HeatMap/arcgis/HeatImage2D';
+import HeatImageGL from './widgets/HeatMap/arcgis/HeatImageGL';
+import HeatImage3D from './widgets/HeatMap/arcgis/HeatImage3D';
+import {GeometrySearch} from './widgets/GeometrySearch/arcgis/GeometrySearch';
+import {Bar3DChart} from './widgets/MigrateChart/arcgis/Bar3DChart';
+import {Utils} from './Utils';
 
 export default class MapAppArcGIS3D implements IMapContainer {
   public view!: __esri.SceneView;
@@ -49,25 +50,25 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async initialize(gisConfig: any, mapContainer: string): Promise<void> {
     let mapConfig = Utils.copyObject(gisConfig);
     const apiUrl =
-      mapConfig.arcgis_api || mapConfig.apiUrl || "https://js.arcgis.com/4.14/";
+      mapConfig.arcgis_api || mapConfig.apiUrl || 'https://js.arcgis.com/4.14/';
 
-    setDefaultOptions({ url: `${apiUrl}/init.js` });
+    setDefaultOptions({url: `${apiUrl}/init.js`});
 
     const cssFile: string = mapConfig.theme
       ? `themes/${mapConfig.theme}/main.css`
-      : "css/main.css";
+      : 'css/main.css';
     loadCss(`${apiUrl}/esri/${cssFile}`);
-    if (mapConfig.theme == "custom") {
+    if (mapConfig.theme == 'custom') {
       this.loadCustomCss();
     }
     type MapModules = [
-      typeof import("esri/views/SceneView"),
-      typeof import("esri/Basemap"),
-      typeof import("esri/Map"),
-      typeof import("esri/layers/TileLayer"),
-      typeof import("esri/layers/WebTileLayer"),
-      typeof import("esri/core/Collection"),
-      typeof import("esri/WebScene")
+      typeof import('esri/views/SceneView'),
+      typeof import('esri/Basemap'),
+      typeof import('esri/Map'),
+      typeof import('esri/layers/TileLayer'),
+      typeof import('esri/layers/WebTileLayer'),
+      typeof import('esri/core/Collection'),
+      typeof import('esri/WebScene')
     ];
     const [
       SceneView,
@@ -76,15 +77,15 @@ export default class MapAppArcGIS3D implements IMapContainer {
       TileLayer,
       WebTileLayer,
       Collection,
-      WebScene,
+      WebScene
     ] = await (loadModules([
-      "esri/views/SceneView",
-      "esri/Basemap",
-      "esri/Map",
-      "esri/layers/TileLayer",
-      "esri/layers/WebTileLayer",
-      "esri/core/Collection",
-      "esri/WebScene",
+      'esri/views/SceneView',
+      'esri/Basemap',
+      'esri/Map',
+      'esri/layers/TileLayer',
+      'esri/layers/WebTileLayer',
+      'esri/core/Collection',
+      'esri/WebScene'
     ]) as Promise<MapModules>);
 
     let map: __esri.Map | __esri.WebScene;
@@ -93,45 +94,45 @@ export default class MapAppArcGIS3D implements IMapContainer {
     if (mapConfig.baseLayers) {
       baseLayers.addMany(
         mapConfig.baseLayers.map((layerConfig: ILayerConfig) => {
-          if (layerConfig.type === "tiled") {
+          if (layerConfig.type === 'tiled') {
             delete layerConfig.type;
             return new TileLayer(layerConfig);
-          } else if (layerConfig.type === "webtiled") {
+          } else if (layerConfig.type === 'webtiled') {
             return new WebTileLayer({
               urlTemplate: layerConfig.url,
-              subDomains: layerConfig.subDomains || undefined,
+              subDomains: layerConfig.subDomains || undefined
             });
           }
         })
       );
     }
     const basemap: __esri.Basemap = new Basemap({
-      baseLayers,
+      baseLayers
     });
 
     if (mapConfig.webScene) {
-      map = new WebScene({ ...mapConfig.webScene, basemap });
+      map = new WebScene({...mapConfig.webScene, basemap});
     } else {
       map = new Map({
         basemap,
-        ground: mapConfig.options.ground,
+        ground: mapConfig.options.ground
       });
     }
 
     const view: __esri.SceneView = new SceneView({
       map,
       container: mapContainer,
-      ...mapConfig.options,
+      ...mapConfig.options
     });
     if (mapConfig.operationallayers) {
       this.createLayer(view, mapConfig.operationallayers);
     }
-    view.ui.remove("attribution");
+    view.ui.remove('attribution');
     // view.ui.remove("zoom");
     // view.ui.remove("compass");
     // view.ui.remove("navigation-toggle");
 
-    view.on("click", async (event) => {
+    view.on('click', async (event) => {
       console.log(this.view.camera);
 
       if (event.mapPoint) {
@@ -141,7 +142,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
           y: mp.latitude,
           lat: mp.x,
           lnt: mp.y,
-          wkid: mp.spatialReference.wkid,
+          wkid: mp.spatialReference.wkid
         });
       } else {
         this.mapClick(event);
@@ -153,25 +154,25 @@ export default class MapAppArcGIS3D implements IMapContainer {
         // });
         let result = response.results[0];
         const graphic = result.graphic;
-        let { type, id } = graphic.attributes;
-        let label = graphic.layer ? (graphic.layer as any).label : "";
+        let {type, id} = graphic.attributes;
+        let label = graphic.layer ? (graphic.layer as any).label : '';
         if (
           graphic.layer &&
-          (graphic.layer.type == "feature" || graphic.layer.type == "graphics")
+          (graphic.layer.type == 'feature' || graphic.layer.type == 'graphics')
         ) {
           id =
-            graphic.attributes["DEVICEID"] ||
-            graphic.attributes["FEATUREID"] ||
-            graphic.attributes["SECTIONID"] ||
-            graphic.attributes["id"] ||
-            graphic.attributes["ID"] ||
+            graphic.attributes['DEVICEID'] ||
+            graphic.attributes['FEATUREID'] ||
+            graphic.attributes['SECTIONID'] ||
+            graphic.attributes['id'] ||
+            graphic.attributes['ID'] ||
             undefined;
           type =
-            graphic.attributes["DEVICETYPE"] ||
-            graphic.attributes["FEATURETYPE"] ||
-            graphic.attributes["FEATURETYP"] ||
-            graphic.attributes["type"] ||
-            graphic.attributes["TYPE"] ||
+            graphic.attributes['DEVICETYPE'] ||
+            graphic.attributes['FEATURETYPE'] ||
+            graphic.attributes['FEATURETYP'] ||
+            graphic.attributes['type'] ||
+            graphic.attributes['TYPE'] ||
             label ||
             undefined;
         }
@@ -198,9 +199,9 @@ export default class MapAppArcGIS3D implements IMapContainer {
             let layername = res.layerName;
             let layerid = res.layerId;
             let id =
-              res.feature.attributes["DEVICEID"] ||
-              res.feature.attributes["FEATUREID"] ||
-              res.feature.attributes["SECTIONID"] ||
+              res.feature.attributes['DEVICEID'] ||
+              res.feature.attributes['FEATUREID'] ||
+              res.feature.attributes['SECTIONID'] ||
               res.feature.attributes[res.displayFieldName];
             this.showGisDeviceInfo(layername, id, res.feature.attributes);
             let selectLayer = this.getLayerByName(layername, layerid);
@@ -213,7 +214,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
                     res.feature.attributes,
                     popup.content
                   ),
-                  location: event.mapPoint,
+                  location: event.mapPoint
                 });
               }
             }
@@ -236,7 +237,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
     (this.view as any).mapOptions = mapConfig.options;
   }
   private loadCustomCss() {
-    require("./styles/custom.css");
+    require('./styles/custom.css');
   }
   private destroy() {}
   //使toolTip中支持{字段}的形式
@@ -247,7 +248,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
       for (let fieldName in attr) {
         if (attr.hasOwnProperty(fieldName)) {
           tipContent = tipContent.replace(
-            "{" + fieldName + "}",
+            '{' + fieldName + '}',
             attr[fieldName]
           );
         }
@@ -257,10 +258,10 @@ export default class MapAppArcGIS3D implements IMapContainer {
   }
   private getLayerIds(layer: any): any[] {
     let layerids = [];
-    if (layer.type == "feature") {
+    if (layer.type == 'feature') {
       //featurelayer查询
       layerids.push(layer.layerId);
-    } else if (layer.type == "map-image") {
+    } else if (layer.type == 'map-image') {
       let sublayers = (layer as __esri.MapImageLayer).sublayers;
       sublayers.forEach((sublayer) => {
         if (sublayer.visible) {
@@ -273,7 +274,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
   private getLayerByName(layername: string, id: string | number): any {
     let selLayer;
     let layers = this.view.map.allLayers.toArray().forEach((layer: any) => {
-      if (layer.type == "imagery" || layer.type == "map-image") {
+      if (layer.type == 'imagery' || layer.type == 'map-image') {
         let sublayers = (layer as __esri.MapImageLayer).allSublayers;
         sublayers.forEach((sublayer) => {
           if (
@@ -292,7 +293,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
     let layers = this.view.map.allLayers.filter((layer: any) => {
       if (
         layer.visible &&
-        (layer.type == "imagery" || layer.type == "map-image")
+        (layer.type == 'imagery' || layer.type == 'map-image')
       ) {
         return true;
       }
@@ -300,14 +301,14 @@ export default class MapAppArcGIS3D implements IMapContainer {
     });
     let that = this;
     type MapModules = [
-      typeof import("esri/Graphic"),
-      typeof import("esri/tasks/IdentifyTask"),
-      typeof import("esri/tasks/support/IdentifyParameters")
+      typeof import('esri/Graphic'),
+      typeof import('esri/tasks/IdentifyTask'),
+      typeof import('esri/tasks/support/IdentifyParameters')
     ];
     const [Graphic, IdentifyTask, IdentifyParameters] = await (loadModules([
-      "esri/Graphic",
-      "esri/tasks/IdentifyTask",
-      "esri/tasks/support/IdentifyParameters",
+      'esri/Graphic',
+      'esri/tasks/IdentifyTask',
+      'esri/tasks/support/IdentifyParameters'
     ]) as Promise<MapModules>);
     let promises: any = layers.toArray().map((layer: any) => {
       return new Promise((resolve, reject) => {
@@ -316,7 +317,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
         let identifyParams = new IdentifyParameters(); //创建属性查询参数
         identifyParams.tolerance = 3;
         identifyParams.layerIds = that.getLayerIds(layer);
-        identifyParams.layerOption = "visible"; //"top"|"visible"|"all"
+        identifyParams.layerOption = 'visible'; //"top"|"visible"|"all"
         identifyParams.width = that.view.width;
         identifyParams.height = that.view.height;
         identifyParams.geometry = clickpoint;
@@ -341,16 +342,16 @@ export default class MapAppArcGIS3D implements IMapContainer {
   }
   private async createLayer(view: __esri.SceneView, layers: any) {
     type MapModules = [
-      typeof import("esri/layers/FeatureLayer"),
-      typeof import("esri/layers/WebTileLayer"),
-      typeof import("esri/layers/MapImageLayer"),
-      typeof import("esri/layers/WMSLayer"),
-      typeof import("esri/layers/Layer"),
-      typeof import("esri/layers/support/LabelClass"),
-      typeof import("esri/Color"),
-      typeof import("esri/symbols/Font"),
-      typeof import("esri/symbols/TextSymbol"),
-      typeof import("esri/layers/SceneLayer")
+      typeof import('esri/layers/FeatureLayer'),
+      typeof import('esri/layers/WebTileLayer'),
+      typeof import('esri/layers/MapImageLayer'),
+      typeof import('esri/layers/WMSLayer'),
+      typeof import('esri/layers/Layer'),
+      typeof import('esri/layers/support/LabelClass'),
+      typeof import('esri/Color'),
+      typeof import('esri/symbols/Font'),
+      typeof import('esri/symbols/TextSymbol'),
+      typeof import('esri/layers/SceneLayer')
     ];
     const [
       FeatureLayer,
@@ -362,18 +363,18 @@ export default class MapAppArcGIS3D implements IMapContainer {
       Color,
       Font,
       TextSymbol,
-      SceneLayer,
+      SceneLayer
     ] = await (loadModules([
-      "esri/layers/FeatureLayer",
-      "esri/layers/WebTileLayer",
-      "esri/layers/MapImageLayer",
-      "esri/layers/WMSLayer",
-      "esri/layers/Layer",
-      "esri/layers/support/LabelClass",
-      "esri/Color",
-      "esri/symbols/Font",
-      "esri/symbols/TextSymbol",
-      "esri/layers/SceneLayer",
+      'esri/layers/FeatureLayer',
+      'esri/layers/WebTileLayer',
+      'esri/layers/MapImageLayer',
+      'esri/layers/WMSLayer',
+      'esri/layers/Layer',
+      'esri/layers/support/LabelClass',
+      'esri/Color',
+      'esri/symbols/Font',
+      'esri/symbols/TextSymbol',
+      'esri/layers/SceneLayer'
     ]) as Promise<MapModules>);
     let map = view.map;
     map.addMany(
@@ -383,27 +384,27 @@ export default class MapAppArcGIS3D implements IMapContainer {
           let type = layerConfig.type.toLowerCase();
           delete layerConfig.type;
           switch (type) {
-            case "feature":
+            case 'feature':
               layer = new FeatureLayer(layerConfig);
               layer.labelingInfo = layerConfig.labelingInfo;
               break;
-            case "dynamic":
+            case 'dynamic':
               layer = new MapImageLayer(layerConfig);
               break;
-            case "wms":
+            case 'wms':
               layer = new WMSLayer(layerConfig);
               break;
-            case "webtiled":
+            case 'webtiled':
               layer = new WebTileLayer({
                 urlTemplate: layerConfig.url,
-                subDomains: layerConfig.subDomains || undefined,
+                subDomains: layerConfig.subDomains || undefined
               });
               break;
-            case "json":
+            case 'json':
               const drawlayer = DrawLayer.getInstance(view);
               drawlayer.addDrawLayer(layerConfig);
               break;
-            case "scene":
+            case 'scene':
               layer = new SceneLayer(layerConfig);
               break;
           }
@@ -475,7 +476,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
 
     if (!isNaN(x) && !isNaN(y)) {
       this.view.goTo({
-        center: [x, y],
+        center: [x, y]
       });
     }
   }
@@ -487,7 +488,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
     if (!isNaN(x) && !isNaN(y) && !isNaN(level) && level >= 0) {
       this.view.goTo({
         zoom: level,
-        center: [x, y],
+        center: [x, y]
       });
     }
   }
@@ -509,7 +510,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public setMapStyle(param: string) {}
 
   public async routeSearch(params: routeParameter): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public clearRouteSearch() {}
 
@@ -556,14 +557,14 @@ export default class MapAppArcGIS3D implements IMapContainer {
     geometrySearch.clearGeometrySearch();
   }
   public async showDgene(params: any): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public hideDgene() {}
   public async addDgeneFusion(params: any): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public async restoreDegeneFsion(): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public showCustomTip(params: ICustomTip) {
     ToolTip.clear(this.view, params.prop.className);
@@ -577,21 +578,24 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async playSelectedRoute(speed: number) {}
   public stopPlaySelectedRoute() {}
   public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
-    return { status: -1, message: "" };
+    return {status: -1, message: ''};
   }
   public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
-    return { status: -1, message: "" };
+    return {status: -1, message: ''};
   }
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
   public async stopDrawOverlays(): Promise<void> {}
   public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {}
   public async getDrawOverlays(): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public async startLayerSearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
+  public async startLayerDefinition(
+    params: IDefinitionParameter
+  ): Promise<void> {}
 }

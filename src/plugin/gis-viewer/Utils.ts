@@ -36,6 +36,13 @@ export class Utils {
     );
     return zoom;
   }
+  public static resetMap(view: any) {
+    let mapOption = view.mapOptions.options;
+    view.goTo({
+      zoom: mapOption.zoom || 0,
+      center: mapOption.center
+    });
+  }
   public static getGeometryPoint(geometry: any) {
     if (geometry.type == 'point') {
       return geometry;

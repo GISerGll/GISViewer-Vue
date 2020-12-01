@@ -2,8 +2,8 @@
   <div :id="mapId" class="my-map-div" />
 </template>
 <script lang="ts">
-import { Vue, Component, Emit, Prop } from "vue-property-decorator";
-import MapApp from "@/plugin/gis-viewer/MapAppBaidu";
+import {Vue, Component, Emit, Prop} from 'vue-property-decorator';
+import MapApp from '@/plugin/gis-viewer/MapAppBaidu';
 import {
   IMapContainer,
   IOverlayParameter,
@@ -25,30 +25,31 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   ISelectRouteHitTest,
-} from "@/types/map";
+  IDefinitionParameter
+} from '@/types/map';
 @Component({
-  name: "MapAppBaidu",
+  name: 'MapAppBaidu'
 })
 export default class MapContainerArcgis extends Vue implements IMapContainer {
   private mapApp!: MapApp;
 
-  private mapId: string = "divBMap" + (Math.random() * 10000).toFixed(0);
+  private mapId: string = 'divBMap' + (Math.random() * 10000).toFixed(0);
   //地图配置
-  @Prop({ type: Object }) readonly mapConfig!: Object;
+  @Prop({type: Object}) readonly mapConfig!: Object;
 
-  @Emit("map-loaded")
+  @Emit('map-loaded')
   async mounted() {
     this.mapApp = new MapApp();
     await this.mapApp.initialize(this.mapConfig, this.mapId);
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
   }
-  @Emit("layer-loaded")
+  @Emit('layer-loaded')
   public layerLoaded() {}
-  @Emit("map-click")
+  @Emit('map-click')
   public mapClick(point: object) {}
-  @Emit("marker-click")
+  @Emit('marker-click')
   public showGisDeviceInfo(type: string, id: string, detail: any) {}
-  @Emit("marker-mouse")
+  @Emit('marker-mouse')
   public mouseGisDeviceInfo(
     event: any,
     type: string,
@@ -112,13 +113,13 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     this.mapApp.setMapStyle(param);
   }
   public async routeSearch(params: routeParameter): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public clearRouteSearch() {}
   public showRoutePoint(params: any) {}
   public clearRoutePoint() {}
   public async addDrawLayer(params: any): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public clearDrawLayer(params: ILayerConfig) {}
   public addHeatImage(params: IHeatImageParameter) {}
@@ -130,18 +131,18 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async startGeometrySearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public clearGeometrySearch() {}
   public async showDgene(params: any): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public hideDgene() {}
   public async addDgeneFusion(params: any): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public async restoreDegeneFsion(): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public showCustomTip(params: ICustomTip) {}
   public showDgeneOutPoint(params: any) {}
@@ -152,23 +153,26 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async playSelectedRoute(speed: number) {}
   public stopPlaySelectedRoute() {}
   public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
-    return { status: -1, message: "" };
+    return {status: -1, message: ''};
   }
   public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
-    return { status: -1, message: "" };
+    return {status: -1, message: ''};
   }
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
   public async stopDrawOverlays(): Promise<void> {}
   public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {}
   public async getDrawOverlays(): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
   public async startLayerSearch(
     params: IGeometrySearchParameter
   ): Promise<IResult> {
-    return { status: 0, message: "" };
+    return {status: 0, message: ''};
   }
+  public async startLayerDefinition(
+    params: IDefinitionParameter
+  ): Promise<void> {}
 }
 </script>
 
