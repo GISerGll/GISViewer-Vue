@@ -122,6 +122,11 @@ export class LayerDefinition {
     const query = queryLayer.createQuery();
     query.where = express;
     const results = await queryLayer.queryFeatures(query);
+    if (results.features.length > 0) {
+      layer.visible = true;
+    } else {
+      layer.visible = false;
+    }
     this.showLabel(results.features, option.data);
     this.view.goTo({target: results.features});
   }
@@ -129,6 +134,7 @@ export class LayerDefinition {
     this.labels.forEach((id: string) => {
       ToolTip.clear(this.view, id);
     }, this);
+    this.labels = [];
   }
   private async showLabel(featues: any[], data: any) {
     this.clearLabel();
@@ -149,7 +155,7 @@ export class LayerDefinition {
         },
         graphic
       );
-      this.labels.push(index.toString());
+      this.labels.push(this.className + index.toString);
     }, this);
   }
 }
