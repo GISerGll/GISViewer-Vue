@@ -6,7 +6,7 @@ export let GisConfig = {
       label: '深色',
       type: 'tiled',
       url:
-        ' https://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer',
+        ' http://139.224.210.229:6080/arcgis/rest/services/YangPu/YangPu_base/MapServer',
       visible: true
     }
     // {
@@ -27,8 +27,8 @@ export let GisConfig = {
       label: '派出所',
       type: 'dynamic',
       url:
-        'http://172.30.30.1:6080/arcgis/rest/services/YangPu/YangPu_paichusuo/MapServer',
-      visible: true
+        'http://139.224.210.229:6080/arcgis/rest/services/YangPu/YangPu_paichusuo/MapServer',
+      visible: false
     }
     // {
     //   type: 'image',
@@ -132,7 +132,7 @@ export let GisConfig = {
   ],
   options: {
     center: [121.452, 31.23],
-    zoom: 12,
+    zoom: 2,
     //viewingMode: 'global',
     // ground: {opacity: 1},
     // alphaCompositingEnabled: true,

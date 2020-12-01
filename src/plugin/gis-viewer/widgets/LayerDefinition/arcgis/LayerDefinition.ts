@@ -137,7 +137,7 @@ export class LayerDefinition {
       let customtool = new ToolTip(
         this.view,
         {
-          id: index,
+          id: this.className + index.toString,
           className: this.className,
           content:
             '<span style=\'color:white;font-size:14px;font-weight:bold;font-family:"Microsoft YaHei"\' >' +
