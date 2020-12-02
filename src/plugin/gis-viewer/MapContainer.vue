@@ -70,9 +70,10 @@ import {
   ISelectRouteParam,
   ISelectRouteResult,
   IDrawOverlays,
-  IEditFenceLabel, IDrawOverlaysDelete, IPolylineRangingParameter, IPicChangeParameter
+  IEditFenceLabel, IDrawOverlaysDelete, IPolylineRangingParameter, IPicChangeParameter, IPOISearch, IRoutePlan, IGeocode
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
+import bdWebAPIRequest from "@/plugin/gis-viewer/widgets/WebAPI/bd/bdWebAPIRequest";
 
 @Component({
   components: {
@@ -370,6 +371,15 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public async changePicById(params:IPicChangeParameter): Promise<IResult> {
     return await this.mapContainer.changePicById(params);
+  }
+  public async bdPOIQuery(params:IPOISearch): Promise<IResult> {
+    return await bdWebAPIRequest.requestPOI(params);
+  }
+  public async bdRouteSearch(params:IRoutePlan): Promise<IResult> {
+    return await bdWebAPIRequest.requestRoadPlan(params);
+  }
+  public async bdGeocode(params:IGeocode): Promise<IResult> {
+    return await bdWebAPIRequest.requestGeocode(params);
   }
 }
 </script>

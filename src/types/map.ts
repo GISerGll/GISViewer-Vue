@@ -450,3 +450,34 @@ export interface ISelectRouteResult {
     ids: Array<string>;
   };
 }
+export interface IPOISearch {
+  searchType:string,                  // 查询方式 rectangle/circle/region
+  searchName:string,                  // 查询名称
+  searchTag?:string,                  // 查询分类，用于筛选查询结果
+  searchPage?:number,                 // 当查询结果较多时，可以设置查询页面继续查询
+  city?:string,
+  district?:string,
+  location?:number[],                 // circle search center
+  radius?:number,                     // circle search radius
+  region?:string,                     // region search cityName
+  bounds?:number[],                   // rectangle search bounds coordinates
+  scope?:boolean,                     // 是否显示详细信息
+}
+export interface IRoutePlan {
+  origin: number[],
+  destination: number[],
+  midPoints?: number[][],
+  changeRoute?: string,            // shortest time/shortest distance
+  avoidArea?: {
+    areaType:string,
+    center?:number[],
+    radius?:number,
+    coordinates:number[]
+  },            // 圆：[x,y,radius]/矩形：[x1,y1,x2,y2]
+  mode?:string                     //CAR,BICYCLE,WALK
+}
+export interface IGeocode {
+  location:number[],
+  radius?:number,
+  poiTypes?:string[],           //hotel,road...
+}

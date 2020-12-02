@@ -25,7 +25,7 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   IDrawOverlaysDelete,
-  IPolylineRangingParameter, ITrackPlaybackParameter, ITrackPlaybackBDParameter, IPicChangeParameter,
+  IPolylineRangingParameter, ITrackPlaybackParameter, ITrackPlaybackBDParameter, IPicChangeParameter, IPOISearch,
 } from '@/types/map';
 @Component({
   name: 'MapAppBaidu'
@@ -204,6 +204,9 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
   public async changePicById(params:IPicChangeParameter): Promise<IResult> {
     return await this.mapApp.changePicById(params);
   }
+  // public async bdPOIQuery(params: IPOISearch): Promise<IResult> {
+  //   return await this.mapApp.bdPOIQuery(params);
+  // }
 }
 </script>
 

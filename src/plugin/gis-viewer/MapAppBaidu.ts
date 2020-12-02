@@ -22,7 +22,7 @@ import {
   IDrawOverlays,
   IDrawOverlaysDelete,
   IPolylineRangingParameter,
-  ITrackPlaybackParameter, IPicChangeParameter,
+  ITrackPlaybackParameter, IPicChangeParameter, IPOISearch,
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -32,7 +32,7 @@ import DrawOverlaysBD from "@/plugin/gis-viewer/widgets/DrawOverlays/bd/DrawOver
 import GeometrySearchBD from "@/plugin/gis-viewer/widgets/GeometrySearch/bd/GeometrySearchBD";
 import mapStyleConfig from "@/config/mapStyleConfig";
 import TrackPlaybackBD from "@/plugin/gis-viewer/widgets/TrackPlayback/bd/TrackPlaybackBD";
-import $ from 'jquery';
+import bdWebAPIRequest from "./widgets/WebAPI/bd/bdWebAPIRequest";
 
 
 declare let BMap: any;
@@ -109,18 +109,6 @@ export default class MapAppBaidu implements IMapContainer {
     console.log(`center:(${center.lng},${center.lat}),zoom:${zoom}`);
     view.centerAndZoom(center, zoom);
     view.enableScrollWheelZoom();
-
-    $.ajax({
-      url: 'http://api.jiaotong.baidu.com/dugis' + '/search',
-      dataType: 'json',
-      data: {page_num:1,page_size:9999},
-      success: function (response) {
-        console.log(response);
-      },
-      error:function(err){
-        console.log(err);
-      }
-    })
 
     await mapLoadPromise.then(async ()=>{
       console.log('map Loaded!');
@@ -405,5 +393,9 @@ export default class MapAppBaidu implements IMapContainer {
     const overlays = OverlayBaidu.getInstance(this.view);
     return await overlays.changePicById(params);
   }
+
+  // public async bdPOIQuery(params:IPOISearch): Promise<IResult> {
+  //   return await bdWebAPIRequest.requestPOI(params);
+  // }
 
 }
