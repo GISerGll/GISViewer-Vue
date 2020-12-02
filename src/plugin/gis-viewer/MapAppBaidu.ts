@@ -20,7 +20,8 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   ISelectRouteHitTest,
-  IDefinitionParameter
+  IDefinitionParameter,
+  ITrackParameter
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -292,4 +293,5 @@ export default class MapAppBaidu implements IMapContainer {
   public async startLayerDefinition(
     params: IDefinitionParameter
   ): Promise<void> {}
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {}
 }

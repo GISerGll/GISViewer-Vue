@@ -19,7 +19,8 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   ISelectRouteHitTest,
-  IDefinitionParameter
+  IDefinitionParameter,
+  ITrackParameter
 } from '@/types/map';
 import {OverlayArcgis2D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis2D';
 import {FindFeature} from './widgets/FindFeature/arcgis/FindFeature';
@@ -889,4 +890,5 @@ export default class MapAppArcGIS2D {
     const definition = LayerDefinition.getInstance(this.view);
     return await definition.startLayerDefinition(params);
   }
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {}
 }

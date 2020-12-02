@@ -69,7 +69,8 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   ISelectRouteHitTest,
-  IDefinitionParameter
+  IDefinitionParameter,
+  ITrackParameter
 } from '@/types/map';
 
 @Component({
@@ -335,6 +336,9 @@ export default class MapContainer extends Vue implements IMapContainer {
     params: IDefinitionParameter
   ): Promise<void> {
     return await this.mapContainer.startLayerDefinition(params);
+  }
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {
+    return await this.mapContainer.startTrackPlay(params);
   }
 }
 </script>

@@ -25,7 +25,8 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   ISelectRouteHitTest,
-  IDefinitionParameter
+  IDefinitionParameter,
+  ITrackParameter
 } from '@/types/map';
 @Component({
   name: 'MapAppBaidu'
@@ -173,6 +174,7 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async startLayerDefinition(
     params: IDefinitionParameter
   ): Promise<void> {}
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {}
 }
 </script>
 

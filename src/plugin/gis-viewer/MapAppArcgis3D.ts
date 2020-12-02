@@ -21,7 +21,8 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   ISelectRouteHitTest,
-  IDefinitionParameter
+  IDefinitionParameter,
+  ITrackParameter
 } from '@/types/map';
 import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
 import {RasterStretchRenderer} from 'esri/rasterRenderers';
@@ -39,6 +40,7 @@ import HeatImage3D from './widgets/HeatMap/arcgis/HeatImage3D';
 import {GeometrySearch} from './widgets/GeometrySearch/arcgis/GeometrySearch';
 import {Bar3DChart} from './widgets/MigrateChart/arcgis/Bar3DChart';
 import {Utils} from './Utils';
+import TrackPlay from './widgets/TrackPlay/arcgis/TrackPlay';
 
 export default class MapAppArcGIS3D implements IMapContainer {
   public view!: __esri.SceneView;
@@ -598,4 +600,9 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async startLayerDefinition(
     params: IDefinitionParameter
   ): Promise<void> {}
+
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {
+    const trackplay = TrackPlay.getInstance(this.view);
+    return await trackplay.startTrackPlay(params);
+  }
 }

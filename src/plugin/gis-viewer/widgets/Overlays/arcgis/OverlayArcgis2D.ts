@@ -249,13 +249,15 @@ export class OverlayArcgis2D {
       geometryJsonUtils,
       PopupTemplate,
       SpatialReference,
-      WebMercatorUtils
+      WebMercatorUtils,
+      geometryEngine
     ] = await loadModules([
       'esri/Graphic',
       'esri/geometry/support/jsonUtils',
       'esri/PopupTemplate',
       'esri/geometry/SpatialReference',
-      'esri/geometry/support/webMercatorUtils'
+      'esri/geometry/support/webMercatorUtils',
+      'esri/geometry/geometryEngine'
     ]);
 
     const defaultSymbol = this.makeSymbol(params.defaultSymbol);
@@ -267,6 +269,7 @@ export class OverlayArcgis2D {
     const custom = params.custom;
     const iswgs = params.iswgs !== false;
     const zooms = params.defaultZooms || [0, 0];
+    const showRegion = params.showRegion === true;
     if (params.defaultZooms) {
       overlayLayer.minScale = Utils.getScale(this.view, zooms[0]);
       overlayLayer.maxScale = Utils.getScale(this.view, zooms[1]);
@@ -280,6 +283,10 @@ export class OverlayArcgis2D {
     }
 
     let addCount = 0;
+    let drawRegion: __esri.Geometry | undefined = undefined;
+    if (showRegion) {
+      drawRegion = await this.getDrawOverlays();
+    }
     for (let i = 0; i < params.overlays.length; i++) {
       const overlay = params.overlays[i];
       if ((overlay.geometry as any).x) {
@@ -349,7 +356,13 @@ export class OverlayArcgis2D {
           graphic
         );
       }
-      overlayLayer.add(graphic);
+      if (showRegion && drawRegion !== undefined) {
+        if (geometryEngine.contains(drawRegion, geometry)) {
+          overlayLayer.add(graphic);
+        }
+      } else {
+        overlayLayer.add(graphic);
+      }
       addCount++;
     }
     return {
@@ -357,6 +370,26 @@ export class OverlayArcgis2D {
       message: 'ok',
       result: `成功添加${params.overlays.length}中的${addCount}个覆盖物`
     };
+  }
+  public async getDrawOverlays(): Promise<__esri.Geometry | undefined> {
+    let unionGeo: __esri.Geometry | undefined = undefined;
+    const [geometryEngine] = await loadModules([
+      'esri/geometry/geometryEngine'
+    ]);
+    let geometrys: any[] = [];
+    let layer = this.view.map.allLayers.find((baselayer: any) => {
+      return baselayer.type == 'graphics' && baselayer.label === 'drawOverlays';
+    });
+    if (layer) {
+      (layer as __esri.GraphicsLayer).graphics.forEach(
+        (graphic: __esri.Graphic) => {
+          geometrys.push(graphic.geometry);
+        }
+      );
+      unionGeo = await geometryEngine.union(geometrys);
+    }
+
+    return unionGeo;
   }
   public async deleteOverlays(params: IOverlayDelete): Promise<IResult> {
     let types = params.types || [];

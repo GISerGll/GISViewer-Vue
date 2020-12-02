@@ -123,6 +123,7 @@ export interface IOverlayParameter {
   defaultVisible?: boolean;
   iswgs?: boolean;
   custom: {content: string; zooms: [number, number]; visible: true};
+  showRegion?: boolean;
 }
 export interface IOverlayClusterParameter {
   points?: Array<IOverlay>;
@@ -198,6 +199,7 @@ export interface IMapContainer {
   getDrawOverlays: () => Promise<IResult>;
   startLayerSearch: (params: IGeometrySearchParameter) => Promise<IResult>;
   startLayerDefinition: (params: IDefinitionParameter) => Promise<void>;
+  startTrackPlay: (params: ITrackParameter) => Promise<void>;
 }
 export interface IPopUpTemplate {
   title?: string;
@@ -339,4 +341,7 @@ export interface ISelectRouteHitTest {
       points: Array<Array<number>>;
     }
   ];
+}
+export interface ITrackParameter {
+  id: string;
 }

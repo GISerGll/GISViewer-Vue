@@ -20,7 +20,8 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   ISelectRouteHitTest,
-  IDefinitionParameter
+  IDefinitionParameter,
+  ITrackParameter
 } from '@/types/map';
 import {OverlayGaode} from '@/plugin/gis-viewer/widgets/Overlays/gd/OverlayGaode';
 import {JurisdictionPoliceGD} from './widgets/JurisdictionPolice/gd/JurisdictionPoliceGD';
@@ -333,4 +334,5 @@ export default class MapAppGaode implements IMapContainer {
   public async startLayerDefinition(
     params: IDefinitionParameter
   ): Promise<void> {}
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {}
 }
