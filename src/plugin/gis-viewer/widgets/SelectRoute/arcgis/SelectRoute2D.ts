@@ -21,6 +21,7 @@ export default class SelectRoute2D {
 
   /** 显示全部路网的图层 */
   private allLinkLayer!: __esri.FeatureLayer;
+  private allLinkGraphicArray!: Array<__esri.Graphic>;
   /** 显示已选定Link的图层 */
   private selectedLinkLayer!: __esri.GraphicsLayer;
   /** 显示待选Link的图层 */
@@ -33,6 +34,7 @@ export default class SelectRoute2D {
 
   /** 显示全部信号机的图层 */
   private allTrafficSignalLayer!: __esri.FeatureLayer;
+  private allTrafficSignalGraphicArray!: Array<__esri.Graphic>;
   /** 显示已选定信号机的图层 */
   private selectedTrafficSignalLayer!: __esri.GraphicsLayer;
   /** 已选定的信号机编号 */
@@ -151,9 +153,11 @@ export default class SelectRoute2D {
             // 只能用FID来查找ID
             const { FID } = this.view.popup.selectedFeature.attributes;
             const selectedGraphic = await this.getLinkGraphicByFID(FID);
-            const clonedGraphic = selectedGraphic.clone();
-            this.iteratorLinkGraphicArray = [[clonedGraphic]];
-            this.addSelectedLink(clonedGraphic);
+            if (selectedGraphic) {
+              const clonedGraphic = selectedGraphic.clone();
+              this.iteratorLinkGraphicArray = [[clonedGraphic]];
+              this.addSelectedLink(clonedGraphic);
+            }
 
             break;
           }
@@ -161,7 +165,9 @@ export default class SelectRoute2D {
           case "addLink": {
             const { FID } = this.view.popup.selectedFeature.attributes;
             const selectedGraphic = await this.getLinkGraphicByFID(FID);
-            this.addSelectedLink(selectedGraphic.clone());
+            if (selectedGraphic) {
+              this.addSelectedLink(selectedGraphic.clone());
+            }
             break;
           }
 
@@ -170,7 +176,9 @@ export default class SelectRoute2D {
             const selectedGraphic = await this.getLinkGraphicByFID(FID);
 
             //从已选定link中移除当前及之后link
-            this.reSelectLink(selectedGraphic.attributes["ID"]);
+            if (selectedGraphic) {
+              this.reSelectLink(selectedGraphic.attributes["ID"]);
+            }
 
             break;
           }
@@ -178,7 +186,9 @@ export default class SelectRoute2D {
           case "endRouteInCandidateLink": {
             const { FID } = this.view.popup.selectedFeature.attributes;
             const selectedGraphic = await this.getLinkGraphicByFID(FID);
-            await this.addSelectedLink(selectedGraphic.clone(), true);
+            if (selectedGraphic) {
+              await this.addSelectedLink(selectedGraphic.clone(), true);
+            }
 
             await this.view.goTo(this.selectedLinkGraphicArray);
             this.view.zoom -= 1;
@@ -190,13 +200,15 @@ export default class SelectRoute2D {
           case "endRouteInSelectedLink": {
             const { FID } = this.view.popup.selectedFeature.attributes;
             const selectedGraphic = await this.getLinkGraphicByFID(FID);
-            this.reSelectLink(selectedGraphic.attributes["ID"], true);
-            this.candidateLinkLayer.removeAll();
+            if (selectedGraphic) {
+              this.reSelectLink(selectedGraphic.attributes["ID"], true);
+              this.candidateLinkLayer.removeAll();
 
-            await this.view.goTo(this.selectedLinkGraphicArray);
-            this.view.zoom -= 1;
+              await this.view.goTo(this.selectedLinkGraphicArray);
+              this.view.zoom -= 1;
 
-            this.emitRouteResult();
+              this.emitRouteResult();
+            }
 
             break;
           }
@@ -347,6 +359,13 @@ export default class SelectRoute2D {
         } as any,
       });
       this.view.map.add(this.allLinkLayer);
+
+      const query = this.allLinkLayer.createQuery();
+      query.where = "1=1";
+      query.outFields = ["*"];
+      query.returnGeometry = true;
+      const results = await this.allLinkLayer.queryFeatures(query);
+      this.allLinkGraphicArray = results.features;
     }
 
     if (this.selectedLinkLayer) {
@@ -382,6 +401,13 @@ export default class SelectRoute2D {
         } as any,
       });
       this.view.map.add(this.allTrafficSignalLayer);
+
+      const query = this.allTrafficSignalLayer.createQuery();
+      query.where = "1=1";
+      query.outFields = ["*"];
+      query.returnGeometry = true;
+      const results = await this.allTrafficSignalLayer.queryFeatures(query);
+      this.allTrafficSignalGraphicArray = results.features;
     }
 
     if (this.selectedTrafficSignalLayer) {
@@ -429,32 +455,51 @@ export default class SelectRoute2D {
   }
 
   /** 根据FID查找link Graphic */
-  private async getLinkGraphicByFID(fid: string): Promise<__esri.Graphic> {
-    const query = this.allLinkLayer.createQuery();
-    query.where = `FID=${fid}`;
-    const results = await this.allLinkLayer.queryFeatures(query);
-    return results.features[0];
+  private async getLinkGraphicByFID(
+    fid: string
+  ): Promise<__esri.Graphic | undefined> {
+    // const query = this.allLinkLayer.createQuery();
+    // query.where = `FID=${fid}`;
+    // const results = await this.allLinkLayer.queryFeatures(query);
+    // return results.features[0];
+
+    return this.allLinkGraphicArray.find((graphic) =>
+      graphic ? graphic.attributes["FID"] === Number(fid) : false
+    );
   }
 
   /** 根据ID查找link Graphic */
   private async getLinkGraphicByLinkId(
     linkId: string
-  ): Promise<__esri.Graphic> {
-    const query = this.allLinkLayer.createQuery();
-    query.where = `ID='${linkId}'`;
-    const results = await this.allLinkLayer.queryFeatures(query);
-    return results.features[0];
+  ): Promise<__esri.Graphic | undefined> {
+    // const query = this.allLinkLayer.createQuery();
+    // query.where = `ID='${linkId}'`;
+    // const results = await this.allLinkLayer.queryFeatures(query);
+    // return results.features[0];
+
+    return this.allLinkGraphicArray.find((graphic) =>
+      graphic ? graphic.attributes["ID"] === linkId : false
+    );
   }
 
   /** 根据信号机id查找graphic */
   private async getTrafficSignalById(
     signalId: string
   ): Promise<__esri.Graphic | void> {
-    const query = this.allTrafficSignalLayer.createQuery();
-    query.where = `FSTR_SCATS='${signalId}'`;
-    const results = await this.allTrafficSignalLayer.queryFeatures(query);
-    if (results.features.length > 0) {
-      return results.features[0];
+    // const query = this.allTrafficSignalLayer.createQuery();
+    // query.where = `FSTR_SCATS='${signalId}'`;
+    // const results = await this.allTrafficSignalLayer.queryFeatures(query);
+    // if (results.features.length > 0) {
+    //   return results.features[0];
+    // } else {
+    //   return;
+    // }
+
+    const results = this.allTrafficSignalGraphicArray.filter(
+      (graphic) => graphic.attributes["FSTR_SCATS"] === signalId
+    );
+    if (results.length > 0) {
+      return results[0];
     } else {
       return;
     }
