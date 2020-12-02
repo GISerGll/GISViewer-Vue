@@ -21,6 +21,7 @@ export default class SelectRoute2D {
 
   /** 显示全部路网的图层 */
   private allLinkLayer!: __esri.FeatureLayer;
+  private allLinkGraphicArray!: Array<__esri.Graphic>;
   /** 显示已选定Link的图层 */
   private selectedLinkLayer!: __esri.GraphicsLayer;
   /** 显示待选Link的图层 */
@@ -33,6 +34,7 @@ export default class SelectRoute2D {
 
   /** 显示全部信号机的图层 */
   private allTrafficSignalLayer!: __esri.FeatureLayer;
+  private allTrafficSignalGraphicArray!: Array<__esri.Graphic>;
   /** 显示已选定信号机的图层 */
   private selectedTrafficSignalLayer!: __esri.GraphicsLayer;
   /** 已选定的信号机编号 */
@@ -347,6 +349,13 @@ export default class SelectRoute2D {
         } as any,
       });
       this.view.map.add(this.allLinkLayer);
+
+      const query = this.allLinkLayer.createQuery();
+      query.where = "1=1";
+      query.outFields = ["*"];
+      query.returnGeometry = true;
+      const results = await this.allLinkLayer.queryFeatures(query);
+      this.allLinkGraphicArray = results.features;
     }
 
     if (this.selectedLinkLayer) {
@@ -382,6 +391,13 @@ export default class SelectRoute2D {
         } as any,
       });
       this.view.map.add(this.allTrafficSignalLayer);
+
+      const query = this.allTrafficSignalLayer.createQuery();
+      query.where = "1=1";
+      query.outFields = ["*"];
+      query.returnGeometry = true;
+      const results = await this.allTrafficSignalLayer.queryFeatures(query);
+      this.allTrafficSignalGraphicArray = results.features;
     }
 
     if (this.selectedTrafficSignalLayer) {
@@ -430,31 +446,48 @@ export default class SelectRoute2D {
 
   /** 根据FID查找link Graphic */
   private async getLinkGraphicByFID(fid: string): Promise<__esri.Graphic> {
-    const query = this.allLinkLayer.createQuery();
-    query.where = `FID=${fid}`;
-    const results = await this.allLinkLayer.queryFeatures(query);
-    return results.features[0];
+    // const query = this.allLinkLayer.createQuery();
+    // query.where = `FID=${fid}`;
+    // const results = await this.allLinkLayer.queryFeatures(query);
+    // return results.features[0];
+
+    return this.allLinkGraphicArray.filter(
+      (graphic) => graphic.attributes["FID"] === fid
+    )[0];
   }
 
   /** 根据ID查找link Graphic */
   private async getLinkGraphicByLinkId(
     linkId: string
   ): Promise<__esri.Graphic> {
-    const query = this.allLinkLayer.createQuery();
-    query.where = `ID='${linkId}'`;
-    const results = await this.allLinkLayer.queryFeatures(query);
-    return results.features[0];
+    // const query = this.allLinkLayer.createQuery();
+    // query.where = `ID='${linkId}'`;
+    // const results = await this.allLinkLayer.queryFeatures(query);
+    // return results.features[0];
+
+    return this.allLinkGraphicArray.filter(
+      (graphic) => graphic.attributes["ID"] === linkId
+    )[0];
   }
 
   /** 根据信号机id查找graphic */
   private async getTrafficSignalById(
     signalId: string
   ): Promise<__esri.Graphic | void> {
-    const query = this.allTrafficSignalLayer.createQuery();
-    query.where = `FSTR_SCATS='${signalId}'`;
-    const results = await this.allTrafficSignalLayer.queryFeatures(query);
-    if (results.features.length > 0) {
-      return results.features[0];
+    // const query = this.allTrafficSignalLayer.createQuery();
+    // query.where = `FSTR_SCATS='${signalId}'`;
+    // const results = await this.allTrafficSignalLayer.queryFeatures(query);
+    // if (results.features.length > 0) {
+    //   return results.features[0];
+    // } else {
+    //   return;
+    // }
+
+    const results = this.allTrafficSignalGraphicArray.filter(
+      (graphic) => graphic.attributes["FSTR_SCATS"] === signalId
+    );
+    if (results.length > 0) {
+      return results[0];
     } else {
       return;
     }
