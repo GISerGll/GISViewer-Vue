@@ -628,7 +628,7 @@ export class OverlayBaidu {
     }
 
   }
-  private async listenOverlayMouseOver(popupType:string,popup:Vue.Component):Promise<any>{
+  private async listenOverlayMouseOver(popupType:string,popup:Vue.Component,overlays:any[]):Promise<any>{
     if(!popupType){
       return {
         status:0,
@@ -642,14 +642,17 @@ export class OverlayBaidu {
       }
     }
 
-    this.view.removeEventListener('mousemove');
     switch (popupType) {
       case "movePopup":
-        this.view.addEventListener('mousemove',async (e:any)=>{
-          if(e.overlay && e.overlay.attributes && e.overlay.attributes.popupWindow){
-            let overlay = e.overlay;
-            let content = overlay.attributes.popupWindow;
-            let center = e.overlay.getPosition();
+        overlays.forEach((ptOverlay:any) =>{
+          ptOverlay.addEventListener('mouseover',async (e:any) => {
+            let fields = e.target.attributes;
+            let content = null;
+            if(!fields){
+              return ;
+            }
+            content = fields.popupWindow;
+            let center = e.target.getPosition();
 
             if (this.popup) {
               this.popup.remove();
@@ -664,21 +667,52 @@ export class OverlayBaidu {
                 content,
                 center
             );
-          }else{
+          })
+
+          ptOverlay.addEventListener('mouseout',async (e:any) => {
             if (this.popup) {
               this.popup.remove();
               this.popup = null;
             }
-          }
+          })
         });
-
+        // this.view.addEventListener('mousemove',async (e:any)=>{
+        //   if(e.overlay && e.overlay.attributes && e.overlay.attributes.popupWindow){
+        //     let overlay = e.overlay;
+        //     let content = overlay.attributes.popupWindow;
+        //     let center = e.overlay.getPosition();
+        //
+        //     if (this.popup) {
+        //       this.popup.remove();
+        //       this.popup = null;
+        //     }
+        //     if(content.hasOwnProperty('valuePromise')){
+        //       content.valuePromise = await content.valuePromise;
+        //     }
+        //     this.popup = new ToolTipBaiDu(
+        //         this.view,
+        //         popup,
+        //         content,
+        //         center
+        //     );
+        //   }else{
+        //     if (this.popup) {
+        //       this.popup.remove();
+        //       this.popup = null;
+        //     }
+        //   }
+        // });
         break;
       case "moveTooltip":
-        this.view.addEventListener('mousemove',async (e:any)=>{
-          if(e.overlay && e.overlay.attributes && e.overlay.attributes.tooltipWindow){
-            let overlay = e.overlay;
-            let content = overlay.attributes.tooltipWindow;
-            let center = e.overlay.getPosition();
+        overlays.forEach((ptOverlay:any) =>{
+          ptOverlay.addEventListener('mouseover',async (e:any) => {
+            let fields = e.target.attributes;
+            let content = null;
+            if(!fields){
+              return ;
+            }
+            content = fields.tooltipWindow;
+            let center = e.target.getPosition();
 
             if (this.tooltip) {
               this.tooltip.remove();
@@ -687,20 +721,49 @@ export class OverlayBaidu {
             if(content.hasOwnProperty('valuePromise')){
               content.valuePromise = await content.valuePromise;
             }
-
             this.tooltip = new ToolTipBaiDu(
                 this.view,
                 popup,
                 content,
                 center
             );
-          }else{
+          })
+
+          ptOverlay.addEventListener('mouseout',async (e:any) => {
             if (this.tooltip) {
               this.tooltip.remove();
               this.tooltip = null;
             }
-          }
+          })
         });
+
+        // this.view.addEventListener('mousemove',async (e:any)=>{
+        //   if(e.overlay && e.overlay.attributes && e.overlay.attributes.tooltipWindow){
+        //     let overlay = e.overlay;
+        //     let content = overlay.attributes.tooltipWindow;
+        //     let center = e.overlay.getPosition();
+        //
+        //     if (this.tooltip) {
+        //       this.tooltip.remove();
+        //       this.tooltip = null;
+        //     }
+        //     if(content.hasOwnProperty('valuePromise')){
+        //       content.valuePromise = await content.valuePromise;
+        //     }
+        //
+        //     this.tooltip = new ToolTipBaiDu(
+        //         this.view,
+        //         popup,
+        //         content,
+        //         center
+        //     );
+        //   }else{
+        //     if (this.tooltip) {
+        //       this.tooltip.remove();
+        //       this.tooltip = null;
+        //     }
+        //   }
+        // });
         break;
       default:
         break;
@@ -955,7 +1018,7 @@ export class OverlayBaidu {
     if(showPopup && popupComponent){
       await this.listenOverlayClick('showPopup',popupComponent,overlays);
     }else if(movePopup && popupComponent){
-      await this.listenOverlayMouseOver('movePopup',popupComponent);
+      await this.listenOverlayMouseOver('movePopup',popupComponent,overlays);
     }else if(autoPopup && popupComponent){
       await this.autoPopup(popupComponent);
     }else {
@@ -965,7 +1028,7 @@ export class OverlayBaidu {
     if(showTooltip && tooltipComponent){
       await this.listenOverlayClick('showTooltip',tooltipComponent,overlays)
     }else if(moveTooltip && tooltipComponent){
-      await this.listenOverlayMouseOver('moveTooltip',tooltipComponent)
+      await this.listenOverlayMouseOver('moveTooltip',tooltipComponent,overlays)
     }else if(autoTooltip && tooltipComponent){
       await this.autoTooltip(tooltipComponent);
     }

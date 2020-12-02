@@ -159,26 +159,28 @@
           {
             id: 'test001',
             geometry: {x: 102.2687, y: 27.8843},
-            fields: {name: '测试2', featureid: '0002',popupWindow: true}
+            fields: {name: '测试2', featureid: '0002',popupWindow: true,tooltipWindow: true}
           },
           {
             id: 'test002',
             geometry: {x: 102.2687, y: 27.8853},
-            fields: {name: '测试3', featureid: '0003',popupWindow: true,}
+            fields: {name: '测试3', featureid: '0003',popupWindow: true,tooltipWindow: true}
           },
           {
             id: 'test003',
             geometry: {x: 102.2607, y: 27.8813},
-            fields: {name: '测试4', featureid: '0001',popupWindow: true}
+            fields: {name: '测试4', featureid: '0001',popupWindow: true,tooltipWindow: true}
           }
         ],
         showPopup: true,
+        moveTooltip: true,
         autoPopup: false,
         // defaultInfoTemplate: {
         //   title: '1212',
         //   content: '<div>name:{name}<br/><button>{name}</button></div>'
         // },
         popupComponent:simpleTooltip,
+        tooltipComponent:Parent,
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       });
       console.log(obj)
@@ -720,7 +722,7 @@
               name: '测试2',
               featureid: '0002',
               popupWindow: true,
-              // tooltipWindow:true
+              tooltipWindow:true
             }
           },
           {
@@ -730,7 +732,7 @@
               name: '测试3',
               featureid: '0003',
               popupWindow: { type:sleep() ,value1:"这是一个警告弹窗",value2:"随意测试一下",valuePromise:sleep()},
-              // tooltipWindow:true
+              tooltipWindow:true
             }
           },
           {
@@ -740,14 +742,15 @@
               name: '测试4',
               featureid: '0001',
               popupWindow: {valuePromise:sleep1()},
+              tooltipWindow:true
             }
           }
         ],
         showPopup: true,
         autoPopup: false,
-        moveTooltip: false,
+        moveTooltip: true,
         popupComponent:Parent,
-        // tooltipComponent:SimpleTooltip,
+        tooltipComponent:SimpleTooltip,
         // defaultInfoTemplate: {
         //   title: '1212',
         //   content: '<div>name:{name}<br/><button>{name}</button></div>'
