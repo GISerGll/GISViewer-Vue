@@ -241,7 +241,8 @@ export interface IMapContainer {
 export interface IPicChangeParameter {
   id:string,
   pictureUrl:string,
-  callback?:boolean
+  callback?:boolean,
+  isSelected?:boolean,
 }
 export interface IPolylineRangingParameter {
   lineSymbol?:IPolylineSymbol,        //测距线符号样式

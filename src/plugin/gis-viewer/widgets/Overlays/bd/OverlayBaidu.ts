@@ -1046,6 +1046,7 @@ export class OverlayBaidu {
     const id = params.id;
     const curPicUrl = params.pictureUrl;
     const callback = params.callback || false;
+    const isSelected = params.isSelected || false;
 
     let callbackResults:any = null;
     let overlays = this.overlays;
@@ -1054,6 +1055,8 @@ export class OverlayBaidu {
         const icon = overlay.getIcon();
         icon.setImageUrl(curPicUrl);
         overlay.setIcon(icon);
+        overlay.isSeleted = isSelected;
+        overlay.attributes.isSeleted = isSelected;
 
         if(callback){
           let geometry = overlay.point ? overlay.point : overlay.points ?
