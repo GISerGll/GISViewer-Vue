@@ -16,6 +16,11 @@
   "dependencies": {
     "@amap/amap-jsapi-loader": "0.0.3",
     "@amap/amap-jsapi-types": "0.0.4",
+    "@turf/along": "^6.0.1",
+    "@turf/distance": "^6.0.1",
+    "@turf/helpers": "^6.1.4",
+    "@turf/length": "^6.0.2",
+    "@turf/line-slice": "^5.1.5",
     "@turf/boolean-point-in-polygon": "^6.0.1",
     "@turf/helpers": "^6.1.4",
     "@turf/length": "^6.0.2",
@@ -24,6 +29,9 @@
     "echarts-gl": "^1.1.1",
     "esri-loader": "^2.16.0",
     "jquery": "^3.5.1",
+    "three": "^0.123.0",
+    "three-obj-mtl-loader": "^1.0.3",
+    "ts-debounce-throttle": "^1.0.0",
     "vue": "^2.6.12",
     "vue-class-component": "^7.2.6",
     "vue-property-decorator": "^8.5.1"

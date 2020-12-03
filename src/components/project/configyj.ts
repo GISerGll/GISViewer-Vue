@@ -5,13 +5,7 @@ export let GisConfig = {
     {
       label: '深色底图',
       type: 'tiled',
-      url: 'https://10.31.214.248/server/rest/services/bj_xxb/MapServer',
-      visible: true
-    },
-    {
-      label: '标线',
-      url: 'https://10.31.214.248/server/rest/services/bx/MapServer',
-      type: 'tiled',
+      url: 'https://10.31.214.248/server/rest/services/bj_dmd/MapServer',
       visible: true
     }
   ],
@@ -121,238 +115,256 @@ export let GisConfig = {
       type: 'dynamic',
       visible: false
     },
+    /*设备*/
     {
       label: '快速路摄像机',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/1',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{位置}<br/>类型:{图层名}'
+      }
     },
     {
       label: '快速路摄像机',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/2',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{位置}<br/>类型:{图层名}'
+      }
     },
     {
       label: '快速路摄像机',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/3',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{位置}<br/>类型:{图层名}'
+      }
     },
     {
       label: '快速路摄像机',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/4',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{位置}<br/>类型:{图层名}'
+      }
     },
     {
-      label: '高架摄像机',
+      label: '高速公路摄像机',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/6',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{位置}<br/>类型:{图层名}'
+      }
     },
     {
-      label: '高架摄像机',
+      label: '高速公路摄像机',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/7',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{位置}<br/>类型:{图层名}'
+      }
     },
     {
-      label: '高架摄像机',
+      label: '高速公路摄像机',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/8',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{位置}<br/>类型:{图层名}'
+      }
     },
     {
-      label: '高架摄像机',
+      label: '高速公路摄像机',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/9',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{位置}<br/>类型:{图层名}'
+      }
     },
     {
-      label: '高架摄像机',
+      label: '高速公路摄像机',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/10',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{位置}<br/>类型:{图层名}'
+      }
     },
     {
-      label: '地面摄像机',
+      label: '主线情报板',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/12',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {title: '', content: '路名:{ROADNAME}<br/>描述:{DES}'}
     },
     {
-      label: '地面摄像机',
+      label: '主线情报板',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/13',
       type: 'feature',
       outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '地面摄像机',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/14',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '地面摄像机',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/15',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '地面摄像机',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/16',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '地面摄像机',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/17',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '主线情报板',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/19',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '主线情报板',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/20',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {title: '', content: '路名:{ROADNAME}<br/>描述:{DES}'}
     },
     {
       label: '匝道情报板',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/21',
+      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/14',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {title: '', content: '路名:{ROADNAME}<br/>描述:{DES}'}
     },
     {
       label: '高速情报板',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/22',
+      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/15',
       type: 'feature',
       outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '地面情报板',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/24',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '地面情报板',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/25',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {title: '', content: '路名:{ROADNAME}<br/>描述:{DES}'}
     },
     {
       label: '高速收费站',
+      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/17',
+      type: 'feature',
+      outFields: ['*'],
+      visible: false,
+      popupTemplate: {title: '', content: '名称:{NAME}'}
+    },
+    {
+      label: '高速收费站',
+      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/18',
+      type: 'feature',
+      outFields: ['*'],
+      visible: false,
+      popupTemplate: {title: '', content: '名称:{NAME}'}
+    },
+    {
+      label: '高速收费站',
+      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/19',
+      type: 'feature',
+      outFields: ['*'],
+      visible: false,
+      popupTemplate: {title: '', content: '名称:{NAME}'}
+    },
+    {
+      label: '高速收费站',
+      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/20',
+      type: 'feature',
+      outFields: ['*'],
+      visible: false,
+      popupTemplate: {title: '', content: '名称:{NAME}'}
+    },
+    {
+      label: '高速收费站',
+      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/21',
+      type: 'feature',
+      outFields: ['*'],
+      visible: false,
+      popupTemplate: {title: '', content: '名称:{NAME}'}
+    },
+    {
+      label: '匝道通行灯',
+      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/26',
+      type: 'feature',
+      outFields: ['*'],
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
+      }
+    },
+    {
+      label: '匝道通行灯',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/27',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
+      }
     },
     {
-      label: '高速收费站',
+      label: '匝道通行灯',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/28',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
+      }
     },
     {
-      label: '高速收费站',
+      label: '匝道通行灯',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/29',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
+      }
     },
     {
-      label: '高速收费站',
+      label: '匝道通行灯',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/30',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
+      }
     },
     {
-      label: '高速收费站',
+      label: '匝道通行灯',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/31',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
+      }
     },
     {
       label: '匝道通行灯',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/33',
+      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/32',
       type: 'feature',
       outFields: ['*'],
-      visible: false
+      visible: false,
+      popupTemplate: {
+        title: '',
+        content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
+      }
     },
-    {
-      label: '匝道通行灯',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/34',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '匝道通行灯',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/35',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '匝道通行灯',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/36',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '匝道通行灯',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/37',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '匝道通行灯',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/38',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
-    },
-    {
-      label: '匝道通行灯',
-      url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer/39',
-      type: 'feature',
-      outFields: ['*'],
-      visible: false
-    },
-
+    /*设备*/
     {
       label: '摄像机',
       url: 'https://10.31.214.248/server/rest/services/sssb_dpt/MapServer',
@@ -397,136 +409,75 @@ export let GisConfig = {
         },
         '12': {
           title: '',
-          content: '描述:{DES}<br/>类型:{图层名}'
+          content: '路名:{ROADNAME}<br/>描述:{DES}'
         },
         '13': {
           title: '',
-          content: '描述:{DES}<br/>类型:{图层名}'
+          content: '路名:{ROADNAME}<br/>描述:{DES}'
         },
         '14': {
           title: '',
-          content: '描述:{DES}<br/>类型:{图层名}'
+          content: '路名:{ROADNAME}<br/>描述:{DES}'
         },
         '15': {
           title: '',
-          content: '描述:{DES}<br/>类型:{图层名}'
-        },
-        '16': {
-          title: '',
-          content: '描述:{DES}<br/>类型:{图层名}'
+          content: '路名:{ROADNAME}<br/>描述:{DES}'
         },
         '17': {
           title: '',
-          content: '描述:{DES}<br/>类型:{图层名}'
+          content: '名称:{NAME}'
+        },
+        '18': {
+          title: '',
+          content: '名称:{NAME}'
         },
         '19': {
           title: '',
-          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
+          content: '名称:{NAME}'
         },
         '20': {
           title: '',
-          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
+          content: '名称:{NAME}'
         },
         '21': {
           title: '',
-          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
+          content: '名称:{NAME}'
         },
-        '22': {
-          title: '',
-          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
-        },
-        '24': {
-          title: '',
-          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
-        },
-        '25': {
+        '26': {
           title: '',
           content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
         },
         '27': {
           title: '',
-          content: '路名:{LXMC}<br/>描述:{NAME}'
+          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
         },
         '28': {
           title: '',
-          content: '路名:{LXMC}<br/>描述:{NAME}'
+          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
         },
         '29': {
           title: '',
-          content: '路名:{LXMC}<br/>描述:{NAME}'
+          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
         },
         '30': {
           title: '',
-          content: '路名:{LXMC}<br/>描述:{NAME}'
+          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
         },
         '31': {
           title: '',
-          content: '路名:{LXMC}<br/>描述:{NAME}'
-        },
-        '33': {
-          title: '',
-          content: '路名:{ROADNAME }<br/>描述:{DES}<br/>类型:{DEVTYPE}'
-        },
-        '34': {
-          title: '',
           content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
         },
-        '35': {
-          title: '',
-          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
-        },
-        '36': {
-          title: '',
-          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
-        },
-        '37': {
-          title: '',
-          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
-        },
-        '38': {
-          title: '',
-          content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
-        },
-        '39': {
+        '32': {
           title: '',
           content: '路名:{ROADNAME}<br/>描述:{DES}<br/>类型:{DEVTYPE}'
         }
       }
     }
-    // {
-    //   label: '发布段0000',
-    //   url:
-    //     'http://10.31.214.201:6080/arcgis/rest/services/YJZH/ShangHai_HeatMap/MapServer/1',
-    //   type: 'chengdi',
-    //   visible: true,
-    //   isCD: true,
-    //   outFields: ['*'],
-    //   renderer: {
-    //     type: 'heatmap',
-    //     colorStops: [
-    //       {ratio: 0, color: 'rgba(255, 255, 255, 0)'},
-    //       {ratio: 0.2, color: 'rgba(255, 255, 255, 1)'},
-    //       {ratio: 0.5, color: 'rgba(255, 140, 0, 1)'},
-    //       {ratio: 0.8, color: 'rgba(255, 140, 0, 1)'},
-    //       {ratio: 1, color: 'rgba(255, 0, 0, 1)'}
-    //     ],
-    //     field: 'ID',
-    //     blurRadius: 11,
-    //     maxPixelIntensity: 3000,
-    //     minPixelIntensity: 1
-    //   }
-    // }
-    // {
-    //   label: 'fbd1333',
-    //   url: './config/fbd/pcs.json',
-    //   type: 'json',
-    //   visible: true
-    // }
   ],
   options: {
     //for arcgis-2d
     center: [0, 0],
-    zoom: 1,
+    zoom: 2,
     //viewMode: '3D',
     constraints: {
       //minZoom: 3

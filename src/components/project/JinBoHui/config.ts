@@ -1,6 +1,5 @@
 export let GisConfig = {
-  arcgis_api:
-    'http://10.31.214.203:8994/arcgis_js_v414_api/arcgis_js_api/library/4.14',
+  arcgis_api: 'http://localhost:8090/arcgis_js_api/library/4.14',
   theme: 'custom', //dark,vec
   baseLayers: [
     {
@@ -27,11 +26,22 @@ export let GisConfig = {
     },
     {
       type: 'image',
+      label: 'gzzx',
+      url: 'assets/mapIcons/JinBoHui/gzzx.svg',
+      geometry: {x: 13502790.77925912, y: 3657732.182986842},
+      width: 520,
+      height: 520,
+      minScale: 9028
+    },
+    {
+      type: 'image',
+      label: 'flower',
       url: 'assets/mapIcons/JinBoHui/flower.png',
-      geometry: {x: 13502204.92578, y: 3658256.1152},
-      width: 564,
-      height: 564,
-      minScale: 72224
+      geometry: {x: 13502776.148697566, y: 3657684.599002632},
+      width: 350,
+      height: 350,
+      minScale: 72224,
+      maxScale: 9029
     },
     {
       label: '国展中心点',
@@ -53,25 +63,11 @@ export let GisConfig = {
           height: 32
         }
       }
-    },
-    {
-      label: '巴士线路',
-      url:
-        'http://10.31.214.201:6080/arcgis/rest/services/JinBoHui/ShangHai_jieboxian/MapServer/10',
-      type: 'feature',
-      visible: true,
-      outFields: ['*'],
-      minScale: 0,
-      maxScale: 0,
-      popupTemplate: {
-        title: '',
-        content: '{BUS_NUM}<br/>总乘客数：{PERSON_NUM}<br/>描述：{BUSLINE_DESC}'
-      }
     }
   ],
   options: {
-    center: [121.2974, 31.1956],
-    scale: 144448,
+    center: [121.2974, 31.1916],
+    scale: 9028,
     constraints: {
       rotationEnabled: false,
       minZoom: 0

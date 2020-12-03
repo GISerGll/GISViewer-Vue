@@ -19,6 +19,10 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
+  IDrawOverlays,
+  ISelectRouteHitTest,
+  IDefinitionParameter,
+  ITrackParameter
   IDrawOverlays, IDrawOverlaysDelete, IPolylineRangingParameter, IPicChangeParameter
 } from '@/types/map';
 import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
@@ -38,11 +42,13 @@ import HeatImage3D from './widgets/HeatMap/arcgis/HeatImage3D';
 import {GeometrySearch} from './widgets/GeometrySearch/arcgis/GeometrySearch';
 import {Bar3DChart} from './widgets/MigrateChart/arcgis/Bar3DChart';
 import {Utils} from './Utils';
+import TrackPlay from './widgets/TrackPlay/arcgis/TrackPlay';
 import LayerOperationArcGIS from "@/plugin/gis-viewer/widgets/LayerOperation/arcgis/LayerOperationArcgis";
 
 export default class MapAppArcGIS3D implements IMapContainer {
   public view!: __esri.SceneView;
   public showGisDeviceInfo: any;
+  public layerLoaded: any;
   private mapToolTip: any;
   public mapClick: any;
 
@@ -66,7 +72,8 @@ export default class MapAppArcGIS3D implements IMapContainer {
       typeof import('esri/Map'),
       typeof import('esri/layers/TileLayer'),
       typeof import('esri/layers/WebTileLayer'),
-      typeof import('esri/core/Collection')
+      typeof import('esri/core/Collection'),
+      typeof import('esri/WebScene')
     ];
     const [
       SceneView,
@@ -74,39 +81,51 @@ export default class MapAppArcGIS3D implements IMapContainer {
       Map,
       TileLayer,
       WebTileLayer,
-      Collection
+      Collection,
+      WebScene
     ] = await (loadModules([
       'esri/views/SceneView',
       'esri/Basemap',
       'esri/Map',
       'esri/layers/TileLayer',
       'esri/layers/WebTileLayer',
-      'esri/core/Collection'
+      'esri/core/Collection',
+      'esri/WebScene'
     ]) as Promise<MapModules>);
 
+    let map: __esri.Map | __esri.WebScene;
+
     const baseLayers: __esri.Collection = new Collection();
-    baseLayers.addMany(
-      mapConfig.baseLayers.map((layerConfig: ILayerConfig) => {
-        if (layerConfig.type === 'tiled') {
-          delete layerConfig.type;
-          return new TileLayer(layerConfig);
-        } else if (layerConfig.type === 'webtiled') {
-          return new WebTileLayer({
-            urlTemplate: layerConfig.url,
-            subDomains: layerConfig.subDomains || undefined
-          });
-        }
-      })
-    );
-    //this.destroy();
+    if (mapConfig.baseLayers) {
+      baseLayers.addMany(
+        mapConfig.baseLayers.map((layerConfig: ILayerConfig) => {
+          if (layerConfig.type === 'tiled') {
+            delete layerConfig.type;
+            return new TileLayer(layerConfig);
+          } else if (layerConfig.type === 'webtiled') {
+            return new WebTileLayer({
+              urlTemplate: layerConfig.url,
+              subDomains: layerConfig.subDomains || undefined
+            });
+          }
+        })
+      );
+    }
     const basemap: __esri.Basemap = new Basemap({
       baseLayers
     });
-    const view: __esri.SceneView = new SceneView({
-      map: new Map({
+
+    if (mapConfig.webScene) {
+      map = new WebScene({...mapConfig.webScene, basemap});
+    } else {
+      map = new Map({
         basemap,
         ground: mapConfig.options.ground
-      }),
+      });
+    }
+
+    const view: __esri.SceneView = new SceneView({
+      map,
       container: mapContainer,
       ...mapConfig.options
     });
@@ -118,6 +137,8 @@ export default class MapAppArcGIS3D implements IMapContainer {
     view.ui.remove('compass');
     view.ui.remove('navigation-toggle');
     view.on('click', async (event) => {
+      console.log(this.view.camera);
+
       if (event.mapPoint) {
         let mp = event.mapPoint;
         this.mapClick({
@@ -206,6 +227,14 @@ export default class MapAppArcGIS3D implements IMapContainer {
       }
     });
     await view.when();
+
+    if (mapConfig.viewAnimation) {
+      for (let i = 0; i < mapConfig.viewAnimation.length; i++) {
+        const animation = mapConfig.viewAnimation[i];
+        await view.goTo(animation.target, animation.option);
+      }
+    }
+
     this.view = view;
     (this.view as any).mapOptions = mapConfig.options;
   }
@@ -323,7 +352,8 @@ export default class MapAppArcGIS3D implements IMapContainer {
       typeof import('esri/layers/support/LabelClass'),
       typeof import('esri/Color'),
       typeof import('esri/symbols/Font'),
-      typeof import('esri/symbols/TextSymbol')
+      typeof import('esri/symbols/TextSymbol'),
+      typeof import('esri/layers/SceneLayer')
     ];
     const [
       FeatureLayer,
@@ -334,7 +364,8 @@ export default class MapAppArcGIS3D implements IMapContainer {
       LabelClass,
       Color,
       Font,
-      TextSymbol
+      TextSymbol,
+      SceneLayer
     ] = await (loadModules([
       'esri/layers/FeatureLayer',
       'esri/layers/WebTileLayer',
@@ -344,7 +375,8 @@ export default class MapAppArcGIS3D implements IMapContainer {
       'esri/layers/support/LabelClass',
       'esri/Color',
       'esri/symbols/Font',
-      'esri/symbols/TextSymbol'
+      'esri/symbols/TextSymbol',
+      'esri/layers/SceneLayer'
     ]) as Promise<MapModules>);
     let map = view.map;
     map.addMany(
@@ -373,6 +405,9 @@ export default class MapAppArcGIS3D implements IMapContainer {
             case 'json':
               const drawlayer = DrawLayer.getInstance(view);
               drawlayer.addDrawLayer(layerConfig);
+              break;
+            case 'scene':
+              layer = new SceneLayer(layerConfig);
               break;
           }
           // if (layer) {
@@ -581,6 +616,14 @@ export default class MapAppArcGIS3D implements IMapContainer {
 
   public async initializeRouteSelect(params: ISelectRouteParam) {}
   public async showSelectedRoute(params: ISelectRouteResult) {}
+  public async playSelectedRoute(speed: number) {}
+  public stopPlaySelectedRoute() {}
+  public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
+    return {status: -1, message: ''};
+  }
+  public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
+    return {status: -1, message: ''};
+  }
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<any> {}
   public async deleteDrawOverlays(params: IDrawOverlaysDelete): Promise<IResult> {
@@ -589,8 +632,24 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async stopDrawOverlays(): Promise<IResult> {
     return {status: 0, message: ''};
   }
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
+  public async stopDrawOverlays(): Promise<void> {}
+  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {}
   public async getDrawOverlays(): Promise<IResult> {
     return {status: 0, message: ''};
+  }
+  public async startLayerSearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public async startLayerDefinition(
+    params: IDefinitionParameter
+  ): Promise<void> {}
+
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {
+    const trackplay = TrackPlay.getInstance(this.view);
+    return await trackplay.startTrackPlay(params);
   }
   public async hideOverlays(params:IDrawOverlaysDelete):Promise<IResult> {
     return {status:0, message:''}

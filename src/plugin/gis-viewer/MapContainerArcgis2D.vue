@@ -30,6 +30,10 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
+  IDrawOverlays,
+  ISelectRouteHitTest,
+  IDefinitionParameter,
+  ITrackParameter
   IDrawOverlays, IDrawOverlaysDelete, IPolylineRangingParameter
 } from '@/types/map';
 
@@ -48,8 +52,12 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     this.mapApp = new MapApp();
     await this.mapApp.initialize(this.mapConfig, this.mapId);
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
+    this.mapApp.mouseGisDeviceInfo = this.mouseGisDeviceInfo;
     this.mapApp.mapClick = this.mapClick;
     this.mapApp.selectRouteFinished = this.selectedRouteFinished;
+    this.mapApp.intoSignal = this.intoSignal;
+    this.mapApp.outofSignal = this.outofSignal;
+    this.mapApp.layerLoaded = this.layerLoaded;
   }
   @Emit('map-click')
   public mapClick(point: object) {}
@@ -62,9 +70,16 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     id: string,
     detail: any
   ) {}
-
+  @Emit('layer-loaded')
+  public layerLoaded() {}
   @Emit('select-route-finished')
   public selectedRouteFinished(routeInfo: object) {}
+
+  @Emit('into-signal')
+  public intoSignal(signalId: string) {}
+
+  @Emit('outof-signal')
+  public outofSignal(signalId: string) {}
 
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     return await this.mapApp.addOverlays(params);
@@ -109,9 +124,6 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async findFeature(params: IFindParameter) {
     return await this.mapApp.findFeature(params);
   }
-  // public async showToolTip(param:Vue.Component) :Promise<IResult>{
-  //   return await this.mapApp.showToolTip(param);
-  // }
   public showRoad() {}
   public hideRoad() {}
   public showStreet() {}
@@ -235,10 +247,31 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     await this.mapApp.showSelectedRoute(params);
   }
   public async startDrawOverlays(params: IDrawOverlays): Promise<any> {
+
+  public async playSelectedRoute(speed: number) {
+    await this.mapApp.playSelectedRoute(speed);
+  }
+
+  public stopPlaySelectedRoute() {
+    this.mapApp.stopPlaySelectedRoute();
+  }
+
+  public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
+    return await this.mapApp.routeHitArea(params);
+  }
+
+  public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
+    return await this.mapApp.areaHitRoute(params);
+  }
+
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
     return await this.mapApp.startDrawOverlays(params);
   }
   public async stopDrawOverlays(): Promise<IResult> {
     return await this.mapApp.stopDrawOverlays();
+  }
+  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {
+    return await this.mapApp.deleteDrawOverlays(params);
   }
   public async getDrawOverlays(): Promise<IResult> {
     return await this.mapApp.getDrawOverlays();
@@ -264,6 +297,17 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async changePicById(params:any): Promise<IResult> {
     return await this.mapApp.changePicById(params);
   }
+  public async startLayerSearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return await this.mapApp.startLayerSearch(params);
+  }
+  public async startLayerDefinition(
+    params: IDefinitionParameter
+  ): Promise<void> {
+    return await this.mapApp.startLayerDefinition(params);
+  }
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {}
 }
 </script>
 

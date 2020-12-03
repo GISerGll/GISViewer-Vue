@@ -1,6 +1,6 @@
 export let GisConfig = {
   arcgis_api:
-    'http://10.31.214.203:8991/arcgis_js_v414_api/arcgis_js_api/library/4.14',
+    'http://10.31.214.203:8992/arcgis_js_v414_api/arcgis_js_api/library/4.14',
   theme: 'custom', //dark,vec
   baseLayers: [
     {
@@ -26,11 +26,22 @@ export let GisConfig = {
     },
     {
       type: 'image',
+      label: 'gzzx',
+      url: 'assets/mapIcons/JinBoHui/gzzx.svg',
+      geometry: {x: -16153.035409974027, y: -4814.447401502329},
+      width: 430,
+      height: 430,
+      minScale: 8000
+    },
+    {
+      type: 'image',
+      label: 'flower',
       url: 'assets/mapIcons/JinBoHui/flower.png',
-      geometry: {x: -16465.35204963667, y: -4542.84795454},
+      geometry: {x: -16173.035409974027, y: -4834.447401502329},
       width: 282,
       height: 282,
-      minScale: 64000
+      minScale: 64000,
+      maxScale: 16000
     },
     {
       label: '国展中心点',
@@ -64,13 +75,14 @@ export let GisConfig = {
       maxScale: 0,
       popupTemplate: {
         title: '',
-        content: '{BUS_NUM}<br/>总乘客数：{PERSON_NUM}<br/>描述：{BUSLINE_DESC}'
+        content:
+          '计划班次：{BUS_NUM}<br/>已发乘客数：{PERSON_NUM}<br/>描述：{BUSLINE_DESC}'
       }
     }
   ],
   options: {
-    center: [-0.14532287775028, -0.0435806907338],
-    zoom: 2,
+    center: [-0.09426, -0.0552],
+    zoom: 4,
     constraints: {
       rotationEnabled: false,
       minZoom: 0

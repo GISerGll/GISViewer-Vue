@@ -1,4 +1,4 @@
-import {Vue} from "vue-property-decorator";
+import {loadScript, getScript, ILoadScriptOptions} from 'esri-loader';
 import {
   IMapContainer,
   IOverlayParameter,
@@ -19,6 +19,10 @@ import {
   ISelectRouteParam,
   ISelectRouteResult,
   IDrawOverlays, IDrawOverlaysDelete, IDrawOverlayParameter, IPolylineRangingParameter, IPicChangeParameter
+  IDrawOverlays,
+  ISelectRouteHitTest,
+  IDefinitionParameter,
+  ITrackParameter
 } from '@/types/map';
 import {OverlayGaode} from '@/plugin/gis-viewer/widgets/Overlays/gd/OverlayGaode';
 import {JurisdictionPoliceGD} from './widgets/JurisdictionPolice/gd/JurisdictionPoliceGD';
@@ -36,6 +40,7 @@ export default class MapAppGaode implements IMapContainer {
   public view!: AMap.Map;
   public baseLayers: Array<any> = [];
   public showGisDeviceInfo: any;
+  public layerLoaded: any;
   public mouseGisDeviceInfo: any;
   public mapClick: any;
 
@@ -369,11 +374,22 @@ export default class MapAppGaode implements IMapContainer {
 
   public async initializeRouteSelect(params: ISelectRouteParam) {}
   public async showSelectedRoute(params: ISelectRouteResult) {}
+  public async playSelectedRoute(speed: number) {}
+  public stopPlaySelectedRoute() {}
+  public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
+    return {status: -1, message: ''};
+  }
+  public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
+    return {status: -1, message: ''};
+  }
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<any> {}
   public async stopDrawOverlays(): Promise<IResult> {
     return {status: 0, message: ''};
   }
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
+  public async stopDrawOverlays(): Promise<void> {}
+  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {}
   public async getDrawOverlays(): Promise<IResult> {
     return {status: 0, message: ''};
   }
@@ -394,4 +410,13 @@ export default class MapAppGaode implements IMapContainer {
   }
   public async polylineRanging(params:IPolylineRangingParameter): Promise<any>{}
   public async changePicById(params:IPicChangeParameter): Promise<any> {}
+  public async startLayerSearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public async startLayerDefinition(
+    params: IDefinitionParameter
+  ): Promise<void> {}
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {}
 }

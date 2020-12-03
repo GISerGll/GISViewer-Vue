@@ -90,8 +90,8 @@ export class GeometrySearch {
             drawType: drawType,
             repeat: false,
             update: false,
-            callback: (geometry: any) => {
-              params.geometry = geometry;
+            callback: (res: any) => {
+              params.geometry = res.geometry;
               that.geometrySearch(params).then((res: any) => {
                 resolve(res);
               });
@@ -237,7 +237,7 @@ export class GeometrySearch {
         }
       });
       let centerGraphic = new Graphic({
-        geometry: searchGeometry,
+        geometry: centerGeo,
         symbol: new SimpleMarkerSymbol({
           style: 'circle',
           color: [255, 0, 0, 0.8],
@@ -337,9 +337,13 @@ export class GeometrySearch {
       //     attr: result.attributes
       //   };
       // });
+      let polygoncenter = searchGeometry.centroid || searchGeometry.center;
+      if (polygoncenter) {
+        polygoncenter = [polygoncenter.longitude, polygoncenter.latitude];
+      }
       let searchResults = {
-        center: center,
-        radius: radius,
+        center: center || polygoncenter,
+        radius: center ? radius : 0,
         searchResults: searchRses
       };
       if (clickHandle) {

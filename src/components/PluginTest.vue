@@ -46,6 +46,11 @@
       @map-loaded="mapLoaded"
       @marker-click="showGisDeviceInfo"
       @map-click="mapClick"
+      @marker-mouse="mouseGisDeviceInfo"
+      @select-route-finished="selectRouteFinished"
+      @into-signal="intoSignal"
+      @outof-signal="outofSignal"
+      @layer-loaded="layerLoaded"
     />
   </div>
 </template>
@@ -53,6 +58,7 @@
 import {Vue, Component} from 'vue-property-decorator';
 import WuLuMuQiConfig from '@/config/config_arcgis';
 import axios from 'axios';
+import MapConfig from './MapConfig';
 import {IResult} from "@/types/map";
 import MapConfig from "@/config/config_arcgis";
 import Parent from "@/components/tooltips/Parent.vue";
@@ -74,6 +80,9 @@ export default class PluginTest extends Vue {
         })
         console.log(result);
     }
+  private layerLoaded() {
+    console.log('layer loaded');
+  }
     private async btn_switchLayer() {
         let map = this.$refs.gisViewer as any;
         const result1 = await map.hideLayer({
@@ -593,6 +602,17 @@ export default class PluginTest extends Vue {
     private mapClick(pt: object) {
         console.log(pt);
     }
+  private selectRouteFinished(routeInfo: any) {
+    console.log(routeInfo);
+  }
+
+  private intoSignal(id: string) {
+    console.log('Into: ' + id);
+  }
+
+  private outofSignal(id: string) {
+    console.log('Outof: ' + id);
+  }
 }
 </script>
 
@@ -602,6 +622,7 @@ export default class PluginTest extends Vue {
   width: 100%;
   height: 100%;
   margin: 0 auto;
+  background: rgb(2, 24, 25);
 }
 #test {
   position: absolute;

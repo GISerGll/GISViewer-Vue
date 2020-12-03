@@ -20,6 +20,10 @@ import {
   ISelectRouteParam,
   ISelectRouteResult,
   IDrawOverlays,
+  ISelectRouteHitTest,
+  IDefinitionParameter,
+  ITrackParameter
+  IDrawOverlays,
   IDrawOverlaysDelete,
   IPolylineRangingParameter,
   ITrackPlaybackParameter, IPicChangeParameter, IPOISearch,
@@ -38,6 +42,7 @@ declare let BMap: any;
 export default class MapAppBaidu implements IMapContainer {
   public view!: any;
   public baseLayers: Array<any> = [];
+  public layerLoaded: any;
   public showGisDeviceInfo: any;
   public mapClick: any;
   public drawCallback: any;
@@ -349,6 +354,14 @@ export default class MapAppBaidu implements IMapContainer {
 
   public async initializeRouteSelect(params: ISelectRouteParam) {}
   public async showSelectedRoute(params: ISelectRouteResult) {}
+  public async playSelectedRoute(speed: number) {}
+  public stopPlaySelectedRoute() {}
+  public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
+    return {status: -1, message: ''};
+  }
+  public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
+    return {status: -1, message: ''};
+  }
 
   public async startDrawOverlays(params: IDrawOverlays): Promise<IResult> {
     const drawOverlays = DrawOverlaysBD.getInstance(this.view);
@@ -359,6 +372,9 @@ export default class MapAppBaidu implements IMapContainer {
     const drawOverlays = DrawOverlaysBD.getInstance(this.view);
     return await drawOverlays.stopDrawOverlays(params);
   }
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
+  public async stopDrawOverlays(): Promise<void> {}
+  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {}
   public async getDrawOverlays(): Promise<IResult> {
     const drawOverlays = DrawOverlaysBD.getInstance(this.view);
     return await drawOverlays.getDrawOverlays();
@@ -375,6 +391,15 @@ export default class MapAppBaidu implements IMapContainer {
     const overlays = OverlayBaidu.getInstance(this.view);
     return await overlays.showOverlays(params);
   }
+  public async startLayerSearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public async startLayerDefinition(
+    params: IDefinitionParameter
+  ): Promise<void> {}
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {}
   public async findOverlays(params:IDrawOverlaysDelete): Promise<IResult> {
     const overlays = OverlayBaidu.getInstance(this.view);
     return await overlays.findOverlays(params);

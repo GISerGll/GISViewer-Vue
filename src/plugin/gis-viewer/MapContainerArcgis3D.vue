@@ -25,6 +25,10 @@ import {
   ISelectRouteParam,
   ISelectRouteResult,
   IDrawOverlays, IDrawOverlayParameter, IDrawOverlaysDelete, IPolylineRangingParameter
+  IDrawOverlays,
+  ISelectRouteHitTest,
+  IDefinitionParameter,
+  ITrackParameter
 } from '@/types/map';
 
 @Component({
@@ -44,6 +48,8 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
     this.mapApp.showGisDeviceInfo = this.showGisDeviceInfo;
     this.mapApp.mapClick = this.mapClick;
   }
+  @Emit('layer-loaded')
+  public layerLoaded() {}
   @Emit('map-click')
   public mapClick(point: object) {}
   @Emit('marker-click')
@@ -185,6 +191,18 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public async stopDrawOverlays(): Promise<IResult> {
     return {status:0, message:''}
   }
+  public async playSelectedRoute(speed: number) {}
+  public stopPlaySelectedRoute() {}
+  public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
+    return {status: -1, message: ''};
+  }
+  public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
+    return {status: -1, message: ''};
+  }
+
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
+  public async stopDrawOverlays(): Promise<void> {}
+  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {}
   public async getDrawOverlays(): Promise<IResult> {
     return {status: 0, message: ''};
   }
@@ -209,6 +227,18 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   }
   public async changePicById(params:any): Promise<IResult> {
     return await this.mapApp.changePicById(params);
+  }
+  public async startLayerSearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return {status: 0, message: ''};
+  }
+  public async startLayerDefinition(
+    params: IDefinitionParameter
+  ): Promise<void> {}
+
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {
+    return await this.mapApp.startTrackPlay(params);
   }
 }
 </script>

@@ -15,7 +15,11 @@
       @map-loaded="mapLoaded"
       @map-click="mapClick"
       @marker-click="showGisDeviceInfo"
+      @marker-mouse="mouseGisDeviceInfo"
       @select-route-finished="selectedRouteFinished"
+      @into-signal="intoSignal"
+      @outof-signal="outofSignal"
+      @layer-loaded="layerLoaded"
     />
     <map-container-baidu
       ref="containerBaidu"
@@ -71,6 +75,10 @@ import {
   ISelectRouteResult,
   IDrawOverlays,
   IEditFenceLabel, IDrawOverlaysDelete, IPolylineRangingParameter, IPicChangeParameter, IPOISearch, IRoutePlan, IGeocode
+  IDrawOverlays,
+  ISelectRouteHitTest,
+  IDefinitionParameter,
+  ITrackParameter
 } from '@/types/map';
 import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 import bdWebAPIRequest from "@/plugin/gis-viewer/widgets/WebAPI/bd/bdWebAPIRequest";
@@ -135,6 +143,8 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   @Emit('map-loaded')
   private mapLoaded() {}
+  @Emit('layer-loaded')
+  public layerLoaded() {}
   @Emit('map-click')
   public mapClick(point: object) {}
   @Emit('marker-click')
@@ -150,6 +160,12 @@ export default class MapContainer extends Vue implements IMapContainer {
   public selectedRouteFinished(routeInfo: object) {}
   @Emit('draw-complete')
   private drawCallback(results:any) {}
+
+  @Emit('into-signal')
+  public intoSignal(signalId: string) {}
+
+  @Emit('outof-signal')
+  public outofSignal(signalId: string) {}
 
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     return await this.mapContainer.addOverlays(params);
@@ -342,11 +358,30 @@ export default class MapContainer extends Vue implements IMapContainer {
     await this.mapContainer.showSelectedRoute(params);
   }
 
+  public async playSelectedRoute(speed: number) {
+    await this.mapContainer.playSelectedRoute(speed);
+  }
+
+  public stopPlaySelectedRoute() {
+    this.mapContainer.stopPlaySelectedRoute();
+  }
+
+  public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
+    return await this.mapContainer.routeHitArea(params);
+  }
+  public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
+    return this.mapContainer.areaHitRoute(params);
+  }
+
+  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
   public async startDrawOverlays(params: IDrawOverlays): Promise<IResult> {
     return await this.mapContainer.startDrawOverlays(params);
   }
   public async stopDrawOverlays(params:any): Promise<IResult> {
     return this.mapContainer.stopDrawOverlays(params);
+  }
+  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {
+    return await this.mapContainer.deleteDrawOverlays(params);
   }
   public async getDrawOverlays(): Promise<IResult> {
     return await this.mapContainer.getDrawOverlays();
@@ -380,6 +415,19 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public async bdGeocode(params:IGeocode): Promise<IResult> {
     return await bdWebAPIRequest.requestGeocode(params);
+  }
+  public async startLayerSearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    return await this.mapContainer.startLayerSearch(params);
+  }
+  public async startLayerDefinition(
+    params: IDefinitionParameter
+  ): Promise<void> {
+    return await this.mapContainer.startLayerDefinition(params);
+  }
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {
+    return await this.mapContainer.startTrackPlay(params);
   }
 }
 </script>

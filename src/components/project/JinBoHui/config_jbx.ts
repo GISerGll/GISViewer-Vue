@@ -25,16 +25,18 @@ export let GisConfig = {
     },
     {
       type: 'image',
+      label: 'gzzx',
       url: 'assets/mapIcons/JinBoHui/gzzx.svg',
-      geometry: {x: -16775.35204963667, y: -4222.84795454},
-      width: 618,
-      height: 561,
+      geometry: {x: -16153.035409974027, y: -4814.447401502329},
+      width: 430,
+      height: 430,
       minScale: 8000
     },
     {
       type: 'image',
+      label: 'flower',
       url: 'assets/mapIcons/JinBoHui/flower.png',
-      geometry: {x: -16465.35204963667, y: -4542.84795454},
+      geometry: {x: -16173.035409974027, y: -4834.447401502329},
       width: 282,
       height: 282,
       minScale: 64000,
@@ -99,8 +101,8 @@ export let GisConfig = {
     }
   ],
   options: {
-    center: [-0.14532287775028, -0.0435806907338],
-    zoom: 5,
+    center: [-0.1232, -0.04358],
+    zoom: 4,
     constraints: {
       rotationEnabled: false,
       minZoom: 0

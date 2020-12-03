@@ -35,11 +35,20 @@ export class Utils {
     );
     return zoom;
   }
+  public static resetMap(view: any) {
+    let mapOption = view.mapOptions.options;
+    view.goTo({
+      zoom: mapOption.zoom || 0,
+      center: mapOption.center
+    });
+  }
   public static getGeometryPoint(geometry: any) {
     if (geometry.type == 'point') {
       return geometry;
     } else if (geometry.type == 'polyline') {
-      return geometry.getPoint(0, 0);
+      let len = geometry.paths[0].length;
+      let index = Math.floor(len / 2);
+      return geometry.getPoint(0, index);
     } else if (geometry.type == 'polygon') {
       return geometry.centroid;
     }

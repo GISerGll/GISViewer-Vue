@@ -23,6 +23,10 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
+  IDrawOverlays,
+  ISelectRouteHitTest,
+  IDefinitionParameter,
+  ITrackParameter
   IDrawOverlays, IPolylineRangingParameter, IPicChangeParameter
 } from '@/types/map';
 
@@ -54,6 +58,9 @@ import ToolTip from './widgets/Overlays/arcgis/ToolTip';
 import {Cluster2D} from './widgets/Cluster/arcgis/Cluster2D';
 import SelectRoute2D from '@/plugin/gis-viewer/widgets/SelectRoute/arcgis/SelectRoute2D';
 import {DrawOverlays} from './widgets/DrawOverlays/arcgis/DrawOverlays';
+import {LayerSearch} from './widgets/GeometrySearch/arcgis/LayerSearch';
+import ImageOverlays from './widgets/HeatMap/arcgis/ImageOverlays';
+import {LayerDefinition} from './widgets/LayerDefinition/arcgis/LayerDefinition';
 import GeometrySearchBD from "@/plugin/gis-viewer/widgets/GeometrySearch/bd/GeometrySearchBD";
 
 export default class MapAppArcGIS2D {
@@ -61,8 +68,18 @@ export default class MapAppArcGIS2D {
 
   /** 触发后向父组件传参的函数 */
   public showGisDeviceInfo!: (type: string, id: string, detail: any) => void;
+  public mouseGisDeviceInfo!: (
+    event: any,
+    type: string,
+    id: string,
+    detail: any
+  ) => void;
+  public mouseoverlay: any = undefined;
   public mapClick!: (point: object) => void;
   public selectRouteFinished!: (routeInfo: object) => void;
+  public intoSignal!: (signalId: string) => void;
+  public outofSignal!: (signalId: string) => void;
+  public layerLoaded: any;
 
   public showFlow: boolean = false;
   private tolerance: number = 3;
@@ -116,30 +133,30 @@ export default class MapAppArcGIS2D {
       'esri/core/Collection',
       'esri/config'
     ]) as Promise<MapModules>);
-    esriConfig.fontsUrl = apiUrl + '/font/';
+    // esriConfig.fontsUrl = apiUrl + "/fonts/";
     let baseLayers: __esri.Collection = new Collection();
-    baseLayers.addMany(
-      mapConfig.baseLayers.map((layerConfig: ILayerConfig) => {
-        if (layerConfig.type === 'tiled') {
-          delete layerConfig.type;
-          let tileLayer = new TileLayer(layerConfig)
-          // return new TileLayer(layerConfig);
-          layerConfig.type = "tiled";
-          return tileLayer;
-        } else if (layerConfig.type === 'webtiled') {
-          return new WebTileLayer({
-            urlTemplate: layerConfig.url,
-            subDomains: layerConfig.subDomains || undefined
-          });
-        } else if (layerConfig.type === 'dynamic') {
-          delete layerConfig.type;
-          if ((layerConfig as any).showFlow) {
-            this.showFlow = true;
+    if (mapConfig.baseLayers) {
+      baseLayers.addMany(
+        mapConfig.baseLayers.map((layerConfig: ILayerConfig) => {
+          if (layerConfig.type === 'tiled') {
+            delete layerConfig.type;
+            return new TileLayer(layerConfig);
+          } else if (layerConfig.type === 'webtiled') {
+            return new WebTileLayer({
+              urlTemplate: layerConfig.url,
+              subDomains: layerConfig.subDomains || undefined
+            });
+          } else if (layerConfig.type === 'dynamic') {
+            delete layerConfig.type;
+            if ((layerConfig as any).showFlow) {
+              this.showFlow = true;
+            }
+            return new MapImageLayer(layerConfig);
           }
-          return new MapImageLayer(layerConfig);
-        }
-      })
-    );
+        })
+      );
+    }
+
     //this.destroy();
     let basemap: __esri.Basemap = new Basemap({
       baseLayers
@@ -168,18 +185,99 @@ export default class MapAppArcGIS2D {
           for (let field in attributes) {
             let fieldArr: string[] = field.toString().split('.');
             let newfield = fieldArr.pop() as string;
-            attributes[newfield] = attributes[field]
-              ? attributes[field].toString()
-              : '';
+            attributes[newfield] =
+              attributes[field] !== undefined && attributes[field] !== null
+                ? attributes[field].toString().replace('Null', '')
+                : '';
+          }
+        } else {
+          //dynamic
+          if (
+            typeof content === 'string' &&
+            content.toString().indexOf('Null') > -1
+          ) {
+            content = content.toString().replace(/Null/g, '');
+            view.popup.content = content;
           }
         }
-        if (
-          content == 'Null' ||
-          content == '' ||
-          content == null ||
-          content.toString().indexOf('Null') > -1
-        ) {
+        if (content == 'Null' || content == '' || content == null) {
           view.popup.close();
+        }
+      }
+    });
+    view.on(['pointer-move'], async (event: any) => {
+      const response = await view.hitTest(event);
+      if (response.results.length > 0) {
+        let result = response.results[0];
+
+        const graphic = result.graphic;
+        if (!graphic.attributes) {
+          graphic.attributes = {};
+        }
+        let {type, id} = graphic.attributes;
+        let label = graphic.layer ? (graphic.layer as any).label : '';
+        if (
+          graphic.layer &&
+          (graphic.layer.type == 'feature' || graphic.layer.type == 'graphics')
+        ) {
+          id =
+            graphic.attributes['DEVICEID'] ||
+            graphic.attributes['FEATUREID'] ||
+            graphic.attributes['SECTIONID'] ||
+            graphic.attributes['id'] ||
+            graphic.attributes['ID'] ||
+            undefined;
+          type =
+            graphic.attributes['DEVICETYPE'] ||
+            graphic.attributes['FEATURETYPE'] ||
+            graphic.attributes['FEATURETYP'] ||
+            graphic.attributes['type'] ||
+            graphic.attributes['TYPE'] ||
+            label ||
+            undefined;
+        }
+        //if (id) {
+        if (
+          graphic.attributes &&
+          (graphic.attributes.isCluster || graphic.attributes.isClusterText)
+        ) {
+          return;
+        }
+        if (!this.mouseoverlay) {
+          event.type = 'mouseover';
+          this.mouseGisDeviceInfo(event, type, id, graphic.toJSON());
+          this.mouseoverlay = {
+            event,
+            type,
+            id,
+            graphic: graphic.toJSON()
+          };
+        } else {
+          if (
+            this.mouseoverlay &&
+            this.mouseoverlay.id !== id &&
+            this.mouseoverlay.type !== type
+          ) {
+            event.type = 'mouseout';
+            this.mouseGisDeviceInfo(
+              event,
+              this.mouseoverlay.type,
+              this.mouseoverlay.id,
+              this.mouseoverlay.graphic
+            );
+            this.mouseoverlay = undefined;
+          }
+        }
+      } else {
+        if (this.mouseoverlay) {
+          event.type = 'mouseout';
+          this.mouseGisDeviceInfo(
+            event,
+            this.mouseoverlay.type,
+            this.mouseoverlay.id,
+            this.mouseoverlay.graphic
+          );
+          this.mouseoverlay = undefined;
         }
       }
     });
@@ -202,7 +300,10 @@ export default class MapAppArcGIS2D {
         this.mapClick(event);
       }
       const response = await view.hitTest(event);
-      if (response.results.length > 0) {
+      if (
+        response.results.length > 0 &&
+        (response.results[0].graphic as any).isclick !== false
+      ) {
         // response.results.forEach((result) => {
         //   //}
         // });
@@ -287,11 +388,10 @@ export default class MapAppArcGIS2D {
       }
     });
     await view.when();
-
+    this.view = view;
     if (mapConfig.operationallayers) {
       this.createLayer(view, mapConfig.operationallayers);
     }
-    this.view = view;
     (this.view as any).mapOptions = mapConfig.options;
     if (mapConfig.options && mapConfig.options.tolerance) {
       this.tolerance = mapConfig.options && mapConfig.options.tolerance;
@@ -307,7 +407,6 @@ export default class MapAppArcGIS2D {
   private showSubBar(layer: any, point: any, feature: any) {
     if (layer && layer.showBar) {
       this.view.popup.alignment = 'bottom-center';
-      //console.log(res.feature);
       let inField;
       let outField;
       if (layer.barFields) {
@@ -355,7 +454,11 @@ export default class MapAppArcGIS2D {
           id = attr[field];
         }
       }
-      this.showSubwayMigrateChart({id: id, type: 'd', url: layer.url});
+      this.showSubwayMigrateChart({
+        id: id,
+        type: 'd',
+        url: layer.url + '/' + layer.layerId
+      });
     } else {
       this.showSubwayMigrateChart(undefined);
     }
@@ -397,7 +500,7 @@ export default class MapAppArcGIS2D {
   }
   private getLayerByName(layername: string, id: string): any {
     let selLayer;
-    let layers = this.view.map.allLayers.toArray().forEach((layer: any) => {
+    this.view.map.allLayers.toArray().forEach((layer: any) => {
       if (layer.type == 'imagery' || layer.type == 'map-image') {
         let sublayers = (layer as __esri.MapImageLayer).allSublayers;
         sublayers.forEach((sublayer) => {
@@ -406,7 +509,6 @@ export default class MapAppArcGIS2D {
           }
         });
       }
-      return false;
     });
     return selLayer;
   }
@@ -473,7 +575,8 @@ export default class MapAppArcGIS2D {
       typeof import('esri/layers/support/LabelClass'),
       typeof import('esri/Color'),
       typeof import('esri/symbols/Font'),
-      typeof import('esri/symbols/TextSymbol')
+      typeof import('esri/symbols/TextSymbol'),
+      typeof import('esri/core/watchUtils')
     ];
     const [
       FeatureLayer,
@@ -485,7 +588,8 @@ export default class MapAppArcGIS2D {
       LabelClass,
       Color,
       Font,
-      TextSymbol
+      TextSymbol,
+      watchUtils
     ] = await (loadModules([
       'esri/layers/FeatureLayer',
       'esri/layers/GraphicsLayer',
@@ -496,7 +600,8 @@ export default class MapAppArcGIS2D {
       'esri/layers/support/LabelClass',
       'esri/Color',
       'esri/symbols/Font',
-      'esri/symbols/TextSymbol'
+      'esri/symbols/TextSymbol',
+      'esri/core/watchUtils'
     ]) as Promise<MapModules>);
     let map = view.map;
 
@@ -535,8 +640,10 @@ export default class MapAppArcGIS2D {
               drawlayer.addDrawLayer(layerConfig);
               break;
             case 'image':
-              const heat = HeatImage2D.getInstance(view);
-              heat.addImage({images: layerConfig, points: []});
+              const heat = ImageOverlays.getInstance(view);
+              heat.addImage(layerConfig);
+              // const heat = HeatImage2D.getInstance(view);
+              // heat.addImage({images: layerConfig, points: []});
               break;
           }
           layerConfig.type = type;
@@ -546,8 +653,13 @@ export default class MapAppArcGIS2D {
           return layer !== undefined;
         })
     );
+
     this.HighlightLayer = new GraphicsLayer();
     this.view.map.add(this.HighlightLayer);
+    let _this = this;
+    watchUtils.whenNotOnce(this.view, 'updating', (n: any, o: any) => {
+      _this.layerLoaded();
+    });
   }
 
   public async showSubwayFlow() {
@@ -797,7 +909,7 @@ export default class MapAppArcGIS2D {
   }
   public showCustomTip(params: ICustomTip) {
     let className: string = 'custom-popup';
-    if (params.clear !== false) {
+    if (params == undefined || (params && params.clear !== false)) {
       ToolTip.clear(this.view, undefined, className);
     }
     if (params && params.geometry) {
@@ -826,6 +938,28 @@ export default class MapAppArcGIS2D {
     await selectRoute.showSelectedRoute(params);
   }
 
+  public async playSelectedRoute(speed: number) {
+    const selectRoute = SelectRoute2D.getInstance(this.view);
+    selectRoute.intoSignal = this.intoSignal;
+    selectRoute.outofSignal = this.outofSignal;
+    await selectRoute.playSelectedRoute(speed);
+  }
+
+  public stopPlaySelectedRoute() {
+    const selectRoute = SelectRoute2D.getInstance(this.view);
+    selectRoute.stopPlaySelectedRoute();
+  }
+
+  public async routeHitArea(params: ISelectRouteHitTest): Promise<IResult> {
+    const selectRoute = SelectRoute2D.getInstance(this.view);
+    return await selectRoute.routeHitArea(params);
+  }
+
+  public async areaHitRoute(params: ISelectRouteHitTest) {
+    const selectRoute = SelectRoute2D.getInstance(this.view);
+    return await selectRoute.areaHitRoute(params);
+  }
+
   public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
     const drawoverlay = DrawOverlays.getInstance(this.view);
     return await drawoverlay.startDrawOverlays(params);
@@ -833,6 +967,10 @@ export default class MapAppArcGIS2D {
   public async stopDrawOverlays(): Promise<IResult> {
     const drawoverlay = DrawOverlays.getInstance(this.view);
     return await drawoverlay.stopDrawOverlays();
+  }
+  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {
+    const drawoverlay = DrawOverlays.getInstance(this.view);
+    return await drawoverlay.deleteDrawOverlays(params);
   }
   public async getDrawOverlays(): Promise<IResult> {
     const drawoverlay = DrawOverlays.getInstance(this.view);
@@ -846,4 +984,17 @@ export default class MapAppArcGIS2D {
   }
   public async polylineRanging(params:IPolylineRangingParameter): Promise<any>{}
   public async changePicById(params:IPicChangeParameter): Promise<any> {}
+  public async startLayerSearch(
+    params: IGeometrySearchParameter
+  ): Promise<IResult> {
+    const layersearch = LayerSearch.getInstance(this.view);
+    return await layersearch.startLayerSearch(params);
+  }
+  public async startLayerDefinition(
+    params: IDefinitionParameter
+  ): Promise<void> {
+    const definition = LayerDefinition.getInstance(this.view);
+    return await definition.startLayerDefinition(params);
+  }
+  public async startTrackPlay(params: ITrackParameter): Promise<void> {}
 }

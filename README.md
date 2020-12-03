@@ -163,3 +163,21 @@ export default {
 ### routeSearch()高德路径规划
 
 ### clearRouteSearch()清除路径规划
+
+### showCustomTip()显示自定义弹窗
+
+### stopPlaySelectedRoute ()
+
+### startDrawOverlays ()手动画区域
+
+### stopDrawOverlays ()清除区域
+
+### getDrawOverlays ()得到手画区域
+
+### startGeometrySearch()区域搜索
+
+### clearGeometrySearch ()清除区域搜索
+
+### showMigrateChart()显示迁徙图
+
+### hideMigrateChart ()隐藏迁徙图

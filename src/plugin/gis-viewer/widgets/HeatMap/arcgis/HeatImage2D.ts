@@ -92,6 +92,7 @@ export default class HeatImage2D {
     await loadModules([
       'esri/views/2d/layers/BaseLayerView2D',
       'esri/layers/BaseDynamicLayer',
+      'esri/layers/MapImageLayer',
       'esri/geometry/Point',
       'esri/geometry/SpatialReference',
       'esri/layers/GraphicsLayer',
@@ -102,6 +103,7 @@ export default class HeatImage2D {
       ([
         BaseLayerView2D,
         BaseDynamicLayer,
+        MapImageLayer,
         Point,
         SpatialReference,
         GraphicsLayer,
@@ -117,23 +119,21 @@ export default class HeatImage2D {
           load: (signal: any) => {
             console.log(signal);
           },
+
           fetchImage: (extent: any, width: any, height: any): Promise<any> => {
             // generate the URL for the map image
             // create a canvas with teal fill
             //this.getImageUrl(extent, width, height);
             //options.signal =
+            console.log('fetchImage', width, height);
             opt.heatDiv.innerHTML = '';
-
             let step = _that.scale / _that.view.scale;
-
             let point = new Point({
               x: pt.x,
               y: pt.y,
               spatialReference: _that.view.spatialReference
             });
-
             let pcc = _that.view.toScreen(point);
-
             if (opt.heatData) {
               let heatmapInstance = h337.create({
                 // only container is required, the rest will be defaults
@@ -160,20 +160,13 @@ export default class HeatImage2D {
             return new Promise((resolve, reject) => {
               let canvas = opt.heatDiv.firstChild;
               let context = canvas.getContext('2d');
-
               context.globalCompositeOperation = 'destination-atop';
-              context.drawImage(
-                opt.image,
-                pcc.x,
-                pcc.y,
-                opt.imageOpt.width * step,
-                opt.imageOpt.height * step
-              );
-
+              let devicePixelRatio = window.devicePixelRatio || 1;
+              let imgWidth = opt.imageOpt.width * step;
+              let imgHeight = opt.imageOpt.height * step;
+              context.drawImage(opt.image, pcc.x, pcc.y, imgWidth, imgHeight);
               resolve(canvas);
             });
-
-            //return 'http://localhost/gz.svg';
           }
           // Override the getImageUrl() method to generate URL
           // to an image for a given extent, width, and height.
@@ -204,13 +197,7 @@ export default class HeatImage2D {
           // }
         });
         let wmsLayer = new CustomWMSLayer({
-          mapUrl: opt.imageOpt.url,
-          mapParameters: {
-            WIDTH: '{width}',
-            HEIGHT: '{height}',
-            CRS: 'EPSG:{wkid}',
-            BBOX: '{xmin},{ymin},{xmax},{ymax}'
-          }
+          mapUrl: opt.imageOpt.url
         });
         wmsLayer.maxScale = opt.imageOpt.maxScale || 0;
         wmsLayer.minScale = opt.imageOpt.minScale || 0;

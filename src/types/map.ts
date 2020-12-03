@@ -130,6 +130,21 @@ export interface IOverlayParameter {
     popupComponent?: Vue.Component
     iswgs?: boolean;
     custom: {content: string; zooms: [number, number]; visible: true};
+  defaultType?: string;
+  type?: string;
+  defaultSymbol?: IPointSymbol | IPolylineSymbol;
+  defaultZooms?: [number, number];
+  overlays: Array<IOverlay>;
+  autoPopup?: boolean;
+  showPopup?: boolean; //是否显示popup
+  defaultInfoTemplate?: IPopUpTemplate;
+  defaultButtons?: Object[];
+  showToolTip?: boolean; //鼠标移到该点位是，是否显示悬浮窗
+  toolTipContent?: string; //悬浮窗内容
+  defaultVisible?: boolean;
+  iswgs?: boolean;
+  custom: {content: string; zooms: [number, number]; visible: true};
+  showRegion?: boolean;
 }
 export interface IOverlayClusterParameter {
   points?: Array<IOverlay>;
@@ -225,6 +240,14 @@ export interface IMapContainer {
   showSelectedRoute: (params: ISelectRouteResult) => Promise<void>;
   stopDrawOverlays: (params:any) => Promise<IResult>;
   deleteDrawOverlays: (params:IDrawOverlaysDelete) => Promise<IResult>;
+  playSelectedRoute: (speed: number) => Promise<void>;
+  stopPlaySelectedRoute: () => void;
+  routeHitArea: (params: ISelectRouteHitTest) => Promise<IResult>;
+  areaHitRoute: (params: ISelectRouteHitTest) => Promise<IResult>;
+
+  startDrawOverlays: (params: IDrawOverlays) => Promise<void>;
+  stopDrawOverlays: () => Promise<void>;
+  deleteDrawOverlays: (params: IOverlayDelete) => Promise<void>;
   getDrawOverlays: () => Promise<IResult>;
   arcgisLoadGDLayer: () => void;
   backgroundGeometrySearch: (params:IGeometrySearchParameter) => Promise<IResult>;
@@ -242,6 +265,9 @@ export interface IPolylineRangingParameter {
   unit?:string,                       //测距单位
   secSymbol?:any                      //转折点symbol
   closeSymbol?:any                    //结尾关闭点symbol
+  startLayerSearch: (params: IGeometrySearchParameter) => Promise<IResult>;
+  startLayerDefinition: (params: IDefinitionParameter) => Promise<void>;
+  startTrackPlay: (params: ITrackParameter) => Promise<void>;
 }
 export interface IPopUpTemplate {
   title?: string;
@@ -284,6 +310,11 @@ export interface IFindParameter {
   showPopUp?: boolean;
   layerIds?: Array<string>;
   callback?: boolean
+}
+export interface IDefinitionParameter {
+  layerName: string;
+  searchNames: Array<string>;
+  url?: string;
 }
 export interface IOverlayDelete {
   types?: Array<string>;
@@ -359,6 +390,7 @@ export interface routeParameter {
 }
 export interface IGeometrySearchParameter {
   radius: number; //搜索半径,单位米
+  layerName?: string; //搜索图层
   drawType?: string; //作画方式,
   center?: Array<number>; //搜索中心
   types?: Array<string>; //搜索点位类型,默认搜索全部
@@ -426,6 +458,10 @@ export interface ICircleOutline {
 }
 export interface IDrawOverlays {
   drawType: string;
+  model?: string;
+  id?: string;
+  type?: string;
+  symbol?: any;
   callback?: any;
   update?: boolean; //画完的图形是否可以编辑,
   repeat?: boolean; //画完是否继续画
@@ -434,20 +470,32 @@ export interface ISelectRouteParam {
   enableXHJ?: boolean;
   roadUrl?: string;
   trafficSignalUrl?: string;
+  symbol?: any;
+  showRoad?: boolean;
+  showSignal?: boolean;
 }
 export interface IDrawOverlaysDelete {
   ids?:string[],
   types?:string[],
 }
 export interface ISelectRouteResult {
+  autoStart?: boolean; // 显示选路结果时是否自动开始轨迹演示
   routeInfo: {
+    // 路段信息
     ids: Array<string>;
     length?: number;
     startPoint?: [number, number];
     endPoint?: [number, number];
   };
-  signalInfo: {
-    ids: Array<string>;
+  signalInfo?: {
+    // 信号机信息
+    signals: Array<{
+      id: string;
+      name?: string;
+      x?: number;
+      y?: number;
+      distance?: number;
+    }>;
   };
 }
 export interface IPOISearch {
@@ -480,4 +528,25 @@ export interface IGeocode {
   location:number[],
   radius?:number,
   poiTypes?:string[],           //hotel,road...
+}
+
+export interface ISelectRouteHitTest {
+  showRoute?: boolean;
+  routes: [
+    {
+      id?: string;
+      routeIds: Array<string>;
+    }
+  ];
+  showArea?: boolean;
+  areas: [
+    {
+      id?: string;
+      name?: string;
+      points: Array<Array<number>>;
+    }
+  ];
+}
+export interface ITrackParameter {
+  id: string;
 }
