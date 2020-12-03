@@ -30,9 +30,7 @@ import {JurisdictionPolice} from './widgets/JurisdictionPolice/bd/JurisdictionPo
 import {Utils} from '@/plugin/gis-viewer/Utils';
 import DrawOverlaysBD from "@/plugin/gis-viewer/widgets/DrawOverlays/bd/DrawOverlaysBD";
 import GeometrySearchBD from "@/plugin/gis-viewer/widgets/GeometrySearch/bd/GeometrySearchBD";
-import mapStyleConfig from "@/config/mapStyleConfig";
 import TrackPlaybackBD from "@/plugin/gis-viewer/widgets/TrackPlayback/bd/TrackPlaybackBD";
-import bdWebAPIRequest from "./widgets/WebAPI/bd/bdWebAPIRequest";
 
 
 declare let BMap: any;
@@ -119,7 +117,7 @@ export default class MapAppBaidu implements IMapContainer {
           const geometry = JSON.parse(JSON.stringify(e.overlay.points || e.overlay.point))
           this.showGisDeviceInfo(e.overlay.id,e.overlay.type,e.overlay.attributes,geometry);
         }
-        this.mapClick(e.point);
+        this.mapClick(JSON.parse(JSON.stringify(e.point)));
       });
     })
 
