@@ -22,8 +22,7 @@ import {
   IDrawOverlays,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter
-  IDrawOverlays,
+  ITrackParameter,
   IDrawOverlaysDelete,
   IPolylineRangingParameter,
   ITrackPlaybackParameter, IPicChangeParameter, IPOISearch,
@@ -372,9 +371,6 @@ export default class MapAppBaidu implements IMapContainer {
     const drawOverlays = DrawOverlaysBD.getInstance(this.view);
     return await drawOverlays.stopDrawOverlays(params);
   }
-  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
-  public async stopDrawOverlays(): Promise<void> {}
-  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {}
   public async getDrawOverlays(): Promise<IResult> {
     const drawOverlays = DrawOverlaysBD.getInstance(this.view);
     return await drawOverlays.getDrawOverlays();

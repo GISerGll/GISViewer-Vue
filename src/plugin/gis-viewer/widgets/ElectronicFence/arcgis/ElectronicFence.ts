@@ -158,7 +158,7 @@ export default class ElectronicFence {
     }
 
     return {
-      message:"not finish",
+      message:"ok",
       status:0,
       result:resultBuffers
     }

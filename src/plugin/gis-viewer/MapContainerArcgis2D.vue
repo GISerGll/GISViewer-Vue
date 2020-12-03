@@ -30,11 +30,12 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter
-  IDrawOverlays, IDrawOverlaysDelete, IPolylineRangingParameter
+  ITrackParameter,
+  IDrawOverlays,
+  IDrawOverlaysDelete,
+  IPolylineRangingParameter
 } from '@/types/map';
 
 @Component({
@@ -246,7 +247,6 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async showSelectedRoute(params: ISelectRouteResult) {
     await this.mapApp.showSelectedRoute(params);
   }
-  public async startDrawOverlays(params: IDrawOverlays): Promise<any> {
 
   public async playSelectedRoute(speed: number) {
     await this.mapApp.playSelectedRoute(speed);
@@ -263,15 +263,11 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
   public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
     return await this.mapApp.areaHitRoute(params);
   }
-
-  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
+  public async startDrawOverlays(params: IDrawOverlays): Promise<any> {
     return await this.mapApp.startDrawOverlays(params);
   }
   public async stopDrawOverlays(): Promise<IResult> {
     return await this.mapApp.stopDrawOverlays();
-  }
-  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {
-    return await this.mapApp.deleteDrawOverlays(params);
   }
   public async getDrawOverlays(): Promise<IResult> {
     return await this.mapApp.getDrawOverlays();

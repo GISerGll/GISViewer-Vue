@@ -22,8 +22,10 @@ import {
   IDrawOverlays,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter
-  IDrawOverlays, IDrawOverlaysDelete, IPolylineRangingParameter, IPicChangeParameter
+  ITrackParameter,
+  IDrawOverlaysDelete,
+  IPolylineRangingParameter,
+  IPicChangeParameter
 } from '@/types/map';
 import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
 import {RasterStretchRenderer} from 'esri/rasterRenderers';
@@ -632,9 +634,6 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async stopDrawOverlays(): Promise<IResult> {
     return {status: 0, message: ''};
   }
-  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
-  public async stopDrawOverlays(): Promise<void> {}
-  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {}
   public async getDrawOverlays(): Promise<IResult> {
     return {status: 0, message: ''};
   }

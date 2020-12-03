@@ -74,8 +74,13 @@ import {
   ISelectRouteParam,
   ISelectRouteResult,
   IDrawOverlays,
-  IEditFenceLabel, IDrawOverlaysDelete, IPolylineRangingParameter, IPicChangeParameter, IPOISearch, IRoutePlan, IGeocode
-  IDrawOverlays,
+  IEditFenceLabel,
+  IDrawOverlaysDelete,
+  IPolylineRangingParameter,
+  IPicChangeParameter,
+  IPOISearch,
+  IRoutePlan,
+  IGeocode,
   ISelectRouteHitTest,
   IDefinitionParameter,
   ITrackParameter
@@ -372,16 +377,11 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
     return this.mapContainer.areaHitRoute(params);
   }
-
-  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {
   public async startDrawOverlays(params: IDrawOverlays): Promise<IResult> {
     return await this.mapContainer.startDrawOverlays(params);
   }
   public async stopDrawOverlays(params:any): Promise<IResult> {
     return this.mapContainer.stopDrawOverlays(params);
-  }
-  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {
-    return await this.mapContainer.deleteDrawOverlays(params);
   }
   public async getDrawOverlays(): Promise<IResult> {
     return await this.mapContainer.getDrawOverlays();
@@ -416,19 +416,19 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async bdGeocode(params:IGeocode): Promise<IResult> {
     return await bdWebAPIRequest.requestGeocode(params);
   }
-  public async startLayerSearch(
-    params: IGeometrySearchParameter
-  ): Promise<IResult> {
-    return await this.mapContainer.startLayerSearch(params);
-  }
-  public async startLayerDefinition(
-    params: IDefinitionParameter
-  ): Promise<void> {
-    return await this.mapContainer.startLayerDefinition(params);
-  }
-  public async startTrackPlay(params: ITrackParameter): Promise<void> {
-    return await this.mapContainer.startTrackPlay(params);
-  }
+  // public async startLayerSearch(
+  //   params: IGeometrySearchParameter
+  // ): Promise<IResult> {
+  //   return await this.mapContainer.startLayerSearch(params);
+  // }
+  // public async startLayerDefinition(
+  //   params: IDefinitionParameter
+  // ): Promise<void> {
+  //   return await this.mapContainer.startLayerDefinition(params);
+  // }
+  // public async startTrackPlay(params: ITrackParameter): Promise<void> {
+  //   return await this.mapContainer.startTrackPlay(params);
+  // }
 }
 </script>
 

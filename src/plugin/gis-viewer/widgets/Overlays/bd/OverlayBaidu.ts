@@ -90,7 +90,7 @@ export class OverlayBaidu {
     }
     return features;
   }
-  private makeSymbol(symbol: IPointSymbol | undefined,defaultSymbol?:any): object | undefined {
+  private makeSymbol(symbol: any,defaultSymbol?:any): object | undefined {
     if (!symbol) {
       return undefined;
     }
@@ -113,10 +113,20 @@ export class OverlayBaidu {
         overlaySymbol = {strokeColor: symbol.color, strokeWeight: symbol.width};
         break;
       case 'polygon' || 'extent' || 'circle':
-        if (!symbol.outline) return undefined;
+        if (!symbol.outline) {
+          if(defaultSymbol.outline){
+            symbol.outline = defaultSymbol.outline;
+          }else {
+            symbol.outline = {
+              color:'black',
+              width:0.1
+            }
+          }
+        }
+
         overlaySymbol = {
           strokeColor: symbol.outline.color,
-          strokeWeight: symbol.outline.size,
+          strokeWeight: symbol.outline.width,
           fillColor: symbol.color
         };
         break;
@@ -171,7 +181,6 @@ export class OverlayBaidu {
     }
     return content;
   }
-
   private getPopUpHtml(graphic: any, content: string): any {
     let tipContent = content;
     for (let fieldName in graphic.attributes) {

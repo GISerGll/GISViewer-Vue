@@ -37,9 +37,9 @@ export default class ToolTip {
     return { xoffset: xoffset, yoffset: yoffset };
   }
   private init() {
-    this.view.addEventListener('dragstart', () => {
-      this.changeText();
-    });
+    // this.view.addEventListener('dragstart', () => {
+    //   this.changeText();
+    // });
     this.view.addEventListener('dragging', () => {
       this.changeText();
     });
@@ -68,9 +68,9 @@ export default class ToolTip {
     // 回收组件
     this.view.getContainer().removeChild(this.vm.$el); // 删除元素
     this.vm.$destroy(); // 销毁组件
-    this.view.removeEventListener('dragstart', () => {
-      this.changeText();
-    });
+    // this.view.removeEventListener('dragstart', () => {
+    //   this.changeText();
+    // });
     this.view.removeEventListener('dragging', () => {
       this.changeText();
     });

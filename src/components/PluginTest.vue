@@ -46,7 +46,6 @@
       @map-loaded="mapLoaded"
       @marker-click="showGisDeviceInfo"
       @map-click="mapClick"
-      @marker-mouse="mouseGisDeviceInfo"
       @select-route-finished="selectRouteFinished"
       @into-signal="intoSignal"
       @outof-signal="outofSignal"
@@ -58,7 +57,6 @@
 import {Vue, Component} from 'vue-property-decorator';
 import WuLuMuQiConfig from '@/config/config_arcgis';
 import axios from 'axios';
-import MapConfig from './MapConfig';
 import {IResult} from "@/types/map";
 import MapConfig from "@/config/config_arcgis";
 import Parent from "@/components/tooltips/Parent.vue";

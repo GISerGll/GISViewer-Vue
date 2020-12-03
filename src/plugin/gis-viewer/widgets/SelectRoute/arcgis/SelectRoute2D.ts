@@ -7,7 +7,7 @@ import {
 import { loadModules } from "esri-loader";
 import along from "@turf/along";
 import length from "@turf/length";
-import distance from "@turf/distance";
+// import distance from "@turf/distance";
 import lineSlice from "@turf/line-slice";
 import * as turf from "@turf/helpers";
 import { debounce } from "ts-debounce-throttle";

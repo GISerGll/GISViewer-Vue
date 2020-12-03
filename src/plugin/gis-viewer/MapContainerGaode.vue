@@ -24,8 +24,9 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays, IDrawOverlaysDelete, IPolylineRangingParameter
   IDrawOverlays,
+  IDrawOverlaysDelete,
+  IPolylineRangingParameter,
   ISelectRouteHitTest,
   IDefinitionParameter,
   ITrackParameter
@@ -215,10 +216,6 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public async areaHitRoute(params: ISelectRouteHitTest): Promise<IResult> {
     return {status: -1, message: ''};
   }
-
-  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
-  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {}
-  public async stopDrawOverlays(): Promise<void> {}
   public async getDrawOverlays(): Promise<IResult> {
     return {status: 0, message: ''};
   }

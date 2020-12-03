@@ -391,8 +391,6 @@ export class OverlayArcgis2D {
 
     return unionGeo;
   }
-  public async deleteOverlays(params: IOverlayDelete): Promise<IResult> {
-
   public async deleteOverlays(params: IOverlayDelete,overlayLayer?:__esri.GraphicsLayer): Promise<IResult> {
     let types = params.types || [];
     let ids = params.ids || [];

@@ -65,6 +65,7 @@
   import SimpleTooltip from "@/components/tooltips/simpleTooltip.vue";
   import Parent from "@/components/tooltips/Parent.vue";
   import simpleTooltip from "@/components/tooltips/simpleTooltip.vue";
+
   @Component
   export default class PluginTest extends Vue {
     private baiduConfig = new MapConfig();
@@ -249,10 +250,10 @@
         type: 'simplePolygon',
         defaultSymbol: {
           type: 'polygon',
-          color:'red',
+          color:'pink',
           outline:{
             color:'black',
-            width:2
+            width:0.1
           }
         },
         overlays: [
@@ -264,7 +265,15 @@
           {
             id: 'testPolygon002',
             geometry: {rings:rings2},
-            fields: {name: '测试2', featureid: '0002'}
+            fields: {name: '测试2', featureid: '0002'},
+            symbol: {
+              type: 'polygon',
+              color:'blue',
+              outline:{
+               color:'black',
+               width:2
+            }
+          },
           }
         ],
         showPopup: true,

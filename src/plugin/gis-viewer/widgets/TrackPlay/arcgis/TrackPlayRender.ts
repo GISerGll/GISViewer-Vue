@@ -1,7 +1,8 @@
 import {geometry} from '@turf/helpers';
 import {loadModules} from 'esri-loader';
 import * as THREE from 'three';
-import {OBJLoader} from 'three-obj-mtl-loader';
+// @ts-ignore
+import {MTLLoader, OBJLoader} from 'three-obj-mtl-loader'
 
 import {GetSpeed} from './distance';
 

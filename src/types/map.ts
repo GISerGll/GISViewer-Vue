@@ -130,20 +130,8 @@ export interface IOverlayParameter {
     popupComponent?: Vue.Component
     iswgs?: boolean;
     custom: {content: string; zooms: [number, number]; visible: true};
-  defaultType?: string;
-  type?: string;
-  defaultSymbol?: IPointSymbol | IPolylineSymbol;
-  defaultZooms?: [number, number];
-  overlays: Array<IOverlay>;
-  autoPopup?: boolean;
-  showPopup?: boolean; //是否显示popup
-  defaultInfoTemplate?: IPopUpTemplate;
-  defaultButtons?: Object[];
   showToolTip?: boolean; //鼠标移到该点位是，是否显示悬浮窗
   toolTipContent?: string; //悬浮窗内容
-  defaultVisible?: boolean;
-  iswgs?: boolean;
-  custom: {content: string; zooms: [number, number]; visible: true};
   showRegion?: boolean;
 }
 export interface IOverlayClusterParameter {
@@ -244,10 +232,6 @@ export interface IMapContainer {
   stopPlaySelectedRoute: () => void;
   routeHitArea: (params: ISelectRouteHitTest) => Promise<IResult>;
   areaHitRoute: (params: ISelectRouteHitTest) => Promise<IResult>;
-
-  startDrawOverlays: (params: IDrawOverlays) => Promise<void>;
-  stopDrawOverlays: () => Promise<void>;
-  deleteDrawOverlays: (params: IOverlayDelete) => Promise<void>;
   getDrawOverlays: () => Promise<IResult>;
   arcgisLoadGDLayer: () => void;
   backgroundGeometrySearch: (params:IGeometrySearchParameter) => Promise<IResult>;

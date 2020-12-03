@@ -24,8 +24,10 @@ import {
   ICustomTip,
   ISelectRouteParam,
   ISelectRouteResult,
-  IDrawOverlays, IDrawOverlayParameter, IDrawOverlaysDelete, IPolylineRangingParameter
   IDrawOverlays,
+  IDrawOverlayParameter,
+  IDrawOverlaysDelete,
+  IPolylineRangingParameter,
   ISelectRouteHitTest,
   IDefinitionParameter,
   ITrackParameter
@@ -200,9 +202,7 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
     return {status: -1, message: ''};
   }
 
-  public async startDrawOverlays(params: IDrawOverlays): Promise<void> {}
-  public async stopDrawOverlays(): Promise<void> {}
-  public async deleteDrawOverlays(params: IOverlayDelete): Promise<void> {}
+
   public async getDrawOverlays(): Promise<IResult> {
     return {status: 0, message: ''};
   }

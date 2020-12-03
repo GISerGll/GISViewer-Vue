@@ -26,8 +26,9 @@ import {
   IDrawOverlays,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter
-  IDrawOverlays, IPolylineRangingParameter, IPicChangeParameter
+  ITrackParameter,
+  IPolylineRangingParameter,
+  IPicChangeParameter
 } from '@/types/map';
 
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
