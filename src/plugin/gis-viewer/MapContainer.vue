@@ -85,7 +85,6 @@ import {
   IDefinitionParameter,
   ITrackParameter
 } from '@/types/map';
-import TrackPlayback from "@/project/WuLuMuQi/TrackPlayback";
 import bdWebAPIRequest from "@/plugin/gis-viewer/widgets/WebAPI/bd/bdWebAPIRequest";
 
 @Component({

@@ -5,6 +5,7 @@ import {
   IRoutePlan
 } from '@/types/map';
 import $ from 'jquery';
+import axios from 'axios';
 export default class bdWebAPIRequest {
   constructor() {}
 
@@ -30,9 +31,9 @@ export default class bdWebAPIRequest {
       city = params.city || "";           //目前只支持京津冀
       district = params.district || "";
 
-      const searchObj = {
+      axios({
+        method: 'post',
         url: 'http://api.jiaotong.baidu.com/dugis/search',
-        dataType: 'json',
         data: `query_type=placepoi&
 q=${query}&
 output=json&
@@ -43,15 +44,36 @@ scope=2&
 city_limit=true&
 page_num=${requestPage}&
 page_size=20`,
-      }
-
-      $.ajax(searchObj).then((value:any) => {
-        console.log(searchObj);
-        console.log(value);
-      }).fail((err:any) => {
-        console.log(searchObj);
-        console.log(err);
       })
+          .then(function (response) {
+            console.log(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
+//       const searchObj = {
+//         url: 'http://api.jiaotong.baidu.com/dugis/search',
+//         dataType: 'json',
+//         data: `query_type=placepoi&
+// q=${query}&
+// output=json&
+// city=${city}&
+// district=${district}&
+// tag=${searchTag}&
+// scope=2&
+// city_limit=true&
+// page_num=${requestPage}&
+// page_size=20`,
+//       }
+//
+//       $.ajax(searchObj).then((value:any) => {
+//         console.log(searchObj);
+//         console.log(value);
+//       }).fail((err:any) => {
+//         console.log(searchObj);
+//         console.log(err);
+//       })
     }else if(searchType === "rectangle"){
       bounds = params.bounds || [];
 
@@ -59,9 +81,10 @@ page_size=20`,
       location = params.location || [];
       radius = params.radius || 1000;
 
-      const searchObj = {
+      const searchObj:any = {
+        method:'get',
         url: 'http://api.jiaotong.baidu.com/dugis/search',
-        dataType: 'json',
+        // dataType: 'json',
         data: `query_type=placepoi&
 q=${query}&
 output=json&
@@ -73,6 +96,24 @@ radius_limit=true&
 page_num=${requestPage}&
 page_size=20`,
       }
+
+      axios({
+        method:'get',
+        url: 'http://api.jiaotong.baidu.com/dugis/search',
+        // dataType: 'json',
+        params: {
+          query_type:"placepoi",
+          q:query,
+
+        }
+      })
+          .then(function (response) {
+            console.log(searchObj);
+            console.log(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
 
       $.ajax(searchObj).then((value:any) => {
         console.log(searchObj);

@@ -645,10 +645,11 @@
     private async btn_POIQuery_circle(){
       let map = this.$refs.gisViewer as any;
       await map.bdPOIQuery({
-        location:[116.403569,39.924075],
-        searchName:"博物馆",
+        location:[116.33439,39.895884],
+        searchName:"湾子",
         searchType:"circle",
-        radius:1000
+        // searchTag:"地铁站",
+        radius:100000
       })
     }
     private async btn_POIQuery_rectangle(){

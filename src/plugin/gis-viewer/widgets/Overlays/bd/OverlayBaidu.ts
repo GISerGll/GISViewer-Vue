@@ -1055,8 +1055,8 @@ export class OverlayBaidu {
         const icon = overlay.getIcon();
         icon.setImageUrl(curPicUrl);
         overlay.setIcon(icon);
-        overlay.isSeleted = isSelected;
-        overlay.attributes.isSeleted = isSelected;
+        overlay.isSelected = isSelected;
+        overlay.attributes.isSelected = isSelected;
 
         if(callback){
           let geometry = overlay.point ? overlay.point : overlay.points ?
