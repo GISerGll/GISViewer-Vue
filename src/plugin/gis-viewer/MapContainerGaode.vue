@@ -29,7 +29,7 @@ import {
   IPolylineRangingParameter,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter
+  ITrackParameter, IPOISearch, IPOIDelete
 } from '@/types/map';
 
 @Component({
@@ -250,6 +250,8 @@ export default class MapContainerGd extends Vue implements IMapContainer {
     params: IDefinitionParameter
   ): Promise<void> {}
   public async startTrackPlay(params: ITrackParameter): Promise<void> {}
+  public async searchPOI(params: IPOISearch): Promise<any> {}
+  public async clearPOIResults(params: IPOIDelete): Promise<any> {}
 }
 </script>
 
