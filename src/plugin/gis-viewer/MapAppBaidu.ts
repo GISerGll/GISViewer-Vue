@@ -25,7 +25,7 @@ import {
   ITrackParameter,
   IDrawOverlaysDelete,
   IPolylineRangingParameter,
-  ITrackPlaybackParameter, IPicChangeParameter, IPOISearch,
+  ITrackPlaybackParameter, IPicChangeParameter, IPOISearch, IPOIDelete,
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -34,6 +34,7 @@ import {Utils} from '@/plugin/gis-viewer/Utils';
 import DrawOverlaysBD from "@/plugin/gis-viewer/widgets/DrawOverlays/bd/DrawOverlaysBD";
 import GeometrySearchBD from "@/plugin/gis-viewer/widgets/GeometrySearch/bd/GeometrySearchBD";
 import TrackPlaybackBD from "@/plugin/gis-viewer/widgets/TrackPlayback/bd/TrackPlaybackBD";
+import POISearchBD from "@/plugin/gis-viewer/widgets/POISearch/bd/POISearchBD";
 
 
 declare let BMap: any;
@@ -413,8 +414,14 @@ export default class MapAppBaidu implements IMapContainer {
     return await overlays.changePicById(params);
   }
 
-  // public async bdPOIQuery(params:IPOISearch): Promise<IResult> {
-  //   return await bdWebAPIRequest.requestPOI(params);
-  // }
+  public async searchPOI(params:IPOISearch): Promise<IResult> {
+    const poi = POISearchBD.getInstance(this.view);
+    return await poi.searchPOI(params);
+  }
+
+  public async clearPOIResults(params:IPOIDelete): Promise<IResult> {
+    const poi = POISearchBD.getInstance(this.view);
+    return await poi.clearPOIResults(params);
+  }
 
 }

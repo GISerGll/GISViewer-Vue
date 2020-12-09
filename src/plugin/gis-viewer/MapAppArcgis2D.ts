@@ -28,7 +28,7 @@ import {
   IDefinitionParameter,
   ITrackParameter,
   IPolylineRangingParameter,
-  IPicChangeParameter
+  IPicChangeParameter, IPOISearch, IPOIDelete
 } from '@/types/map';
 
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
@@ -63,6 +63,7 @@ import {LayerSearch} from './widgets/GeometrySearch/arcgis/LayerSearch';
 import ImageOverlays from './widgets/HeatMap/arcgis/ImageOverlays';
 import {LayerDefinition} from './widgets/LayerDefinition/arcgis/LayerDefinition';
 import GeometrySearchBD from "@/plugin/gis-viewer/widgets/GeometrySearch/bd/GeometrySearchBD";
+import POISearchBD from "@/plugin/gis-viewer/widgets/POISearch/bd/POISearchBD";
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
@@ -998,4 +999,6 @@ export default class MapAppArcGIS2D {
     return await definition.startLayerDefinition(params);
   }
   public async startTrackPlay(params: ITrackParameter): Promise<void> {}
+  public async searchPOI(params:IPOISearch): Promise<any> {}
+  public async clearPOIResults(params:IPOIDelete): Promise<any> {}
 }

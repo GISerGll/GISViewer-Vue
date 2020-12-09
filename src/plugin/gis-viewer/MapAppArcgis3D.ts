@@ -25,7 +25,7 @@ import {
   ITrackParameter,
   IDrawOverlaysDelete,
   IPolylineRangingParameter,
-  IPicChangeParameter
+  IPicChangeParameter, IPOISearch, IPOIDelete
 } from '@/types/map';
 import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
 import {RasterStretchRenderer} from 'esri/rasterRenderers';
@@ -46,6 +46,7 @@ import {Bar3DChart} from './widgets/MigrateChart/arcgis/Bar3DChart';
 import {Utils} from './Utils';
 import TrackPlay from './widgets/TrackPlay/arcgis/TrackPlay';
 import LayerOperationArcGIS from "@/plugin/gis-viewer/widgets/LayerOperation/arcgis/LayerOperationArcgis";
+import POISearchBD from "@/plugin/gis-viewer/widgets/POISearch/bd/POISearchBD";
 
 export default class MapAppArcGIS3D implements IMapContainer {
   public view!: __esri.SceneView;
@@ -664,4 +665,6 @@ export default class MapAppArcGIS3D implements IMapContainer {
   }
   public async polylineRanging(params:IPolylineRangingParameter): Promise<any>{}
   public async changePicById(params:IPicChangeParameter): Promise<any> {}
+  public async searchPOI(params:IPOISearch): Promise<any> {}
+  public async clearPOIResults(params:IPOIDelete): Promise<any> {}
 }

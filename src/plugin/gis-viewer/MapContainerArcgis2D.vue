@@ -35,8 +35,9 @@ import {
   ITrackParameter,
   IDrawOverlays,
   IDrawOverlaysDelete,
-  IPolylineRangingParameter
+  IPolylineRangingParameter, IPOISearch, IPOIDelete
 } from '@/types/map';
+import POISearchBD from "@/plugin/gis-viewer/widgets/POISearch/bd/POISearchBD";
 
 @Component({
   name: 'MapContainerArcgisTwoD'
@@ -304,6 +305,8 @@ export default class MapContainerArcgis extends Vue implements IMapContainer {
     return await this.mapApp.startLayerDefinition(params);
   }
   public async startTrackPlay(params: ITrackParameter): Promise<void> {}
+  public async searchPOI(params:IPOISearch): Promise<any> {}
+  public async clearPOIResults(params:IPOIDelete): Promise<any> {}
 }
 </script>
 

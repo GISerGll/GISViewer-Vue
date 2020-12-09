@@ -237,6 +237,8 @@ export interface IMapContainer {
   backgroundGeometrySearch: (params:IGeometrySearchParameter) => Promise<IResult>;
   polylineRanging: (params: IPolylineRangingParameter) => Promise<IResult>;
   changePicById: (params: IPicChangeParameter) => Promise<IResult>;
+  searchPOI: (params: IPOISearch) => Promise<IResult>;
+  clearPOIResults: (params: IPOIDelete) => Promise<IResult>;
 }
 export interface IPicChangeParameter {
   id:string,
@@ -304,6 +306,7 @@ export interface IDefinitionParameter {
 export interface IOverlayDelete {
   types?: Array<string>;
   ids?: Array<string>;
+  exceptId?:string                         //用于排除某一个id
 }
 export interface IDistrictParameter {
   name: string;
@@ -495,6 +498,8 @@ export interface IPOISearch {
   region?:string,                     // region search cityName
   bounds?:number[],                   // rectangle search bounds coordinates
   scope?:boolean,                     // 是否显示详细信息
+  addResults?:boolean                 // 是否将结果添加到地图上
+  resultsUrl?:string                  // 显示结果图片的url地址
 }
 export interface IRoutePlan {
   origin: number[],
@@ -514,7 +519,6 @@ export interface IGeocode {
   radius?:number,
   poiTypes?:string[],           //hotel,road...
 }
-
 export interface ISelectRouteHitTest {
   showRoute?: boolean;
   routes: [
@@ -534,4 +538,7 @@ export interface ISelectRouteHitTest {
 }
 export interface ITrackParameter {
   id: string;
+}
+export interface IPOIDelete {
+  exceptId?:string
 }

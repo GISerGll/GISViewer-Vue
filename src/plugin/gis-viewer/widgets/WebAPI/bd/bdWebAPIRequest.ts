@@ -4,16 +4,17 @@ import {
   IResult,
   IRoutePlan
 } from '@/types/map';
-import $ from 'jquery';
+
 import axios from 'axios';
 export default class bdWebAPIRequest {
   constructor() {}
 
   public static async requestPOI(params:IPOISearch): Promise<IResult>{
-    const searchType = params.searchType || "region";
+    const searchType = params.searchType || "circle";
     const query = params.searchName;
     const searchTag = params.searchTag || "";
-    const requestPage = 1;
+    const requestPage = params.searchPage || 1;
+    let resultDate = null;
 
     if(!query){
       return {
@@ -31,49 +32,25 @@ export default class bdWebAPIRequest {
       city = params.city || "";           //目前只支持京津冀
       district = params.district || "";
 
-      axios({
-        method: 'post',
-        url: 'http://api.jiaotong.baidu.com/dugis/search',
-        data: `query_type=placepoi&
-q=${query}&
-output=json&
-city=${city}&
-district=${district}& 
-tag=${searchTag}&
-scope=2&
-city_limit=true&
-page_num=${requestPage}&
-page_size=20`,
-      })
+      const requestUrl = `http://api.jiaotong.baidu.com/dugis/search?` +
+          `q=${query}` +
+          // `region=${city}` +
+          `&city=${city}` +
+          `&district=${district}` +
+          `&output=json` +
+          `&tag=${searchTag}` +
+          '&city_limit=true' +
+          `&page_num=${requestPage}` +
+          `&page_size=10`;
+
+      await axios.get(requestUrl,
+      )
           .then(function (response) {
-            console.log(response);
+            resultDate = response.data;
           })
           .catch(function (error) {
             console.log(error);
           });
-
-//       const searchObj = {
-//         url: 'http://api.jiaotong.baidu.com/dugis/search',
-//         dataType: 'json',
-//         data: `query_type=placepoi&
-// q=${query}&
-// output=json&
-// city=${city}&
-// district=${district}&
-// tag=${searchTag}&
-// scope=2&
-// city_limit=true&
-// page_num=${requestPage}&
-// page_size=20`,
-//       }
-//
-//       $.ajax(searchObj).then((value:any) => {
-//         console.log(searchObj);
-//         console.log(value);
-//       }).fail((err:any) => {
-//         console.log(searchObj);
-//         console.log(err);
-//       })
     }else if(searchType === "rectangle"){
       bounds = params.bounds || [];
 
@@ -81,68 +58,43 @@ page_size=20`,
       location = params.location || [];
       radius = params.radius || 1000;
 
-      const searchObj:any = {
-        method:'get',
-        url: 'http://api.jiaotong.baidu.com/dugis/search',
-        // dataType: 'json',
-        data: `query_type=placepoi&
-q=${query}&
-output=json&
-location=${location[1]},${location[0]}&
-radius=${radius}&
-tag=${searchTag}&
-scope=2&
-radius_limit=true&
-page_num=${requestPage}&
-page_size=20`,
-      }
-
-      axios({
-        method:'get',
-        url: 'http://api.jiaotong.baidu.com/dugis/search',
-        // dataType: 'json',
-        params: {
-          query_type:"placepoi",
-          q:query,
-
-        }
-      })
+      const requestUrl = `http://api.jiaotong.baidu.com/dugis/search?` +
+          `location=${location[1]},${location[0]}` +
+          `&q=${query}` +
+          `&radius=${radius}` +
+          `&sort_rule=0` +
+          `&output=json` +
+          `&tag=${searchTag}` +
+          '&radius_limit=true' +
+          `&page_num=${requestPage}` +
+          `&page_size=10`
+      await axios.get(requestUrl,
+      )
           .then(function (response) {
-            console.log(searchObj);
-            console.log(response);
+            resultDate = response.data;
           })
           .catch(function (error) {
             console.log(error);
           });
 
-      $.ajax(searchObj).then((value:any) => {
-        console.log(searchObj);
-        console.log(value);
-      }).fail((err:any) => {
-        console.log(searchObj);
-        console.log(err);
-      })
     }else if(searchType === "roadCross"){
+      const requestUrl = `http://api.jiaotong.baidu.com/dugis/search?` +
+          `query_type=roadcross` +
+          `&q=${query}` +
+          `&output=json` +
+          `&scope=2` +
+          `&radius_limit=true` +
+          `page_num=${requestPage}` +
+          `page_size=10`;
+      await axios.get(requestUrl,
+      )
+          .then(function (response) {
+            resultDate = response.data;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
 
-      const searchObj = {
-        url: 'http://api.jiaotong.baidu.com/dugis/search',
-        dataType: 'json',
-        data: `query_type=roadcross&
-q=${query}&
-output=json&
-scope=2&
-radius_limit=true&
-page_num=${requestPage}&
-page_size=20`,
-      }
-
-      $.ajax(searchObj).then((value:any) => {
-        console.log(searchObj);
-        console.log(value);
-      }).fail((err:any) => {
-        console.log(searchObj);
-        console.log(err);
-      })
     }else {
       return {
         status:0,
@@ -150,10 +102,10 @@ page_size=20`,
       }
     }
 
-
     return {
       status:0,
-      message:'not complete'
+      result:resultDate,
+      message:'成功调用！'
     }
   }
 
@@ -248,4 +200,11 @@ page_size=20`,
     }
   }
 
+  public static async requestPOIByUID():Promise<IResult>{
+
+    return {
+      status:0,
+      message:'not complete'
+    }
+  }
 }

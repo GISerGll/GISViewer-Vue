@@ -25,7 +25,7 @@ import {
   IPicChangeParameter,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter
+  ITrackParameter, IPOISearch, IPOIDelete
 } from '@/types/map';
 import {OverlayGaode} from '@/plugin/gis-viewer/widgets/Overlays/gd/OverlayGaode';
 import {JurisdictionPoliceGD} from './widgets/JurisdictionPolice/gd/JurisdictionPoliceGD';
@@ -38,6 +38,7 @@ import Route from './widgets/Route/Route';
 import RoutePoint from './widgets/XinKong/RoutePoint';
 import {GeometrySearchGD} from './widgets/GeometrySearch/gd/GeometrySearchGD';
 import {OverlayBaidu} from "@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu";
+import POISearchBD from "@/plugin/gis-viewer/widgets/POISearch/bd/POISearchBD";
 
 export default class MapAppGaode implements IMapContainer {
   public view!: AMap.Map;
@@ -419,4 +420,6 @@ export default class MapAppGaode implements IMapContainer {
     params: IDefinitionParameter
   ): Promise<void> {}
   public async startTrackPlay(params: ITrackParameter): Promise<void> {}
+  public async searchPOI(params:IPOISearch): Promise<any> {}
+  public async clearPOIResults(params:IPOIDelete): Promise<any> {}
 }

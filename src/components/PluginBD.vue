@@ -41,9 +41,11 @@
       <button @click="btn_polylineRanging">测距</button>
       <button @click="btn_changePicById">改变图片</button><br>
       <button @click="btn_POIQuery_circle">圆形搜索</button>
+      <button @click="btn_POIQuery_circle1">圆形搜索1</button>
       <button @click="btn_POIQuery_rectangle">矩形搜索</button>
       <button @click="btn_POIQuery_region">区域搜索</button>
-      <button @click="btn_POIQuery_roadCross">路口搜索</button><br>
+      <button @click="btn_POIQuery_roadCross">路口搜索</button>
+      <button @click="btn_POIQuery_deletePOI">删除搜索结果</button><br>
       <button @click="btn_POIQuery_roadPlan">路径规划</button>
       <button @click="btn_POIQuery_Geocoding">点击获取信息</button>
     </div>
@@ -644,12 +646,32 @@
     }
     private async btn_POIQuery_circle(){
       let map = this.$refs.gisViewer as any;
-      await map.bdPOIQuery({
+      // await map.bdPOIQuery({
+      //   location:[116.33439,39.895884],
+      //   searchName:"停车场",
+      //   searchType:"circle",
+      //   searchTag:"交通设施",
+      //   radius:1000
+      // })
+
+      await map.searchPOI({
         location:[116.33439,39.895884],
-        searchName:"湾子",
+        searchName:"停车场",
         searchType:"circle",
-        // searchTag:"地铁站",
-        radius:100000
+        searchTag:"交通设施",
+        radius:1000
+      })
+    }
+    private async btn_POIQuery_circle1(){
+      let map = this.$refs.gisViewer as any;
+
+      await map.searchPOI({
+        location:[116.33439,39.895884],
+        searchName:"停车场",
+        searchType:"circle",
+        searchTag:"交通设施",
+        searchPage:2,
+        radius:1000
       })
     }
     private async btn_POIQuery_rectangle(){
@@ -663,12 +685,11 @@
     private async btn_POIQuery_region(){
       let map = this.$refs.gisViewer as any;
       await map.bdPOIQuery({
-        location:[116.403569,39.924075],
         searchName:"博物馆",
         searchType:"region",
+        searchTag:"博物馆",
         city:"北京市",
         district:"海淀区",
-        radius:1000
       })
     }
     private async btn_POIQuery_roadCross(){
@@ -679,6 +700,12 @@
         searchType:"roadCross",
         city:"北京市",
         radius:1000
+      })
+    }
+    private async btn_POIQuery_deletePOI(){
+      let map = this.$refs.gisViewer as any;
+      await map.clearPOIResults({
+        exceptId:"poi15"
       })
     }
     private async btn_POIQuery_roadPlan(){

@@ -30,8 +30,9 @@ import {
   IPolylineRangingParameter,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter
+  ITrackParameter, IPOISearch, IPOIDelete
 } from '@/types/map';
+import POISearchBD from "@/plugin/gis-viewer/widgets/POISearch/bd/POISearchBD";
 
 @Component({
   name: 'MapContainerArcgisThreeD'
@@ -240,6 +241,10 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public async startTrackPlay(params: ITrackParameter): Promise<void> {
     return await this.mapApp.startTrackPlay(params);
   }
+
+  public async searchPOI(params:IPOISearch): Promise<any> {}
+
+  public async clearPOIResults(params:IPOIDelete): Promise<any> {}
 }
 </script>
 

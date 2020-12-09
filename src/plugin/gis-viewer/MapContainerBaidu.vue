@@ -32,7 +32,7 @@ import {
   IPOISearch,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter
+  ITrackParameter, IPOIDelete
 } from '@/types/map';
 @Component({
   name: 'MapAppBaidu'
@@ -231,9 +231,12 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
   public async changePicById(params:IPicChangeParameter): Promise<IResult> {
     return await this.mapApp.changePicById(params);
   }
-  // public async bdPOIQuery(params: IPOISearch): Promise<IResult> {
-  //   return await this.mapApp.bdPOIQuery(params);
-  // }
+  public async searchPOI(params: IPOISearch): Promise<IResult> {
+    return await this.mapApp.searchPOI(params);
+  }
+  public async clearPOIResults(params: IPOIDelete): Promise<IResult> {
+    return await this.mapApp.clearPOIResults(params);
+  }
 }
 </script>
 
