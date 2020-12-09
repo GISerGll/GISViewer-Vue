@@ -32,7 +32,7 @@ import {
   IPOISearch,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter, IPOIDelete
+  ITrackParameter, IPOIDelete, IMonitorAreaParameter
 } from '@/types/map';
 @Component({
   name: 'MapAppBaidu'
@@ -140,7 +140,9 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
     return this.mapApp.closeTooltip();
   }
   public async findLayerFeature():Promise<any>{}
-  public showMonitorArea():any{}
+  public async showMonitorArea(params:IMonitorAreaParameter):Promise<IResult>{
+    return await this.mapApp.showMonitorArea(params);
+  }
   public showRoutePoint(params: any) {}
   public clearRoutePoint() {}
   public async addDrawLayer(params: any): Promise<IResult> {

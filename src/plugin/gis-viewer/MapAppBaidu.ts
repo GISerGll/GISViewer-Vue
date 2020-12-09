@@ -25,7 +25,7 @@ import {
   ITrackParameter,
   IDrawOverlaysDelete,
   IPolylineRangingParameter,
-  ITrackPlaybackParameter, IPicChangeParameter, IPOISearch, IPOIDelete,
+  ITrackPlaybackParameter, IPicChangeParameter, IPOISearch, IPOIDelete, IMonitorAreaParameter,
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -35,6 +35,7 @@ import DrawOverlaysBD from "@/plugin/gis-viewer/widgets/DrawOverlays/bd/DrawOver
 import GeometrySearchBD from "@/plugin/gis-viewer/widgets/GeometrySearch/bd/GeometrySearchBD";
 import TrackPlaybackBD from "@/plugin/gis-viewer/widgets/TrackPlayback/bd/TrackPlaybackBD";
 import POISearchBD from "@/plugin/gis-viewer/widgets/POISearch/bd/POISearchBD";
+import ElectronicFence from "@/plugin/gis-viewer/widgets/ElectronicFence/bd/ElectronicFence";
 
 
 declare let BMap: any;
@@ -318,7 +319,10 @@ export default class MapAppBaidu implements IMapContainer {
     const overlay = OverlayBaidu.getInstance(this.view);
     return await overlay.closeTooltip();
   }
-  public showMonitorArea():any{}
+  public async showMonitorArea(params:IMonitorAreaParameter):Promise<IResult>{
+    const monitor = ElectronicFence.getInstance(this.view);
+    return await monitor.showMonitorArea(params);
+  }
   public showCircleOutline():any{}
   public createPlaceFence():any{}
   public createLineFence(params:any):any{}

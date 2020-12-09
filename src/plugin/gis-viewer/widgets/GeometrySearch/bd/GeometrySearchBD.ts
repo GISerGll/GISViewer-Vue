@@ -40,6 +40,7 @@ export default class GeometrySearchBD {
   public async backgroundGeometrySearch(params:IGeometrySearchParameter):Promise<IResult>{
     await this.clearGeometrySearch();
 
+    this.searchTypes = params.types || [];
     const searchGeometry = params.geometry;
     if(!Array.isArray(searchGeometry)){
       return {
@@ -92,7 +93,6 @@ export default class GeometrySearchBD {
       result:returnResults.length ? JSON.stringify(returnResults) : null
     }
   }
-
   private async booleanContains():Promise<any>{
     const allOverlays = this.view.getOverlays();
     const turfPolygon = turf.polygon([this.searchGeometry]);
