@@ -1,5 +1,6 @@
 import bdWebAPIRequest from "@/plugin/gis-viewer/widgets/WebAPI/bd/bdWebAPIRequest";
 import {OverlayBaidu} from "@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu";
+
 import {
   IPOISearch,
   IResult,
@@ -88,6 +89,8 @@ export default class POISearchBD {
       }
     }
 
+    const imagesContext = require.context('@/assets/images/POISearch/', false, /\.png$/);
+
     if(addResults){
       const overlaysBD = OverlayBaidu.getInstance(this.view);
       overlaysBD.deleteOverlays({
@@ -101,9 +104,13 @@ export default class POISearchBD {
         overlayObj.geometry = {x:ptCoordinate.lng,y:ptCoordinate.lat};
         overlayObj.id = `poi` + `${(this.searchPage-1) * 10 + index + 1}`;
         overlayObj.fields = result;
+
+        // debugger;
+        const imgName = `./red${index+1}.png`;
+        const imgUrl = imagesContext(imgName);
         overlayObj.symbol = {
           type: 'point',
-          url: picUrl ? picUrl : require(`../../../../../assets/images/POISearch/red${index+1}.png`),
+          url: picUrl ? picUrl : imgUrl,
           size: [24, 35],
         }
 
@@ -118,7 +125,7 @@ export default class POISearchBD {
 
     return {
       status:0,
-      message:`成功调用该方法！`
+      message:`成功调用该方法！`,
     }
   }
 
