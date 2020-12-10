@@ -1,15 +1,6 @@
 import bdWebAPIRequest from "@/plugin/gis-viewer/widgets/WebAPI/bd/bdWebAPIRequest";
 import {OverlayBaidu} from "@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu";
-import red1 from "@/assets/images/POISearch/red1.png";
-import red2 from "@/assets/images/POISearch/red2.png";
-import red3 from "@/assets/images/POISearch/red3.png";
-import red4 from "@/assets/images/POISearch/red4.png";
-import red5 from "@/assets/images/POISearch/red5.png";
-import red6 from "@/assets/images/POISearch/red6.png";
-import red7 from "@/assets/images/POISearch/red7.png";
-import red8 from "@/assets/images/POISearch/red8.png";
-import red9 from "@/assets/images/POISearch/red9.png";
-import red10 from "@/assets/images/POISearch/red10.png";
+import rebObj from "./picUrlBase64";
 
 
 import {
@@ -107,7 +98,7 @@ export default class POISearchBD {
       })
 
       const overlays = [] as any;
-      const picUrlArray = [red1,red2,red3,red4,red5,red6,red7,red8,red9,red10];
+      // const picUrlArray = [red1,red2,red3,red4,red5,red6,red7,red8,red9,red10];
       results.forEach((result:any,index:number) => {
         const overlayObj:any = {};
         const ptCoordinate = result.location;
@@ -117,7 +108,7 @@ export default class POISearchBD {
 
         overlayObj.symbol = {
           type: 'point',
-          url: picUrl ? picUrl : picUrlArray[index],
+          url: picUrl ? picUrl : rebObj[index],
           size: [24, 35],
         }
 
