@@ -2,7 +2,8 @@ import {
   IGeocode,
   IPOISearch,
   IResult,
-  IRoutePlan
+  IRoutePlan,
+  IRoadNetwork, IBoundary
 } from '@/types/map';
 
 import axios from 'axios';
@@ -205,6 +206,63 @@ export default class bdWebAPIRequest {
     return {
       status:0,
       message:'not complete'
+    }
+  }
+
+  public static async requestRoadNetwork(params:IRoadNetwork): Promise<IResult>{
+    const searchName = params.searchName;
+    if(!searchName || typeof searchName !== "string"){
+      return {
+        status:0,
+        message:"searchName is required and must be type of string!"
+      }
+    }
+    const province = params.province || "四川省";
+    const city = params.city || "凉山彝族自治州";
+    let resultDate = null;
+    const requestUrl = `http://api.jiaotong.baidu.com/dugis/road?` +
+        `q=${searchName}` +
+        `&province=${province}` +
+        `&city=${city}` +
+        `&output=json`
+    await axios.get(requestUrl,
+    )
+        .then(function (response) {
+          resultDate = response.data;
+          console.log(resultDate);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    return {
+      status:0,
+      message:'成功调用改方法！',
+      result:resultDate
+    }
+  }
+
+  public static async requestBoundary(params:IBoundary): Promise<IResult>{
+    const queryName = params.searchName;
+    const adcode = params.adcode || "";
+
+    const requestUrl = `http://api.jiaotong.baidu.com/dugis/boundary?` +
+        `adcode=${adcode}` +
+        `&q=${queryName}` +
+        `&output=json`;
+    let resultDate = null;
+    await axios.get(requestUrl,
+    )
+        .then(function (response) {
+          resultDate = response.data;
+          console.log(resultDate);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    return {
+      status:0,
+      message:"成功调用该方法！",
+      result:resultDate
     }
   }
 }

@@ -83,7 +83,7 @@ import {
   IGeocode,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter, IPOIDelete
+  ITrackParameter, IPOIDelete, IRoadNetwork, IBoundary
 } from '@/types/map';
 import bdWebAPIRequest from "@/plugin/gis-viewer/widgets/WebAPI/bd/bdWebAPIRequest";
 
@@ -420,6 +420,12 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public async clearPOIResults(params:IPOIDelete): Promise<IResult> {
     return await this.mapContainer.clearPOIResults(params);
+  }
+  public async searchRoadNetwork(params:IRoadNetwork): Promise<IResult> {
+    return await this.mapContainer.searchRoadNetwork(params);
+  }
+  public async searchBoundary(params:IBoundary): Promise<IResult> {
+    return await this.mapContainer.searchBoundary(params);
   }
   // public async startLayerSearch(
   //   params: IGeometrySearchParameter

@@ -48,6 +48,8 @@
       <button @click="btn_POIQuery_roadCross">路口搜索</button>
       <button @click="btn_POIQuery_deletePOI">删除搜索结果</button><br>
       <button @click="btn_POIQuery_roadPlan">路径规划</button>
+      <button @click="btn_POIQuery_roadNetwork">路网查询</button>
+      <button @click="btn_POIQuery_searchBoundary">行政区划查询</button>
       <button @click="btn_POIQuery_Geocoding">点击获取信息</button>
     </div>
     <gis-viewer
@@ -745,6 +747,20 @@
         midPoints:[
             [116.417654,39.921585],
             [116.420205,39.916826]],
+      })
+    }
+    private async btn_POIQuery_roadNetwork(){
+      let map = this.$refs.gisViewer as any;
+      await map.searchRoadNetwork({
+        searchName:"范阳西路",
+        province:"河北省",
+        city:"保定市"
+      })
+    }
+    private async btn_POIQuery_searchBoundary(){
+      let map = this.$refs.gisViewer as any;
+      await map.searchBoundary({
+        searchName:"东城区"
       })
     }
     private async btn_POIQuery_Geocoding(){

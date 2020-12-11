@@ -165,7 +165,7 @@ export interface IMapContainer {
   // layerDefinition: (param:ILayerConfig) => Promise<IResult>;
   addOverlays: (param: IOverlayParameter) => Promise<IResult>;
   // showTooltip: (param:Vue.Component) => Promise<IResult>;
-  closeTooltip:() => Promise<IResult>;
+  closeTooltip: () => Promise<IResult>;
   addHeatMap: (param: IHeatParameter) => void;
   addOverlaysCluster: (param: IOverlayClusterParameter) => void;
   deleteOverlays: (param: IOverlayDelete) => Promise<IResult>;
@@ -185,7 +185,7 @@ export interface IMapContainer {
   hideDistrictMask: () => void;
   findFeature: (param: IFindParameter) => any;
   findOverlays: (param: IFindParameter) => Promise<IResult>;
-  showRoad: (param: {ids: string[]}) => void;
+  showRoad: (param: { ids: string[] }) => void;
   hideRoad: () => void;
   showStreet: () => void;
   hideStreet: () => void;
@@ -211,12 +211,12 @@ export interface IMapContainer {
   clearGeometrySearch: () => void;
   showDgene: (params: any) => Promise<IResult>;
   hideDgene: () => void;
-  showMonitorArea: (param:IMonitorAreaParameter)=> Promise<IResult>;
-  showCircleOutline: (param:ICircleOutline)=> Promise<IResult>;
-  createPlaceFence: (param:IElectronicFenceParameter)=> Promise<IResult>;
-  createLineFence: (param:IElectronicFenceParameter)=> Promise<IResult>;
-  createElectFenceByEndPtsConnection: (param:IElectronicFenceParameter)=> Promise<IResult>;
-  showEditingLabel:(param:IEditFenceLabel) => Promise<IResult>;
+  showMonitorArea: (param: IMonitorAreaParameter) => Promise<IResult>;
+  showCircleOutline: (param: ICircleOutline) => Promise<IResult>;
+  createPlaceFence: (param: IElectronicFenceParameter) => Promise<IResult>;
+  createLineFence: (param: IElectronicFenceParameter) => Promise<IResult>;
+  createElectFenceByEndPtsConnection: (param: IElectronicFenceParameter) => Promise<IResult>;
+  showEditingLabel: (param: IEditFenceLabel) => Promise<IResult>;
   addDgeneFusion: (params: any) => Promise<IResult>;
   restoreDegeneFsion: () => Promise<IResult>;
   showBarChart: (params: any) => void;
@@ -226,20 +226,23 @@ export interface IMapContainer {
   changeDgeneOut: () => void;
   initializeRouteSelect: (params: ISelectRouteParam) => Promise<void>;
   showSelectedRoute: (params: ISelectRouteResult) => Promise<void>;
-  stopDrawOverlays: (params:any) => Promise<IResult>;
-  deleteDrawOverlays: (params:IDrawOverlaysDelete) => Promise<IResult>;
+  stopDrawOverlays: (params: any) => Promise<IResult>;
+  deleteDrawOverlays: (params: IDrawOverlaysDelete) => Promise<IResult>;
   playSelectedRoute: (speed: number) => Promise<void>;
   stopPlaySelectedRoute: () => void;
   routeHitArea: (params: ISelectRouteHitTest) => Promise<IResult>;
   areaHitRoute: (params: ISelectRouteHitTest) => Promise<IResult>;
   getDrawOverlays: () => Promise<IResult>;
   arcgisLoadGDLayer: () => void;
-  backgroundGeometrySearch: (params:IGeometrySearchParameter) => Promise<IResult>;
+  backgroundGeometrySearch: (params: IGeometrySearchParameter) => Promise<IResult>;
   polylineRanging: (params: IPolylineRangingParameter) => Promise<IResult>;
   changePicById: (params: IPicChangeParameter) => Promise<IResult>;
   searchPOI: (params: IPOISearch) => Promise<IResult>;
   clearPOIResults: (params: IPOIDelete) => Promise<IResult>;
+  searchBoundary: (params: IBoundary) => Promise<IResult>;
+  searchRoadNetwork: (params: IRoadNetwork) => Promise<IResult>;
 }
+
 export interface IPicChangeParameter {
   id:string,
   pictureUrl:string,
@@ -500,6 +503,7 @@ export interface IPOISearch {
   scope?:boolean,                     // 是否显示详细信息
   addResults?:boolean                 // 是否将结果添加到地图上
   resultsUrl?:string                  // 显示结果图片的url地址
+  type?:string                       // 显示结果点位的type值
 }
 export interface IRoutePlan {
   origin: number[],
@@ -513,6 +517,30 @@ export interface IRoutePlan {
     coordinates:number[]
   },            // 圆：[x,y,radius]/矩形：[x1,y1,x2,y2]
   mode?:string                     //CAR,BICYCLE,WALK
+}
+export interface IRoadNetwork {
+  searchName:string,
+  province?:string,
+  city?:string,
+  addResults?:boolean,
+  symbol?:{
+    color:string,
+    width:number
+  }
+  type?:string,
+  id?:string
+}
+export interface IBoundary {
+  searchName:string,
+  adcode?:number | string,
+  addResults?:boolean,
+  color?:string,
+  id?:string,
+  type?:string,
+  outline?:{
+    color:string,
+    width:number
+  }
 }
 export interface IGeocode {
   location:number[],
@@ -540,5 +568,7 @@ export interface ITrackParameter {
   id: string;
 }
 export interface IPOIDelete {
+  types?:string[],
+  ids?:string[],
   exceptId?:string
 }

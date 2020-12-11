@@ -25,7 +25,7 @@ import {
   ITrackParameter,
   IDrawOverlaysDelete,
   IPolylineRangingParameter,
-  ITrackPlaybackParameter, IPicChangeParameter, IPOISearch, IPOIDelete, IMonitorAreaParameter,
+  ITrackPlaybackParameter, IPicChangeParameter, IPOISearch, IPOIDelete, IMonitorAreaParameter, IBoundary, IRoadNetwork,
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -426,6 +426,16 @@ export default class MapAppBaidu implements IMapContainer {
   public async clearPOIResults(params:IPOIDelete): Promise<IResult> {
     const poi = POISearchBD.getInstance(this.view);
     return await poi.clearPOIResults(params);
+  }
+
+  public async searchBoundary(params: IBoundary): Promise<IResult> {
+    const poi = POISearchBD.getInstance(this.view);
+    return await poi.searchBoundary(params);
+  }
+
+  public async searchRoadNetwork(params: IRoadNetwork): Promise<IResult> {
+    const poi = POISearchBD.getInstance(this.view);
+    return await poi.searchRoadNetwork(params);
   }
 
 }
