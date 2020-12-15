@@ -1,4 +1,3 @@
-import {loadScript, ILoadScriptOptions} from 'esri-loader';
 import {Vue} from "vue-property-decorator";
 import {
   IMapContainer,

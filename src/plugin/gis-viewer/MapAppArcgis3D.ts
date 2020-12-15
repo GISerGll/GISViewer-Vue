@@ -25,7 +25,7 @@ import {
   ITrackParameter,
   IDrawOverlaysDelete,
   IPolylineRangingParameter,
-  IPicChangeParameter, IPOISearch, IPOIDelete
+  IPicChangeParameter, IPOISearch, IPOIDelete, IBoundary, IRoadNetwork
 } from '@/types/map';
 import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
 import {RasterStretchRenderer} from 'esri/rasterRenderers';
@@ -666,5 +666,7 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async polylineRanging(params:IPolylineRangingParameter): Promise<any>{}
   public async changePicById(params:IPicChangeParameter): Promise<any> {}
   public async searchPOI(params:IPOISearch): Promise<any> {}
+  public async searchBoundary(params:IBoundary): Promise<any> {}
+  public async searchRoadNetwork(params:IRoadNetwork): Promise<any> {}
   public async clearPOIResults(params:IPOIDelete): Promise<any> {}
 }

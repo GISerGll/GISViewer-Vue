@@ -28,7 +28,7 @@ import {
   IDefinitionParameter,
   ITrackParameter,
   IPolylineRangingParameter,
-  IPicChangeParameter, IPOISearch, IPOIDelete
+  IPicChangeParameter, IPOISearch, IPOIDelete, IBoundary, IRoadNetwork
 } from '@/types/map';
 
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
@@ -1000,5 +1000,7 @@ export default class MapAppArcGIS2D {
   }
   public async startTrackPlay(params: ITrackParameter): Promise<void> {}
   public async searchPOI(params:IPOISearch): Promise<any> {}
+  public async searchBoundary(params:IBoundary): Promise<any> {}
+  public async searchRoadNetwork(params:IRoadNetwork): Promise<any> {}
   public async clearPOIResults(params:IPOIDelete): Promise<any> {}
 }

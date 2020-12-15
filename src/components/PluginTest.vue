@@ -55,9 +55,6 @@
 </template>
 <script lang="ts">
 import {Vue, Component} from 'vue-property-decorator';
-import WuLuMuQiConfig from '@/config/config_arcgis';
-import axios from 'axios';
-import {IResult} from "@/types/map";
 import MapConfig from "@/config/config_arcgis";
 import Parent from "@/components/tooltips/Parent.vue";
 @Component

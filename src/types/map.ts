@@ -12,7 +12,8 @@ export enum Platforms {
   ArcGIS3D = 'arcgis3d',
   ArcGIS2D = 'arcgis2d',
   BDMap = 'bd',
-  AMap = 'gd'
+  AMap = 'gd',
+  PGIS_LS = 'pgis_ls'
 }
 
 export interface ILayerConfig {

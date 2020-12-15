@@ -25,7 +25,7 @@ import {
   IPicChangeParameter,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter, IPOISearch, IPOIDelete
+  ITrackParameter, IPOISearch, IPOIDelete, IBoundary, IRoadNetwork
 } from '@/types/map';
 import {OverlayGaode} from '@/plugin/gis-viewer/widgets/Overlays/gd/OverlayGaode';
 import {JurisdictionPoliceGD} from './widgets/JurisdictionPolice/gd/JurisdictionPoliceGD';
@@ -421,5 +421,7 @@ export default class MapAppGaode implements IMapContainer {
   ): Promise<void> {}
   public async startTrackPlay(params: ITrackParameter): Promise<void> {}
   public async searchPOI(params:IPOISearch): Promise<any> {}
+  public async searchBoundary(params:IBoundary): Promise<any> {}
+  public async searchRoadNetwork(params:IRoadNetwork): Promise<any> {}
   public async clearPOIResults(params:IPOIDelete): Promise<any> {}
 }

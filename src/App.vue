@@ -11,13 +11,15 @@ import Home from '@/components/Home.vue';
 import PluginTest3D from '@/components/PluginTest3D.vue';
 import PluginTest from '@/components/PluginTest.vue';
 import PluginGD from '@/components/PluginGD.vue';
+import PluginPGIS_LS from "@/components/PluginPGIS_LS.vue";
 
 @Component({
   components: {
     Home,
     PluginTest,
     PluginTest3D,
-    PluginGD
+    PluginGD,
+    PluginPGIS_LS
   }
 })
 export default class App extends Vue {}

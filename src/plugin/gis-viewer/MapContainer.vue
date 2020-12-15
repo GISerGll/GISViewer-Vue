@@ -39,6 +39,11 @@
       @map-click="mapClick"
       @marker-mouse="mouseGisDeviceInfo"
     />
+    <map-container-pgis-ls
+      ref="containerPGISLS"
+      v-if="this.platform === 'pgis_ls'"
+      :map-config="this.mapConfig"
+    />
   </div>
 </template>
 
@@ -48,6 +53,7 @@ import MapContainerArcgisThreeD from '@/plugin/gis-viewer/MapContainerArcgis3D.v
 import MapContainerArcgisTwoD from '@/plugin/gis-viewer/MapContainerArcgis2D.vue';
 import MapContainerBaidu from '@/plugin/gis-viewer/MapContainerBaidu.vue';
 import MapContainerGaode from '@/plugin/gis-viewer/MapContainerGaode.vue';
+import MapContainerPgisLs from "@/plugin/gis-viewer/MapContainerPGIS_LS.vue";
 import {
   Platforms,
   IMapContainer,
@@ -92,7 +98,8 @@ import bdWebAPIRequest from "@/plugin/gis-viewer/widgets/WebAPI/bd/bdWebAPIReque
     MapContainerArcgisThreeD,
     MapContainerArcgisTwoD,
     MapContainerBaidu,
-    MapContainerGaode
+    MapContainerGaode,
+    MapContainerPgisLs
   }
 })
 export default class MapContainer extends Vue implements IMapContainer {
@@ -107,6 +114,7 @@ export default class MapContainer extends Vue implements IMapContainer {
   @Ref() readonly containerArcgis2D!: MapContainerArcgisTwoD;
   @Ref() readonly containerBaidu!: MapContainerBaidu;
   @Ref() readonly containerGaode!: MapContainerGaode;
+  @Ref() readonly containerPGIS_LS!: MapContainerPgisLs;
 
   //当前的地图容器
   get mapContainer(): IMapContainer {
@@ -119,6 +127,8 @@ export default class MapContainer extends Vue implements IMapContainer {
         return this.containerBaidu;
       case Platforms.AMap:
         return this.containerGaode;
+      case Platforms.PGIS_LS:
+        return this.containerPGIS_LS;
       default:
         return this.containerArcgis2D;
     }

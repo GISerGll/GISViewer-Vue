@@ -1,6 +1,6 @@
 {
   "name": "gisviewer-vue-cd",
-  "version": "0.3.78",
+  "version": "0.3.80",
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -50,6 +50,7 @@
     "dojo-typings": "^1.11.11",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "ol": "^6.4.3",
     "typescript": "~3.7.5",
     "vue-router": "^3.4.7",
     "vue-template-compiler": "^2.6.12"
