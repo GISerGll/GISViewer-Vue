@@ -42,10 +42,15 @@
     private mapApp!: MapApp;
     private mapId: string = 'divBMap' + (Math.random() * 10000).toFixed(0);
     @Prop({type: Object}) readonly mapConfig!: Object;
+
+    @Emit('map-loaded')
     async mounted() {
       this.mapApp = new MapApp();
       await this.mapApp.initialize(this.mapConfig, this.mapId);
+      this.mapApp.mapClick = this.mapClick;
     }
+    @Emit('map-click')
+    public mapClick(point: object) {}
 
     addDgeneFusion(params: any): Promise<any> {
       return Promise.resolve(undefined);

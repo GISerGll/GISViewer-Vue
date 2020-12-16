@@ -56,6 +56,8 @@
       ref="gisViewer"
       platform="pgis_ls"
       :map-config="mapConfig"
+      @map-click="mapClick"
+      @map-loaded="mapLoaded"
     />
 
   </div>
@@ -768,104 +770,7 @@
       })
     }
     private async mapLoaded() {
-      let map = this.$refs.gisViewer as any;
-      const result = await map.addOverlays({
-        type: 'police',
-        defaultSymbol: {
-          //symbol for 2d
-          type: 'point',
-          // primitive: "square",
-          url: 'assets/image/Anchor.png',
-          size: [50, 50],
-          // anchor: 'center'
-          // color: "red",
-          // outline: {
-          //   color: "white",
-          //   size: 4
-          // },
-          // anchor: "top"
-
-          //symbol for 3d
-          //type: "point-3d",
-          //primitive: "cube",
-          //color: "red",
-          //size: 20000,
-          //anchor: "bottom",
-        },
-        overlays: [
-          {
-            id: 'test004',
-            geometry: {x: 102.267713, y: 27.881396},
-            fields: {
-              name: '测试2',
-              featureid: '0002',
-              popupWindow: true,
-              tooltipWindow:true
-            }
-          },
-          {
-            id: 'test005',
-            geometry: {x: 102.367713, y: 27.881396},
-            fields: {
-              name: '测试3',
-              featureid: '0003',
-              popupWindow: { type:sleep() ,value1:"这是一个警告弹窗",value2:"随意测试一下",valuePromise:sleep()},
-              tooltipWindow:true
-            }
-          },
-          {
-            id: 'test006',
-            geometry: {x: 102.367713, y: 27.981396},
-            fields: {
-              name: '测试4',
-              featureid: '0001',
-              popupWindow: {valuePromise:sleep1()},
-              tooltipWindow:true
-            }
-          }
-        ],
-        showPopup: true,
-        autoPopup: false,
-        moveTooltip: true,
-        popupComponent:Parent,
-        tooltipComponent:SimpleTooltip,
-        // defaultInfoTemplate: {
-        //   title: '1212',
-        //   content: '<div>name:{name}<br/><button>{name}</button></div>'
-        // },
-        defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
-
-      });
-
-      function sleep(){
-        let number = new Promise(resolve => {
-          setTimeout(function () {
-            resolve('normal');
-          },2000);
-        })
-
-        return number;
-      }
-
-      function sleep1(){
-        let number = new Promise(resolve => {
-          setTimeout(function () {
-            resolve("suspicious");
-          },2000);
-        })
-
-        return number;
-      }
-
-      function sleep2(){
-        let number = new Promise(resolve => {
-          setTimeout(function () {
-            resolve('alarm');
-          },2000);
-        })
-
-        return number;
-      }
+      console.log('map loaded from vue component')
     }
     private showGisDeviceInfo(id: string, type: string, attr:any) {
       console.log(type, id,attr);

@@ -276,6 +276,23 @@ export class OverlayBaidu {
           // _this._showGisDeviceInfo(e.target.type, e.target.id);
         });
       }
+
+      if(params.overlays.length === 1){
+        if(type === "polygon"){
+          const bounds = graphic.getBounds();
+          const center = bounds.getCenter();
+          await this.view.centerAndZoom(center, 14);
+        }else if(type === "polyline"){
+          const bounds = graphic.getBounds();
+          const center = bounds.getCenter();
+          await this.view.centerAndZoom(center, 14);
+        }else if(type === "point"){
+          const center = graphic.getPosition();
+          await this.view.centerAndZoom(center, 14);
+        }else {
+
+        }
+      }
     }
     //处理弹窗逻辑,弹窗优先级popup->tooltip,动作优先级show->move->auto
     //冲突关系：同类冲突，例如autpPopup和movePopup冲突，autoTooltip和moveTooltip冲突

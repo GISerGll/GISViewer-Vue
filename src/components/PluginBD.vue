@@ -167,16 +167,16 @@
             geometry: {x: 102.2687, y: 27.8843},
             fields: {name: '测试2', featureid: '0002',popupWindow: true,tooltipWindow: true}
           },
-          {
-            id: 'test002',
-            geometry: {x: 102.2687, y: 27.8853},
-            fields: {name: '测试3', featureid: '0003',popupWindow: true,tooltipWindow: true}
-          },
-          {
-            id: 'test003',
-            geometry: {x: 102.2607, y: 27.8813},
-            fields: {name: '测试4', featureid: '0001',popupWindow: true,tooltipWindow: true}
-          }
+          // {
+          //   id: 'test002',
+          //   geometry: {x: 102.2687, y: 27.8853},
+          //   fields: {name: '测试3', featureid: '0003',popupWindow: true,tooltipWindow: true}
+          // },
+          // {
+          //   id: 'test003',
+          //   geometry: {x: 102.2607, y: 27.8813},
+          //   fields: {name: '测试4', featureid: '0001',popupWindow: true,tooltipWindow: true}
+          // }
         ],
         showPopup: true,
         moveTooltip: true,
@@ -759,6 +759,7 @@
     }
     private async btn_POIQuery_searchBoundary(){
       let map = this.$refs.gisViewer as any;
+      console.log(map);
       await map.searchBoundary({
         searchName:"东城区"
       })
@@ -772,6 +773,7 @@
       })
     }
     private async mapLoaded() {
+      console.log(222);
       let map = this.$refs.gisViewer as any;
       const result = await map.addOverlays({
         type: 'police',

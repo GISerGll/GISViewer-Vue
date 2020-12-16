@@ -43,6 +43,8 @@
       ref="containerPGISLS"
       v-if="this.platform === 'pgis_ls'"
       :map-config="this.mapConfig"
+      @map-loaded="mapLoaded"
+      @map-click="mapClick"
     />
   </div>
 </template>

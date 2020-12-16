@@ -35,6 +35,8 @@ import {
 import {Utils} from '@/plugin/gis-viewer/Utils';
 // @ts-ignore
 import {transform} from 'ol/proj';
+// @ts-ignore
+import {coordinate} from 'ol/coordinate';
 
 declare let FMap: any;
 export default class MapAppPGIS_LS implements IMapContainer{
@@ -72,8 +74,8 @@ export default class MapAppPGIS_LS implements IMapContainer{
 
     await mapLoadPromise.then(async ()=>{
       console.log('map Loaded!');
-      view.on('click',(results:any)=>{
-        console.log(transform(results.coordinate,'EPSG:3857','EPSG:4326'));
+      view.on('singleclick',(results:any)=>{
+        this.mapClick(JSON.parse(JSON.stringify(results.coordinate)));
       });
     })
   }
