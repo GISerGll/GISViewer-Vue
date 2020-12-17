@@ -97,6 +97,7 @@ export default class DrawOverlaysBD{
     this.overlaysType = (typeof params.type === "string") ?  params.type : "drawOverlays";
     this.generateId = (typeof params.generateId === "boolean") ?  params.generateId : false;
     this.clearLastResult = (typeof params.clearLastResult === "boolean") ?  params.clearLastResult : false;
+    const once = params.onlyOnce || false;
     const callback = params.callback;
 
     let resultObj = null;
@@ -122,6 +123,9 @@ export default class DrawOverlaysBD{
       const result = await this.onDrawComplete(results);
       if(callback){
         this.drawCallback(result);
+      }
+      if(once){
+        await this.stopDrawOverlays();
       }
     });
 

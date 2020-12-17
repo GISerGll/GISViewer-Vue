@@ -76,7 +76,6 @@ export default class MapAppBaidu implements IMapContainer {
         console.log('scripts Loaded!');
       });
     })
-
     view = new BMap.Map(mapContainer);
 
     let mapLoadPromise = new Promise(resolve => {

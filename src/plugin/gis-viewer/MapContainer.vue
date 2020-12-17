@@ -39,8 +39,8 @@
       @map-click="mapClick"
       @marker-mouse="mouseGisDeviceInfo"
     />
-    <map-container-pgis-ls
-      ref="containerPGISLS"
+    <map-container-p-g-i-s
+      ref="containerPGIS"
       v-if="this.platform === 'pgis_ls'"
       :map-config="this.mapConfig"
       @map-loaded="mapLoaded"
@@ -55,7 +55,7 @@ import MapContainerArcgisThreeD from '@/plugin/gis-viewer/MapContainerArcgis3D.v
 import MapContainerArcgisTwoD from '@/plugin/gis-viewer/MapContainerArcgis2D.vue';
 import MapContainerBaidu from '@/plugin/gis-viewer/MapContainerBaidu.vue';
 import MapContainerGaode from '@/plugin/gis-viewer/MapContainerGaode.vue';
-import MapContainerPgisLs from "@/plugin/gis-viewer/MapContainerPGIS_LS.vue";
+import MapContainerPGIS from "@/plugin/gis-viewer/MapContainerPGIS_LS.vue";
 import {
   Platforms,
   IMapContainer,
@@ -101,12 +101,12 @@ import bdWebAPIRequest from "@/plugin/gis-viewer/widgets/WebAPI/bd/bdWebAPIReque
     MapContainerArcgisTwoD,
     MapContainerBaidu,
     MapContainerGaode,
-    MapContainerPgisLs
+    MapContainerPGIS
   }
 })
 export default class MapContainer extends Vue implements IMapContainer {
   //平台类型 高德/百度/arcgis
-  @Prop({default: Platforms.ArcGIS2D, type: String})
+  @Prop({default: Platforms.BDMap, type: String})
   readonly platform!: string;
 
   //地图配置
@@ -116,7 +116,7 @@ export default class MapContainer extends Vue implements IMapContainer {
   @Ref() readonly containerArcgis2D!: MapContainerArcgisTwoD;
   @Ref() readonly containerBaidu!: MapContainerBaidu;
   @Ref() readonly containerGaode!: MapContainerGaode;
-  @Ref() readonly containerPGIS_LS!: MapContainerPgisLs;
+  @Ref() readonly containerPGIS!: MapContainerPGIS;
 
   //当前的地图容器
   get mapContainer(): IMapContainer {
@@ -130,7 +130,7 @@ export default class MapContainer extends Vue implements IMapContainer {
       case Platforms.AMap:
         return this.containerGaode;
       case Platforms.PGIS_LS:
-        return this.containerPGIS_LS;
+        return this.containerPGIS;
       default:
         return this.containerArcgis2D;
     }

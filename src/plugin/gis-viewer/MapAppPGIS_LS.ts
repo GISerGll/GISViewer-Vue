@@ -33,12 +33,10 @@ import {
   IRoadNetwork,
 } from '@/types/map';
 import {Utils} from '@/plugin/gis-viewer/Utils';
-// @ts-ignore
-import {transform} from 'ol/proj';
-// @ts-ignore
-import {coordinate} from 'ol/coordinate';
+import OverlayPGIS from "@/plugin/gis-viewer/widgets/Overlays/pgis-ls/OverlayPGIS";
 
 declare let FMap: any;
+declare let ol: any;
 export default class MapAppPGIS_LS implements IMapContainer{
   public view!: any;
   public baseLayers: Array<any> = [];
@@ -50,21 +48,36 @@ export default class MapAppPGIS_LS implements IMapContainer{
   public async initialize(mapConfig: any,mapContainer:string): Promise<any>{
     const apiUrl = mapConfig.pgis_api || mapConfig.api_url;
     const olConfig = apiUrl + '/olConfig.js';
-    const ol = apiUrl + '/ol.js';
-    const fMap_ol = apiUrl + '/FMap-OpenLayers.js'
+    const olUrl = apiUrl + '/ol.js';
+    const fMap_ol = apiUrl + '/FMap-OpenLayers.js';
+    const olCss = apiUrl + '/ol.css';
 
     await Utils.loadScripts([
       olConfig,
-      ol,
-      fMap_ol
-    ]).then(()=>{               //heatMap需要BMap
-      console.log('scripts loaded!')
+      olUrl,
+    ]).then(async ()=>{
+      await Utils.loadScripts([fMap_ol]);
+      await Utils.loadCss([olCss]);
+      console.log('css and scripts loaded!')
+      // await Utils.loadCss([olCss]).then(()=>{
+      //   console.log('css Loaded!')
+      // });
     });
 
     const options = mapConfig.options;
     const fmap = new FMap();
     //此view在二维模式下指openlayers实例的map对象
     const view = fmap.initMap(mapContainer, options);
+    const layer =  new ol.layer.Tile({
+      source:new ol.source.TileArcGISRest({
+        projection:'EPSG:4326',
+        url:'http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer'
+      })
+    })
+
+    const baseLayers = fmap.basisMapService.basemaplayers;   //现有底图数组
+    baseLayers.push(layer);
+    view.addLayer(layer);
 
     let mapLoadPromise = new Promise(resolve => {
       view.once('postrender',(results:any)=>{
@@ -78,6 +91,8 @@ export default class MapAppPGIS_LS implements IMapContainer{
         this.mapClick(JSON.parse(JSON.stringify(results.coordinate)));
       });
     })
+    console.log(view.getTarget());
+    this.view = view;
   }
 
   addDgeneFusion(params: any): Promise<any> {
@@ -97,8 +112,9 @@ export default class MapAppPGIS_LS implements IMapContainer{
   addHeatMap(param: IHeatParameter): void {
   }
 
-  addOverlays(param: IOverlayParameter): Promise<any> {
-    return Promise.resolve(undefined);
+  public async addOverlays(param: IOverlayParameter): Promise<any> {
+    const overlay = OverlayPGIS.getInstance(this.view);
+    return await overlay.addOverlays(param);
   }
 
   addOverlaysCluster(param: IOverlayClusterParameter): void {

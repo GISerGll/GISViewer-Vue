@@ -197,6 +197,8 @@ export class OverlayBaidu {
     const defaultSymbol = params.defaultSymbol;
     const defaultType = params.type;
     const defaultButtons = params.defaultButtons;
+    const centerResult = params.centerResult || true;
+    const defaultZoom = params.defaultZoom || 14;
       //默认弹窗样式
       const defaultInfoTemplate = params.defaultInfoTemplate;
       //自定义vue弹窗样式
@@ -277,18 +279,18 @@ export class OverlayBaidu {
         });
       }
 
-      if(params.overlays.length === 1){
+      if(params.overlays.length === 1 && centerResult){
         if(type === "polygon"){
           const bounds = graphic.getBounds();
           const center = bounds.getCenter();
-          await this.view.centerAndZoom(center, 14);
+          await this.view.centerAndZoom(center, defaultZoom);
         }else if(type === "polyline"){
           const bounds = graphic.getBounds();
           const center = bounds.getCenter();
-          await this.view.centerAndZoom(center, 14);
+          await this.view.centerAndZoom(center, defaultZoom);
         }else if(type === "point"){
           const center = graphic.getPosition();
-          await this.view.centerAndZoom(center, 14);
+          await this.view.centerAndZoom(center, defaultZoom);
         }else {
 
         }

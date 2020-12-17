@@ -347,7 +347,8 @@
         generateId:true,
         type:"alarmPoints",
         clearLastResult:false,
-        callback:true
+        callback:true,
+        onlyOnce:true
       })
       // let resultArray = result.result;
       // resultArray.then((value:any) =>{
@@ -761,7 +762,8 @@
       let map = this.$refs.gisViewer as any;
       console.log(map);
       await map.searchBoundary({
-        searchName:"东城区"
+        searchName:"东城区",
+        zoom:10
       })
     }
     private async btn_POIQuery_Geocoding(){

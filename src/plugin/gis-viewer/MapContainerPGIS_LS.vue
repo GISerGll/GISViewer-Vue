@@ -36,11 +36,11 @@
     ITrackParameter, IPOIDelete, IMonitorAreaParameter, IBoundary
   } from '@/types/map';
   @Component({
-    name: 'MapAppPGIS_LS'
+    name: 'MapContainerPGIS_LS'
   })
   export default class MapContainerPGIS_LS extends Vue implements IMapContainer{
     private mapApp!: MapApp;
-    private mapId: string = 'divBMap' + (Math.random() * 10000).toFixed(0);
+    private mapId: string = 'divPGISMap' + (Math.random() * 10000).toFixed(0);
     @Prop({type: Object}) readonly mapConfig!: Object;
 
     @Emit('map-loaded')
@@ -69,8 +69,8 @@
     addHeatMap(param: IHeatParameter): void {
     }
 
-    addOverlays(param: IOverlayParameter): Promise<any> {
-      return Promise.resolve(undefined);
+    public async addOverlays(param: IOverlayParameter): Promise<any> {
+      return await this.mapApp.addOverlays(param);
     }
 
     addOverlaysCluster(param: IOverlayClusterParameter): void {
@@ -328,5 +328,10 @@
 </script>
 
 <style scoped>
-
+  .my-map-div {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
 </style>

@@ -15,6 +15,25 @@ export class Utils {
       });
     });
   }
+  public static async loadCss(cssUrls: string[]): Promise<any> {
+    let promises = cssUrls.map((cssUrl) => {
+      return new Promise(resolve => {
+        const link = document.createElement('link');
+        link.type = 'text/css';
+        link.rel = 'stylesheet';
+        link.href = cssUrl;
+        const head = document.getElementsByTagName('head')[0];
+        head.appendChild(link);
+        resolve();
+      })
+    })
+
+    return new Promise((resolve) => {
+      Promise.all(promises).then((e) => {
+        resolve(e);
+      });
+    });
+  }
   public static copyObject(obj: object) {
     return JSON.parse(JSON.stringify(obj));
   }

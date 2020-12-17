@@ -259,6 +259,7 @@ export default class POISearchBD {
     const boundaryWidth = params.outline?.width || 5;
     const areaId = params.id;
     const areaType = params.type;
+    const defaultZoom = params.defaultZoom || 12;
 
     const requestResults = await bdWebAPIRequest.requestBoundary({
       searchName:searchName,
@@ -313,7 +314,8 @@ export default class POISearchBD {
       })
       await overlaysBD.addOverlays({
         type:"boundary",
-        overlays:overlays
+        overlays:overlays,
+        defaultZoom:defaultZoom
       })
     }
     return {

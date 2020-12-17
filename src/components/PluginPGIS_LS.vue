@@ -1,6 +1,6 @@
 <template>
   <div id="gisDiv">
-<!--    <div id="test">-->
+    <div id="test">
       <!--      <button @click="btn_loadMap">加载地图</button>-->
 <!--      <button @click="btn_setMapCenter">居中</button>-->
 <!--      <button @click="btn_setMapCenterAndLevel">放大居中</button>-->
@@ -9,7 +9,7 @@
 <!--      <button @click="btn_showLayer">显示图层</button>-->
 <!--      <button @click="btn_hideLayer">隐藏图层</button>-->
 <!--      <button @click="btn_switchLayer">切换底图</button><br>-->
-<!--      <button @click="btn_addOverlays_pt">添加点</button>-->
+      <button @click="btn_addOverlays_pt">添加点</button>
 <!--      <button @click="btn_addOverlays_line">添加线</button>-->
 <!--      <button @click="btn_addOverlays_polygon">添加面</button>-->
 <!--      <button @click="btn_hideOverlays">隐藏</button>-->
@@ -51,7 +51,7 @@
 <!--      <button @click="btn_POIQuery_roadNetwork">路网查询</button>-->
 <!--      <button @click="btn_POIQuery_searchBoundary">行政区划查询</button>-->
 <!--      <button @click="btn_POIQuery_Geocoding">点击获取信息</button>-->
-<!--    </div>-->
+    </div>
     <gis-viewer
       ref="gisViewer"
       platform="pgis_ls"
@@ -136,7 +136,6 @@
     }
     private async btn_addOverlays_pt() {
       let map = this.$refs.gisViewer as any;
-
       const obj =  await map.addOverlays({
         type: 'police',
         defaultSymbol: {

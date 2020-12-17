@@ -115,6 +115,7 @@ export interface IOverlayParameter {
     defaultType?: string;
     type?: string;
     defaultSymbol?: IPointSymbol | IPolylineSymbol;
+    defaultZoom?: number;          //添加单个覆盖物默认缩放等级
     defaultZooms?: [number, number];
     overlays: Array<IOverlay>;
     autoPopup?: boolean;  //自动显示弹窗
@@ -131,6 +132,7 @@ export interface IOverlayParameter {
     popupComponent?: Vue.Component
     iswgs?: boolean;
     custom: {content: string; zooms: [number, number]; visible: true};
+    centerResult?: boolean;
   showToolTip?: boolean; //鼠标移到该点位是，是否显示悬浮窗
   toolTipContent?: string; //悬浮窗内容
   showRegion?: boolean;
@@ -158,6 +160,7 @@ export interface IDrawOverlayParameter {
   type?: string;               //覆盖物类型, 用于按编号/类型删除
   generateId?: boolean;                 //是否随机生成覆盖物编号, 用于按编号/类型删除
   clearLastResult?: boolean;  //清除上一次绘画结果（调用一次方法只能存在一个graphic）
+  onlyOnce?:boolean;
   callback?: boolean
 }
 export interface IMapContainer {
@@ -541,7 +544,8 @@ export interface IBoundary {
   outline?:{
     color:string,
     width:number
-  }
+  },
+  defaultZoom?:number //默认缩放等级
 }
 export interface IGeocode {
   location:number[],
