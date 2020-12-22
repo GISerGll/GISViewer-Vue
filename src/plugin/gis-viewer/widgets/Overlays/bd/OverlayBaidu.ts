@@ -11,7 +11,7 @@ import {
 } from '@/types/map';
 import {Vue} from "vue-property-decorator";
 import ToolTipBaiDu from "@/plugin/gis-viewer/widgets/Overlays/bd/ToolTipBaiDu";
-import ToolTip2D from "@/plugin/gis-viewer/widgets/Overlays/arcgis/ToolTip2D";
+// import ToolTip2D from "@/plugin/gis-viewer/widgets/Overlays/arcgis/ToolTip2D";
 declare let BMap: any;
 declare let BMapLib: any;
 
@@ -369,7 +369,7 @@ export class OverlayBaidu {
     return {
       message:'成功调用改方法',
       status:0,
-      result:`${JSON.stringify(callbackResults)}`
+      result:JSON.stringify(callbackResults)
     }
   }
   public async hideOverlays(params:IOverlayDelete): Promise<IResult> {
@@ -436,7 +436,7 @@ export class OverlayBaidu {
     return {
       status:0,
       message:'成功调用改方法！',
-      result:`成功隐藏${showCount}个覆盖物`
+      result:`成功显示${showCount}个覆盖物`
     }
   }
   public async addOverlaysCluster(params: IOverlayClusterParameter): Promise<IResult> {
@@ -501,17 +501,24 @@ export class OverlayBaidu {
     this.markerClustererLayer.push(markerClusterer);
     return {
       status: 0,
-      message: 'ok'
+      message: '成功调用该方法！'
     };
   }
-  public async deleteAllOverlays() {
+  public async deleteAllOverlays(): Promise<IResult>{
+    let delCount = 0;
     if (this.overlays.length > 0) {
       for (let i = 0; i < this.overlays.length; i++) {
         this.view.removeOverlay(this.overlays[i]);
+        delCount++;
       }
       this.overlays = [];
     }
     this.view.closeInfoWindow();
+
+    return {
+      status:0,
+      message:'成功调用该方法！'
+    }
   }
   public async deleteOverlays(params: IOverlayDelete) {
     if(!params){
@@ -864,7 +871,7 @@ export class OverlayBaidu {
     let popups:ToolTipBaiDu[] = [];
 
     if(type && (typeof type === 'string')){               //有type情况
-      let popupOfType:ToolTip2D[] = this.popupTypes.get(type);   //首先检查该图层是否已经显示Popup
+      let popupOfType:ToolTipBaiDu[] = this.popupTypes.get(type);   //首先检查该图层是否已经显示Popup
       if(popupOfType){
         this.popupTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
         for(let popup of popupOfType){
@@ -943,7 +950,7 @@ export class OverlayBaidu {
     let tooltips:ToolTipBaiDu[] = [];
 
     if(type && (typeof type === 'string')){               //有type情况
-      let tooltipOfType:ToolTip2D[] = this.tooltipTypes.get(type);   //首先检查该图层是否已经显示Popup
+      let tooltipOfType:ToolTipBaiDu[] = this.tooltipTypes.get(type);   //首先检查该图层是否已经显示Popup
       if(tooltipOfType){
         this.tooltipTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
         for(let popup of tooltipOfType){
@@ -1096,7 +1103,7 @@ export class OverlayBaidu {
     return {
       message:'成功调用该方法',
       status:0,
-      result:callback ? callbackResults : '获取该点位信息请在方法中加入callback属性'
+      result:callback ? JSON.stringify(callbackResults) : '获取该点位信息请在方法中加入callback属性'
     }
   }
 }

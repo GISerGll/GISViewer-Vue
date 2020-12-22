@@ -246,7 +246,7 @@ export default class POISearchBD {
     return {
       status:0,
       message:"成功调用该方法！",
-      result:addResults ? JSON.parse(JSON.stringify(overlays)) : resultData
+      result:addResults ? JSON.stringify(overlays) : resultData
     }
   }
 
@@ -321,7 +321,7 @@ export default class POISearchBD {
     return {
       status:0,
       message:"成功调用该方法！",
-      result:addResults ? JSON.parse(JSON.stringify(overlays)) : boundaryResults
+      result:addResults ? JSON.stringify(overlays) : JSON.stringify(boundaryResults)
     }
   }
 }

@@ -53,7 +53,7 @@ export default class ElectronicFenceBD {
     const radiusArray = params.buffers;
     const id = params.id || "monitorId" + Math.random().toFixed(5).toString();
     const type = params.type || "monitorType" + Math.random().toFixed(5).toString();
-
+    const defaultZoom = params.defaultZoom;
     const bufferedArray:any = [];
 
     let turfObj:turf.Feature;
@@ -105,7 +105,8 @@ export default class ElectronicFenceBD {
     })
     await overlaysBD.addOverlays({
       type:type,
-      overlays:overlaysObj
+      overlays:overlaysObj,
+      defaultZoom:defaultZoom
     })
     return {
       status:0,

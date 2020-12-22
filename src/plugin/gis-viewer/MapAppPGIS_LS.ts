@@ -37,13 +37,17 @@ import OverlayPGIS from "@/plugin/gis-viewer/widgets/Overlays/pgis-ls/OverlayPGI
 
 declare let FMap: any;
 declare let ol: any;
+declare let FDataService: any;
 export default class MapAppPGIS_LS implements IMapContainer{
+  public fmap!: any;   //pgis基于ol的封装
   public view!: any;
   public baseLayers: Array<any> = [];
   public layerLoaded: any;
   public showGisDeviceInfo: any;
   public mapClick: any;
   public drawCallback: any;
+
+  private hlLayer: any;
 
   public async initialize(mapConfig: any,mapContainer:string): Promise<any>{
     const apiUrl = mapConfig.pgis_api || mapConfig.api_url;
@@ -59,40 +63,62 @@ export default class MapAppPGIS_LS implements IMapContainer{
       await Utils.loadScripts([fMap_ol]);
       await Utils.loadCss([olCss]);
       console.log('css and scripts loaded!')
-      // await Utils.loadCss([olCss]).then(()=>{
-      //   console.log('css Loaded!')
-      // });
+
     });
 
     const options = mapConfig.options;
     const fmap = new FMap();
+    this.fmap = fmap;
     //此view在二维模式下指openlayers实例的map对象
     const view = fmap.initMap(mapContainer, options);
-    const layer =  new ol.layer.Tile({
-      source:new ol.source.TileArcGISRest({
-        projection:'EPSG:4326',
-        url:'http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer'
-      })
-    })
+    this.view = view;
+    //处理baseLayers
+    if(mapConfig.baseLayers && mapConfig.baseLayers.length){
+      const baseLayers = mapConfig.baseLayers;
+      await this.processBaseLayers(baseLayers);
+    }
+    //处理optionalLayers
+    if(mapConfig.optionalLayers && mapConfig.optionalLayers.length){
 
-    const baseLayers = fmap.basisMapService.basemaplayers;   //现有底图数组
-    baseLayers.push(layer);
-    view.addLayer(layer);
-
+    }
+    //处理图标选中事件
+    if(mapConfig.highlightClick){
+      OverlayPGIS.hlFeatures = true;
+    }
+    //地图图层加载
     let mapLoadPromise = new Promise(resolve => {
       view.once('postrender',(results:any)=>{
         resolve(results);
       });
     })
-
+    //加载完成
     await mapLoadPromise.then(async ()=>{
       console.log('map Loaded!');
       view.on('singleclick',(results:any)=>{
         this.mapClick(JSON.parse(JSON.stringify(results.coordinate)));
       });
     })
-    console.log(view.getTarget());
-    this.view = view;
+  }
+
+  private async processBaseLayers(params:any[]): Promise<any>{
+    params.forEach((baseLayer:any)=> {
+      if(baseLayer.type === "tiled"){
+        const url = baseLayer.url;
+        const platform = baseLayer.platform;
+        if(platform === "arcgis"){
+          const tileLayer =  new ol.layer.Tile({
+            source:new ol.source.TileArcGISRest({
+              projection:'EPSG:4326',
+              url:url
+            })
+          })
+
+          const baseLayers = this.fmap.basisMapService.basemaplayers;   //现有底图数组
+          baseLayers.push(tileLayer);
+          this.view.addLayer(tileLayer);
+        }
+      }
+    })
   }
 
   addDgeneFusion(params: any): Promise<any> {

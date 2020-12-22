@@ -10,8 +10,8 @@
 <!--      <button @click="btn_hideLayer">隐藏图层</button>-->
 <!--      <button @click="btn_switchLayer">切换底图</button><br>-->
       <button @click="btn_addOverlays_pt">添加点</button>
-<!--      <button @click="btn_addOverlays_line">添加线</button>-->
-<!--      <button @click="btn_addOverlays_polygon">添加面</button>-->
+      <button @click="btn_addOverlays_line">添加线</button>
+      <button @click="btn_addOverlays_polygon">添加面</button>
 <!--      <button @click="btn_hideOverlays">隐藏</button>-->
 <!--      <button @click="btn_showOverlays">显示</button>-->
 <!--      <button @click="btn_deleteOverlays">删除</button>-->
@@ -142,7 +142,7 @@
           //symbol for 2d
           type: 'point',
           // primitive: "square",
-          url: 'assets/image/a.png',
+          url: 'assets/image/Anchor.png',
           size: [24,24],
           // color: "red",
           // outline: {
@@ -175,7 +175,7 @@
             fields: {name: '测试4', featureid: '0001',popupWindow: true,tooltipWindow: true}
           }
         ],
-        showPopup: true,
+        showPopup: false,
         moveTooltip: true,
         autoPopup: false,
         // defaultInfoTemplate: {
@@ -214,7 +214,7 @@
             geometry: {paths:path1},
             symbol: {
               type: 'polyline',
-              color:'orange',
+              color:'purple',
               width:10
             },
             fields: {name: '测试1', featureid: '0002'}
@@ -233,10 +233,10 @@
     }
     private async btn_addOverlays_polygon(){
       let rings1 = [
-        [87.597,43.824],
-        [87.617,43.824],
-        [87.617,43.814],
-        [87.597,43.814]];
+        [102.267981, 27.88149],
+        [102.367981, 27.88149],
+        [102.367981, 27.78149],
+        [102.267981, 27.78149]];
       let rings2 = [[87.716, 43.842],[87.716, 43.839],[87.715, 43.836],[87.714, 43.833],[87.713, 43.830],[87.711, 43.827],[87.708, 43.824],
         [87.705, 43.822],[87.702, 43.819],[87.699, 43.817],[87.695, 43.816],[87.691, 43.814],[87.687, 43.813],[87.683, 43.812],
         [87.678, 43.812],[87.674, 43.812],[87.670, 43.812],[87.665, 43.812],[87.661, 43.813],[87.657, 43.814],[87.653, 43.816],
@@ -264,19 +264,19 @@
             geometry: {rings:rings1},
             fields: {name: '测试1', featureid: '0001'}
           },
-          {
-            id: 'testPolygon002',
-            geometry: {rings:rings2},
-            fields: {name: '测试2', featureid: '0002'},
-            symbol: {
-              type: 'polygon',
-              color: 'blue',
-              outline:{
-                color:'black',
-                width:2
-              }
-            },
-          }
+          // {
+          //   id: 'testPolygon002',
+          //   geometry: {rings:rings2},
+          //   fields: {name: '测试2', featureid: '0002'},
+          //   symbol: {
+          //     type: 'polygon',
+          //     color: 'blue',
+          //     outline:{
+          //       color:'black',
+          //       width:2
+          //     }
+          //   },
+          // }
         ],
         showPopup: true,
         autoPopup: false,

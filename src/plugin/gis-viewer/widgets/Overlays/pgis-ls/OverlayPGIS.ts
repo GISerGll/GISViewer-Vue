@@ -9,8 +9,10 @@ import {
   IFindParameter,
   IPicChangeParameter
 } from '@/types/map';
-import TooltipPGIS from "@/plugin/gis-viewer/widgets/Overlays/pgis-ls/TooltipPGIS";
 import {loadModules} from "esri-loader";
+import TooltipPGIS from "@/plugin/gis-viewer/widgets/Overlays/pgis-ls/TooltipPGIS";
+import {Vue} from "vue-property-decorator";
+import ToolTipBaiDu from "@/plugin/gis-viewer/widgets/Overlays/bd/ToolTipBaiDu";
 
 declare let ol:any;
 declare let FMap: any;
@@ -20,7 +22,7 @@ export default class OverlayPGIS {
 
   private view!: any;
   private overlays = new Array();
-
+  private select:any;
   private tooltip:any;
   private popupTypes: Map<string, any> = new Map<string, any>();
   private tooltipTypes:Map<string, any> = new Map<string, any>();
@@ -31,7 +33,9 @@ export default class OverlayPGIS {
       string,
       any
       >();
-  private overlayLayer!: any;                          //一次添加覆盖物的图层组
+  private overlayLayers: any[] = [];                          //一次添加覆盖物的图层组
+  public static hlFeatures:boolean;
+  private featuresSelected:any;
 
   private constructor(view: any) {
     this.view = view;
@@ -58,6 +62,7 @@ export default class OverlayPGIS {
   }
   //一次性添加的覆盖物创建一个vectorLayer
   private async createOverlayLayer(type: string): Promise<any> {
+    //存储原始矢量点、线、面
     const vectorLayer = new ol.layer.Vector({
       source:new ol.source.Vector({}),
       style:new ol.style.Style({
@@ -73,17 +78,25 @@ export default class OverlayPGIS {
             color: '#c00000'
           })
         })
-
       })
     });
+    vectorLayer.title = "addOverlays_layer";
+    this.overlayLayers.push(vectorLayer);     //获取当前加点后的图层
     this.view.addLayer(vectorLayer)
     this.layerGroups.set(type, vectorLayer);
+    if(OverlayPGIS.hlFeatures){
+      await this.highlightFeatures();
+    }
+
     return vectorLayer;
   }
+
   public async addOverlays(params: IOverlayParameter): Promise<IResult> {
     const defaultSymbol = params.defaultSymbol;
-    const defaultType = params.type || "overlays";
+    const defaultType = params.type || params.overlays[0].type || "overlays";
     const defaultButtons = params.defaultButtons;
+    const centerResult = params.centerResult || true;
+    const defaultZoom = params.defaultZoom || 14;
     //默认弹窗样式
     const defaultInfoTemplate = params.defaultInfoTemplate;
     //自定义vue弹窗样式
@@ -121,26 +134,46 @@ export default class OverlayPGIS {
     }
 
     const overlayLayer = await this.createOverlayLayer(defaultType);
+    const features:any[] = []
     for(let overlayObj of params.overlays){
       const overlaySymbol = overlayObj.symbol || defaultSymbol || {};
       overlaySymbol.type = overlaySymbol.type ? overlaySymbol.type :
           defaultSymbol && defaultSymbol.type ? defaultSymbol.type :
               "unknown" ;
       const style = this.getStyle(overlaySymbol);
+      if(!style){
+        break;
+      }
       const overlayGeo = overlayObj.geometry;
       const feature = this.getFeature(overlaySymbol.type,overlayGeo)
       feature.setStyle(style);
+
+      feature.attributes = overlayObj.fields || {};
+      feature.buttons = overlayObj.buttons || defaultButtons;
+      feature.id = overlayObj.id;
+      feature.type = overlayObj.type || defaultType;
+
+      features.push(feature);
       overlayLayer.getSource().addFeature(feature);
+      addCount++;
+
+      if(params.overlays.length === 1 && centerResult){
+        this.view.getView().fit(feature.getGeometry(),{
+          duration:1000,
+        });
+      }
+    }
+    //处理弹窗逻辑,弹窗优先级popup->tooltip,动作优先级show->move->auto
+    //冲突关系：同类冲突，例如autpPopup和movePopup冲突，autoTooltip和moveTooltip冲突
+    //示意：假如同时存在autoPopup和showPopup为true，认为两者冲突，则autoPopup为false
+    if(!defaultInfoTemplate){
+      await this.processPopupAndTooltip(features,popupAndTooltip,componentsObj);
     }
     return {
       status: 0,
       message: 'ok',
       result: `成功添加${params.overlays.length}中的${addCount}个覆盖物`
     };
-  }
-
-  private getGeometry(params:any): any {
-
   }
 
   private getStyle(params:any): any {
@@ -151,10 +184,12 @@ export default class OverlayPGIS {
         if(symbol.primitive){
           const radius = symbol.size || 5;
           const color = symbol.color || '#c0ad00';
-          vectorStyle = new ol.style.Circle({
-            radius: radius,
-            fill: new ol.style.Fill({
-              color: color
+          vectorStyle = new ol.style.Style({
+            image:new ol.style.Circle({
+              radius: radius,
+              fill: new ol.style.Fill({
+                color: color
+              })
             })
           })
         }else {
@@ -167,60 +202,72 @@ export default class OverlayPGIS {
               message:"点url属性错误！"
             }
           }
-          vectorStyle = new ol.style.Style({
-            image: new ol.style.Icon({
-              src:src,
-              // size:size.length ? size : null,
-              // offset:offset.length ? offset : [0,0]
-            })
+          const img = new ol.style.Icon({
+            src:src
           })
-          console.log(vectorStyle);
-          if(size.length){
-            let imgSize = vectorStyle.getImage().getImageSize();
-            imgSize = size;
+          vectorStyle = new ol.style.Style({})
+          if(size.length && typeof size[0] === "number"){
+            let picSize = img.getSize();
+            picSize = size;
+            vectorStyle.setImage(img);
           }
-          if(offset.length){
-            vectorStyle.getImage().offset = offset;
+          if(offset.length && typeof offset[0] === "number"){
+            img.offset = offset;
+            vectorStyle.setImage(img);
           }
         }
         break;
       case "polyline":
         const color = symbol.color;
         const width = symbol.width;
-        vectorStyle = new ol.style.Stroke({
-          color: 'rgb(126,251,37)',
-          width: 2
+        const plStroke = new ol.style.Stroke({
+          color:'rgb(0,253,50)',
+          width:5
+        });
+        vectorStyle = new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color:'rgb(0,253,50)',
+            width:5
+          }),
         })
         if(color){
-          vectorStyle.setColor(color);
+          plStroke.setColor(color);
+          vectorStyle.setStroke(plStroke);
         }
         if(width){
-          vectorStyle.setWidth(width);
+          plStroke.setWidth(width);
+          vectorStyle.setStroke(plStroke);
         }
         break;
       case "polygon":
         const polygonColor = symbol.color;
         const outline = symbol.outline;
-        vectorStyle = new ol.style.Stroke();
+        vectorStyle = new ol.style.Style({});
+        const olStroke = new ol.style.Stroke({
+          color:'rgb(0,0,0)',
+          width:0.1
+        });
+        const fill = new ol.style.Fill({
+          color: 'rgba(0,208,254,0.5)'
+        });
         if(outline && outline.color){
-          vectorStyle.setColor(outline.color);
+          olStroke.setColor(outline.color);
+          vectorStyle.setStroke(olStroke);
         }
         if(outline && outline.width){
-          vectorStyle.setWidth(outline.width);
+          olStroke.setWidth(outline.width);
+          vectorStyle.setStroke(olStroke);
         }
         if(polygonColor){
-          vectorStyle = new ol.style.Fill({
-            color: polygonColor
-          })
+          fill.setColor(polygonColor);
+          vectorStyle.setFill(fill);
         }
-
         break;
       default:
         break;
     }
     return vectorStyle;
   }
-
 
   private getFeature(geoType:any,params:any): any {
     const feature = new ol.Feature();
@@ -241,7 +288,568 @@ export default class OverlayPGIS {
     return feature;
   }
 
-  private getSource(params:any): any {
+  private async listenOverlayClick(popupType:string,popup:Vue.Component,overlays:any[]):Promise<IResult>{
+    if(!popupType){
+      return {
+        status:0,
+        message:'error!please input type of popup/tooltip',
+      }
+    }
+    if(!popup){
+      return {
+        status:0,
+        message:'error!please input vue popup/tooltip component',
+      }
+    }
 
+    switch (popupType) {
+      case "showPopup":
+        const select=new ol.interaction.Select({
+          //condition: ol.events.condition.pointerMove,
+          layers:this.overlayLayers,
+        });
+        select.on("select",(e:any) => {
+          const features=e.selected;
+          const feature=features[0];
+          const geometryType=feature.getGeometry().getType();
+          console.log(geometryType);
+          const attribute1 = feature.getProperties();
+          const attribute2 = feature.attributes;
+        });
+        this.view.addInteraction(select);
+
+        // overlays.forEach((ptOverlay:any) => {
+        //   ptOverlay.addEventListener('click',async (e:any) => {
+        //     let fields = e.target.attributes;
+        //     let content = null;
+        //     if(!fields){
+        //       return ;
+        //     }
+        //     content = fields.popupWindow;
+        //     let center = e.target.getPosition();
+        //
+        //     if (this.popup) {
+        //       this.popup.remove();
+        //       this.popup = null;
+        //     }
+        //     if(content.hasOwnProperty('valuePromise')){
+        //       content.valuePromise = await content.valuePromise;
+        //     }
+        //     this.popup = new ToolTipBaiDu(
+        //         this.view,
+        //         popup,
+        //         content,
+        //         center
+        //     );
+        //   })
+        // });
+        break;
+      case "showTooltip":
+        overlays.forEach((ptOverlay:any) => {
+          ptOverlay.addEventListener('click',async (e:any) => {
+            let fields = e.target.attributes;
+            let content = null;
+            if(!fields){
+              return ;
+            }
+            content = fields.tooltipWindow;
+            let center = e.target.getPosition();
+
+            if (this.tooltip) {
+              this.tooltip.remove();
+              this.tooltip = null;
+            }
+            if(content.hasOwnProperty('valuePromise')){
+              content.valuePromise = await content.valuePromise;
+            }
+            this.tooltip = new ToolTipBaiDu(
+                this.view,
+                popup,
+                content,
+                center
+            );
+          })
+        });
+        break;
+      default:
+        break;
+    }
+
+    return {
+      status:0,
+      message:'成功调用该方法！'
+    }
+
+  }
+
+  private async listenOverlayMouseOver(popupType:string,popup:Vue.Component,overlays:any[]):Promise<any>{
+    if(!popupType){
+      return {
+        status:0,
+        message:'error!please input type of popup/tooltip',
+      }
+    }
+    if(!popup){
+      return {
+        status:0,
+        message:'error!please input vue popup/tooltip component',
+      }
+    }
+
+    switch (popupType) {
+      case "movePopup":
+        overlays.forEach((ptOverlay:any) =>{
+          ptOverlay.addEventListener('mouseover',async (e:any) => {
+            let fields = e.target.attributes;
+            let content = null;
+            if(!fields){
+              return ;
+            }
+            content = fields.popupWindow;
+            let center = e.target.getPosition();
+
+            if (this.popup) {
+              this.popup.remove();
+              this.popup = null;
+            }
+            if(content.hasOwnProperty('valuePromise')){
+              content.valuePromise = await content.valuePromise;
+            }
+            this.popup = new ToolTipBaiDu(
+                this.view,
+                popup,
+                content,
+                center
+            );
+          })
+
+          ptOverlay.addEventListener('mouseout',async (e:any) => {
+            if (this.popup) {
+              this.popup.remove();
+              this.popup = null;
+            }
+          })
+        });
+        // this.view.addEventListener('mousemove',async (e:any)=>{
+        //   if(e.overlay && e.overlay.attributes && e.overlay.attributes.popupWindow){
+        //     let overlay = e.overlay;
+        //     let content = overlay.attributes.popupWindow;
+        //     let center = e.overlay.getPosition();
+        //
+        //     if (this.popup) {
+        //       this.popup.remove();
+        //       this.popup = null;
+        //     }
+        //     if(content.hasOwnProperty('valuePromise')){
+        //       content.valuePromise = await content.valuePromise;
+        //     }
+        //     this.popup = new ToolTipBaiDu(
+        //         this.view,
+        //         popup,
+        //         content,
+        //         center
+        //     );
+        //   }else{
+        //     if (this.popup) {
+        //       this.popup.remove();
+        //       this.popup = null;
+        //     }
+        //   }
+        // });
+        break;
+      case "moveTooltip":
+        overlays.forEach((ptOverlay:any) =>{
+          ptOverlay.addEventListener('mouseover',async (e:any) => {
+            let fields = e.target.attributes;
+            let content = null;
+            if(!fields){
+              return ;
+            }
+            content = fields.tooltipWindow;
+            let center = e.target.getPosition();
+
+            if (this.tooltip) {
+              this.tooltip.remove();
+              this.tooltip = null;
+            }
+            if(content.hasOwnProperty('valuePromise')){
+              content.valuePromise = await content.valuePromise;
+            }
+            this.tooltip = new ToolTipBaiDu(
+                this.view,
+                popup,
+                content,
+                center
+            );
+          })
+
+          ptOverlay.addEventListener('mouseout',async (e:any) => {
+            if (this.tooltip) {
+              this.tooltip.remove();
+              this.tooltip = null;
+            }
+          })
+        });
+
+        // this.view.addEventListener('mousemove',async (e:any)=>{
+        //   if(e.overlay && e.overlay.attributes && e.overlay.attributes.tooltipWindow){
+        //     let overlay = e.overlay;
+        //     let content = overlay.attributes.tooltipWindow;
+        //     let center = e.overlay.getPosition();
+        //
+        //     if (this.tooltip) {
+        //       this.tooltip.remove();
+        //       this.tooltip = null;
+        //     }
+        //     if(content.hasOwnProperty('valuePromise')){
+        //       content.valuePromise = await content.valuePromise;
+        //     }
+        //
+        //     this.tooltip = new ToolTipBaiDu(
+        //         this.view,
+        //         popup,
+        //         content,
+        //         center
+        //     );
+        //   }else{
+        //     if (this.tooltip) {
+        //       this.tooltip.remove();
+        //       this.tooltip = null;
+        //     }
+        //   }
+        // });
+        break;
+      default:
+        break;
+    }
+  }
+
+  public async showTooltip(tooltip:Vue.Component):Promise<IResult>{
+    if(!tooltip && this.tooltip){
+      await this.closeTooltip();
+    }
+    let overlays:any = this.view.getOverlays();
+
+    overlays.forEach((ptOverlay:any) => {
+      ptOverlay.addEventListener('click',async (e:any) => {
+        let fields = e.target.attributes;
+        let center = e.target.getPosition();
+        let infoWindow;
+
+        if(fields){
+          infoWindow = fields.infoWindow;
+        }
+        if(infoWindow){
+          if (this.tooltip) {
+            this.tooltip.remove();
+            this.tooltip = null;
+          }
+          this.tooltip = new ToolTipBaiDu(
+              this.view,
+              tooltip,
+              infoWindow,
+              center
+          );
+        }
+      })
+    })
+    return {
+      status:0,
+      message:'ok',
+      result:'成功调用方法，但无法保证可以正确显示弹窗'
+    }
+  }
+
+  public async closeTooltip():Promise<IResult>{
+    let close = false;
+    if(this.tooltip){
+      this.tooltip.remove();
+      this.tooltip = null;
+      close = true;
+    }
+
+    if(this.popup){
+      this.popup.remove();
+      this.popup = null;
+      close = true
+    }
+
+    return {
+      status:0,
+      message:'ok',
+      result:close ? '成功关闭VUE弹窗': '未存在VUE弹窗'
+    }
+  }
+
+  private async autoPopup(popup:Vue.Component,type?:string) :Promise<IResult>{
+    if(!this.overlays.length){
+      return {
+        status:0,
+        message:'there is no overlays,add first!'
+      }
+    }
+
+    let popupCount = 0;
+    let popups:ToolTipBaiDu[] = [];
+
+    if(type && (typeof type === 'string')){               //有type情况
+      let popupOfType:ToolTipBaiDu[] = this.popupTypes.get(type);   //首先检查该图层是否已经显示Popup
+      if(popupOfType){
+        this.popupTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
+        for(let popup of popupOfType){
+          popup.remove();
+        }
+      }
+
+      for(const overlay of this.overlays){
+        if(overlay.type !== type){
+          continue;
+        }
+
+        let content = overlay.attributes.popupWindow;
+        if(!content){
+          continue;
+        }
+
+        let center =  overlay.getPosition();
+        if(content.hasOwnProperty('valuePromise')){
+          content.valuePromise = await content.valuePromise;
+        }
+
+        let _popup = new ToolTipBaiDu(
+            this.view,
+            popup,
+            content,
+            center
+        );
+        popups.push(_popup);
+        popupCount++;
+      }
+      this.popupTypes.set(type,popups);
+
+      return {
+        status:0,
+        message:`finish autoPopup`,
+        result:`the layer of ${type} with ${popupCount}popups!`
+      }
+    }else {
+      for(const overlay of this.overlays){
+        let content = overlay.attributes.popupWindow;
+        if(!content){
+          continue;
+        }
+
+        let center = overlay.getPosition();
+        if(content.hasOwnProperty('valuePromise')){
+          content.valuePromise = await content.valuePromise;
+        }
+        let _popup = new ToolTipBaiDu(
+            this.view,
+            popup,
+            content,
+            center
+        );
+        popups.push(_popup);
+        popupCount++;
+      }
+
+      return {
+        status:0,
+        message:`finish autoPopup`,
+        result:`add the number of${popupCount}popups!`
+      }
+    }
+  }
+
+  private async autoTooltip(tooltip:Vue.Component,type?:string){
+    if(!this.overlays.length){
+      return {
+        status:0,
+        message:'there is no overlays,add first!'
+      }
+    }
+
+    let tooltipCount = 0;
+    let tooltips:ToolTipBaiDu[] = [];
+
+    if(type && (typeof type === 'string')){               //有type情况
+      let tooltipOfType:ToolTipBaiDu[] = this.tooltipTypes.get(type);   //首先检查该图层是否已经显示Popup
+      if(tooltipOfType){
+        this.tooltipTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
+        for(let popup of tooltipOfType){
+          popup.remove();
+        }
+      }
+
+      for(const overlay of this.overlays){
+        if(overlay.type !== type){
+          continue;
+        }
+
+        let content = overlay.attributes.tooltipWindow;
+        if(!content){
+          continue;
+        }
+
+        let center =  overlay.getPosition();
+        if(content.hasOwnProperty('valuePromise')){
+          content.valuePromise = await content.valuePromise;
+        }
+
+        let _popup = new ToolTipBaiDu(
+            this.view,
+            tooltip,
+            content,
+            center
+        );
+        tooltips.push(_popup);
+        tooltipCount++;
+      }
+      this.popupTypes.set(type,tooltips);
+
+      return {
+        status:0,
+        message:`finish autoPopup`,
+        result:`the layer of ${type} with ${tooltipCount}popups!`
+      }
+    }else {
+      for(const overlay of this.overlays){
+        let content = overlay.attributes.popupWindow;
+        if(!content){
+          continue;
+        }
+
+        let center =  overlay.getPosition();
+        if(content.hasOwnProperty('valuePromise')){
+          content.valuePromise = await content.valuePromise;
+        }
+        let _tooltip = new ToolTipBaiDu(
+            this.view,
+            tooltip,
+            content,
+            center
+        );
+        tooltips.push(_tooltip);
+        tooltipCount++;
+      }
+
+      return {
+        status:0,
+        message:`finish autoPopup`,
+        result:`add the number of${tooltipCount}popups!`
+      }
+    }
+  }
+
+  private async processPopupAndTooltip(overlays:any[],popAndTip:any,componentsObj:any){
+    let showPopup = popAndTip.showPopup;
+    let showTooltip = popAndTip.showTooltip;
+    let moveTooltip = popAndTip.moveTooltip;
+    let movePopup = popAndTip.movePopup;
+    let autoPopup = popAndTip.autoPopup;
+    let autoTooltip = popAndTip.autoTooltip;
+
+    const tooltipComponent = componentsObj.tooltipComponent;
+    const popupComponent = componentsObj.popupComponent;
+
+    if(showPopup){
+      autoPopup = false;
+      movePopup = false;
+    }else if(movePopup){
+      autoPopup = false;
+    }else {
+      if(autoPopup){
+        console.log('autoPopup')
+      }
+    }
+
+    if(showTooltip){
+      autoTooltip = false;
+      moveTooltip = false;
+    }else if(moveTooltip){
+      autoTooltip = false;
+    }else {
+      if(autoTooltip){
+        console.log('autoTooltip')
+      }
+    }
+
+    if(showPopup && popupComponent){
+      await this.listenOverlayClick('showPopup',popupComponent,overlays);
+    }else if(movePopup && popupComponent){
+      await this.listenOverlayMouseOver('movePopup',popupComponent,overlays);
+    }else if(autoPopup && popupComponent){
+      await this.autoPopup(popupComponent);
+    }else {
+      console.log('no overlays popup');
+    }
+
+    if(showTooltip && tooltipComponent){
+      await this.listenOverlayClick('showTooltip',tooltipComponent,overlays)
+    }else if(moveTooltip && tooltipComponent){
+      await this.listenOverlayMouseOver('moveTooltip',tooltipComponent,overlays)
+    }else if(autoTooltip && tooltipComponent){
+      await this.autoTooltip(tooltipComponent);
+    }
+  }
+
+  private async styleFunction(feature:any,isSelect:boolean) {
+    const geometry = feature.getGeometry();
+    const geometryType = geometry.getType();
+    if(geometryType === "Point"){
+      const event = geometry.getExtent();
+      console.log(event);
+    }
+    return  new ol.style.Style({
+      fill: new ol.style.Fill({ //矢量图层填充颜色，以及透明度
+        color:'rgba(201,253,1,0.8)'
+      }),
+      stroke: new ol.style.Stroke({ //边界样式
+        color: '#319FD3',
+        width: 1
+      }),
+    });
+  }
+
+  public async highlightFeatures():Promise<any> {
+    const select=new ol.interaction.Select({
+      layers:this.overlayLayers,
+    });
+    select.on("select",async (e:any) => {
+      const features=e.selected;
+      const feature=features[0];
+      const geometryType=feature.getGeometry().getType();
+      if(geometryType === "Point"){
+        const curStyle = feature.getStyle();
+        const noStyle = new ol.style.Style({
+          image:new ol.style.Circle({
+            radius: 5,
+            fill: new ol.style.Fill({
+              color: 'rgba(0,0,0,0)'
+            })
+          })
+        })
+
+        feature.setStyle(noStyle);
+        for(let i=0;i<3;i++){
+          await sleep(250);
+          feature.setStyle(curStyle);
+          await sleep(250);
+          feature.setStyle(noStyle);
+        }
+        feature.setStyle(curStyle);
+      }
+    });
+    this.view.addInteraction(select);
+
+    function sleep(params:number) {
+      let promise = new Promise(resolve => {
+        setTimeout(()=>{
+          resolve();
+        },params)
+      })
+
+      return promise;
+    }
   }
 }

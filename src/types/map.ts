@@ -415,7 +415,8 @@ export interface IMonitorAreaParameter {
   }
   buffers:number[],
   id?:string,
-  type?:string
+  type?:string,
+  defaultZoom?:number
 }
 export interface IElectronicFence {
   geometry:{
