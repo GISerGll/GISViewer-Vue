@@ -83,6 +83,7 @@ export default class ElectronicFenceBD {
         rings:bufferedArray[i][0]
       }
       overlayObj.id = id;
+      overlayObj.type = type;
       overlayObj.fields = {
         id,
         type
@@ -111,7 +112,7 @@ export default class ElectronicFenceBD {
     return {
       status:0,
       message:'not complete',
-      result:JSON.parse(JSON.stringify(overlaysObj))
+      result:JSON.stringify(overlaysObj)
     }
   }
 

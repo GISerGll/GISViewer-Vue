@@ -12,6 +12,7 @@
       <button @click="btn_addOverlays_pt">添加点</button>
       <button @click="btn_addOverlays_line">添加线</button>
       <button @click="btn_addOverlays_polygon">添加面</button>
+      <button @click="btn_closeAllTooltips">关闭弹窗</button>
 <!--      <button @click="btn_hideOverlays">隐藏</button>-->
 <!--      <button @click="btn_showOverlays">显示</button>-->
 <!--      <button @click="btn_deleteOverlays">删除</button>-->
@@ -176,8 +177,8 @@
           }
         ],
         showPopup: false,
-        moveTooltip: true,
-        autoPopup: false,
+        moveTooltip: false,
+        autoTooltip: true,
         // defaultInfoTemplate: {
         //   title: '1212',
         //   content: '<div>name:{name}<br/><button>{name}</button></div>'
@@ -286,6 +287,10 @@
         },
         defaultButtons: [{label: '确认报警', type: 'confirmAlarm'}]
       })
+    }
+    private async btn_closeAllTooltips(){
+      let map = this.$refs.gisViewer as any;
+      await map.closeAllTooltips();
     }
     private async btn_hideOverlays(){
       let map = this.$refs.gisViewer as any;

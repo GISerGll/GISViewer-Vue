@@ -435,5 +435,6 @@ export default class MapAppBaidu implements IMapContainer {
     const poi = POISearchBD.getInstance(this.view);
     return await poi.searchRoadNetwork(params);
   }
+  public async closeAllTooltips():Promise<any> {}
 
 }

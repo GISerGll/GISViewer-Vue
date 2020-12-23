@@ -1003,4 +1003,5 @@ export default class MapAppArcGIS2D {
   public async searchBoundary(params:IBoundary): Promise<any> {}
   public async searchRoadNetwork(params:IRoadNetwork): Promise<any> {}
   public async clearPOIResults(params:IPOIDelete): Promise<any> {}
+  public async closeAllTooltips():Promise<any> {}
 }

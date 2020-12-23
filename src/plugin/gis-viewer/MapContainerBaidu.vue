@@ -245,6 +245,7 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
   public async searchRoadNetwork(params: IBoundary): Promise<IResult> {
     return await this.mapApp.searchRoadNetwork(params);
   }
+  public async closeAllTooltips():Promise<any> {}
 }
 </script>
 

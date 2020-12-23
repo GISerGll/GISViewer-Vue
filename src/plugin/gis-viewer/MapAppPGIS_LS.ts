@@ -139,7 +139,7 @@ export default class MapAppPGIS_LS implements IMapContainer{
   }
 
   public async addOverlays(param: IOverlayParameter): Promise<any> {
-    const overlay = OverlayPGIS.getInstance(this.view);
+    const overlay = OverlayPGIS.getInstance(this.view,this.fmap);
     return await overlay.addOverlays(param);
   }
 
@@ -394,5 +394,9 @@ export default class MapAppPGIS_LS implements IMapContainer{
   clearPOIResults(): Promise<any>{
     return Promise.resolve(undefined);
   }
-  
+
+  public async closeAllTooltips():Promise<IResult> {
+    const tooltips = OverlayPGIS.getInstance(this.view,this.fmap);
+    return await tooltips.closeAllTooltips();
+  }
 }

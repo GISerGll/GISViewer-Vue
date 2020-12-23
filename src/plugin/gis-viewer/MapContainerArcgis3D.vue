@@ -246,6 +246,7 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public async searchBoundary(params:IBoundary): Promise<any> {}
   public async searchRoadNetwork(params:IRoadNetwork): Promise<any> {}
   public async clearPOIResults(params:IPOIDelete): Promise<any> {}
+  public async closeAllTooltips():Promise<any> {}
 }
 </script>
 

@@ -439,6 +439,9 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async searchBoundary(params:IBoundary): Promise<IResult> {
     return await this.mapContainer.searchBoundary(params);
   }
+  public async closeAllTooltips(): Promise<IResult> {
+    return await this.mapContainer.closeAllTooltips();
+  }
   // public async startLayerSearch(
   //   params: IGeometrySearchParameter
   // ): Promise<IResult> {

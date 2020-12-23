@@ -12,7 +12,6 @@ import {
 import {loadModules} from "esri-loader";
 import TooltipPGIS from "@/plugin/gis-viewer/widgets/Overlays/pgis-ls/TooltipPGIS";
 import {Vue} from "vue-property-decorator";
-import ToolTipBaiDu from "@/plugin/gis-viewer/widgets/Overlays/bd/ToolTipBaiDu";
 
 declare let ol:any;
 declare let FMap: any;
@@ -21,13 +20,16 @@ export default class OverlayPGIS {
   private static intances: Map<string, any>;
 
   private view!: any;
+  private fmap!: any;
   private overlays = new Array();
-  private select:any;
-  private tooltip:any;
-  private popupTypes: Map<string, any> = new Map<string, any>();
-  private tooltipTypes:Map<string, any> = new Map<string, any>();
-
+  //控制showPopup,showTooltip单个弹窗
   private popup:any;
+  private tooltip:any;
+  //控制有autoTooltip,autoPopup多个弹窗
+  private popupTypes: Map<string, TooltipPGIS[]> = new Map<string, TooltipPGIS[]>();
+  private tooltipTypes:Map<string, TooltipPGIS[]> = new Map<string, TooltipPGIS[]>();
+  private tooltips:TooltipPGIS[] = []
+
 
   private layerGroups: Map<string, any> = new Map<     //所有覆盖物的图层组
       string,
@@ -35,20 +37,21 @@ export default class OverlayPGIS {
       >();
   private overlayLayers: any[] = [];                          //一次添加覆盖物的图层组
   public static hlFeatures:boolean;
-  private featuresSelected:any;
 
-  private constructor(view: any) {
+
+  private constructor(view: any,fmap: any) {
     this.view = view;
+    this.fmap = fmap;
   }
 
-  public static getInstance(view: any) {
+  public static getInstance(view: any,fmap: any) {
     let id = view.getTarget();
     if (!OverlayPGIS.intances) {
       OverlayPGIS.intances = new Map();
     }
     let intance = OverlayPGIS.intances.get(id);
     if (!intance) {
-      intance = new OverlayPGIS(view);
+      intance = new OverlayPGIS(view,fmap);
       OverlayPGIS.intances.set(id, intance);
     }
     return intance;
@@ -305,19 +308,43 @@ export default class OverlayPGIS {
     switch (popupType) {
       case "showPopup":
         const select=new ol.interaction.Select({
-          //condition: ol.events.condition.pointerMove,
           layers:this.overlayLayers,
         });
-        select.on("select",(e:any) => {
+        select.on("select",async (e:any) => {
           const features=e.selected;
           const feature=features[0];
+
+          const picSize = feature.getStyle().getImage().getSize();
           const geometryType=feature.getGeometry().getType();
-          console.log(geometryType);
-          const attribute1 = feature.getProperties();
-          const attribute2 = feature.attributes;
+          if(geometryType === "Point"){
+            const fields = feature.attributes;
+            if(!fields){
+              return;
+            }
+            const content = fields.popupWindow;
+            const center = feature.getGeometry().getCoordinates();
+            if (this.popup) {
+              this.popup.remove();
+              this.popup = null;
+            }
+            if(content.hasOwnProperty('valuePromise')){
+              content.valuePromise = await content.valuePromise;
+            }
+
+            const tooltipObj = {
+              view: this.view,
+              component:popup,
+              props:content,
+              position:center,
+              picSize:picSize
+            }
+            this.popup = new TooltipPGIS(tooltipObj);
+          }
+
         });
         this.view.addInteraction(select);
-
+        break;
+      case "showTooltip":
         // overlays.forEach((ptOverlay:any) => {
         //   ptOverlay.addEventListener('click',async (e:any) => {
         //     let fields = e.target.attributes;
@@ -325,17 +352,17 @@ export default class OverlayPGIS {
         //     if(!fields){
         //       return ;
         //     }
-        //     content = fields.popupWindow;
+        //     content = fields.tooltipWindow;
         //     let center = e.target.getPosition();
         //
-        //     if (this.popup) {
-        //       this.popup.remove();
-        //       this.popup = null;
+        //     if (this.tooltip) {
+        //       this.tooltip.remove();
+        //       this.tooltip = null;
         //     }
         //     if(content.hasOwnProperty('valuePromise')){
         //       content.valuePromise = await content.valuePromise;
         //     }
-        //     this.popup = new ToolTipBaiDu(
+        //     this.tooltip = new TooltipPGIS(
         //         this.view,
         //         popup,
         //         content,
@@ -343,33 +370,6 @@ export default class OverlayPGIS {
         //     );
         //   })
         // });
-        break;
-      case "showTooltip":
-        overlays.forEach((ptOverlay:any) => {
-          ptOverlay.addEventListener('click',async (e:any) => {
-            let fields = e.target.attributes;
-            let content = null;
-            if(!fields){
-              return ;
-            }
-            content = fields.tooltipWindow;
-            let center = e.target.getPosition();
-
-            if (this.tooltip) {
-              this.tooltip.remove();
-              this.tooltip = null;
-            }
-            if(content.hasOwnProperty('valuePromise')){
-              content.valuePromise = await content.valuePromise;
-            }
-            this.tooltip = new ToolTipBaiDu(
-                this.view,
-                popup,
-                content,
-                center
-            );
-          })
-        });
         break;
       default:
         break;
@@ -398,38 +398,38 @@ export default class OverlayPGIS {
 
     switch (popupType) {
       case "movePopup":
-        overlays.forEach((ptOverlay:any) =>{
-          ptOverlay.addEventListener('mouseover',async (e:any) => {
-            let fields = e.target.attributes;
-            let content = null;
-            if(!fields){
-              return ;
-            }
-            content = fields.popupWindow;
-            let center = e.target.getPosition();
-
-            if (this.popup) {
-              this.popup.remove();
-              this.popup = null;
-            }
-            if(content.hasOwnProperty('valuePromise')){
-              content.valuePromise = await content.valuePromise;
-            }
-            this.popup = new ToolTipBaiDu(
-                this.view,
-                popup,
-                content,
-                center
-            );
-          })
-
-          ptOverlay.addEventListener('mouseout',async (e:any) => {
-            if (this.popup) {
-              this.popup.remove();
-              this.popup = null;
-            }
-          })
-        });
+        // overlays.forEach((ptOverlay:any) =>{
+        //   ptOverlay.addEventListener('mouseover',async (e:any) => {
+        //     let fields = e.target.attributes;
+        //     let content = null;
+        //     if(!fields){
+        //       return ;
+        //     }
+        //     content = fields.popupWindow;
+        //     let center = e.target.getPosition();
+        //
+        //     if (this.popup) {
+        //       this.popup.remove();
+        //       this.popup = null;
+        //     }
+        //     if(content.hasOwnProperty('valuePromise')){
+        //       content.valuePromise = await content.valuePromise;
+        //     }
+        //     this.popup = new TooltipPGIS(
+        //         this.view,
+        //         popup,
+        //         content,
+        //         center
+        //     );
+        //   })
+        //
+        //   ptOverlay.addEventListener('mouseout',async (e:any) => {
+        //     if (this.popup) {
+        //       this.popup.remove();
+        //       this.popup = null;
+        //     }
+        //   })
+        // });
         // this.view.addEventListener('mousemove',async (e:any)=>{
         //   if(e.overlay && e.overlay.attributes && e.overlay.attributes.popupWindow){
         //     let overlay = e.overlay;
@@ -443,7 +443,7 @@ export default class OverlayPGIS {
         //     if(content.hasOwnProperty('valuePromise')){
         //       content.valuePromise = await content.valuePromise;
         //     }
-        //     this.popup = new ToolTipBaiDu(
+        //     this.popup = new TooltipPGIS(
         //         this.view,
         //         popup,
         //         content,
@@ -458,38 +458,38 @@ export default class OverlayPGIS {
         // });
         break;
       case "moveTooltip":
-        overlays.forEach((ptOverlay:any) =>{
-          ptOverlay.addEventListener('mouseover',async (e:any) => {
-            let fields = e.target.attributes;
-            let content = null;
-            if(!fields){
-              return ;
-            }
-            content = fields.tooltipWindow;
-            let center = e.target.getPosition();
+        // overlays.forEach((ptOverlay:any) =>{
+        //   ptOverlay.addEventListener('mouseover',async (e:any) => {
+        //     let fields = e.target.attributes;
+        //     let content = null;
+        //     if(!fields){
+        //       return ;
+        //     }
+        //     content = fields.tooltipWindow;
+        //     let center = e.target.getPosition();
+        //
+        //     if (this.tooltip) {
+        //       this.tooltip.remove();
+        //       this.tooltip = null;
+        //     }
+        //     if(content.hasOwnProperty('valuePromise')){
+        //       content.valuePromise = await content.valuePromise;
+        //     }
+        //     this.tooltip = new TooltipPGIS(
+        //         this.view,
+        //         popup,
+        //         content,
+        //         center
+        //     );
+        //   })
 
-            if (this.tooltip) {
-              this.tooltip.remove();
-              this.tooltip = null;
-            }
-            if(content.hasOwnProperty('valuePromise')){
-              content.valuePromise = await content.valuePromise;
-            }
-            this.tooltip = new ToolTipBaiDu(
-                this.view,
-                popup,
-                content,
-                center
-            );
-          })
-
-          ptOverlay.addEventListener('mouseout',async (e:any) => {
-            if (this.tooltip) {
-              this.tooltip.remove();
-              this.tooltip = null;
-            }
-          })
-        });
+        //   ptOverlay.addEventListener('mouseout',async (e:any) => {
+        //     if (this.tooltip) {
+        //       this.tooltip.remove();
+        //       this.tooltip = null;
+        //     }
+        //   })
+        // });
 
         // this.view.addEventListener('mousemove',async (e:any)=>{
         //   if(e.overlay && e.overlay.attributes && e.overlay.attributes.tooltipWindow){
@@ -505,7 +505,7 @@ export default class OverlayPGIS {
         //       content.valuePromise = await content.valuePromise;
         //     }
         //
-        //     this.tooltip = new ToolTipBaiDu(
+        //     this.tooltip = new TooltipPGIS(
         //         this.view,
         //         popup,
         //         content,
@@ -530,29 +530,29 @@ export default class OverlayPGIS {
     }
     let overlays:any = this.view.getOverlays();
 
-    overlays.forEach((ptOverlay:any) => {
-      ptOverlay.addEventListener('click',async (e:any) => {
-        let fields = e.target.attributes;
-        let center = e.target.getPosition();
-        let infoWindow;
-
-        if(fields){
-          infoWindow = fields.infoWindow;
-        }
-        if(infoWindow){
-          if (this.tooltip) {
-            this.tooltip.remove();
-            this.tooltip = null;
-          }
-          this.tooltip = new ToolTipBaiDu(
-              this.view,
-              tooltip,
-              infoWindow,
-              center
-          );
-        }
-      })
-    })
+    // overlays.forEach((ptOverlay:any) => {
+    //   ptOverlay.addEventListener('click',async (e:any) => {
+    //     let fields = e.target.attributes;
+    //     let center = e.target.getPosition();
+    //     let infoWindow;
+    //
+    //     if(fields){
+    //       infoWindow = fields.infoWindow;
+    //     }
+    //     if(infoWindow){
+    //       if (this.tooltip) {
+    //         this.tooltip.remove();
+    //         this.tooltip = null;
+    //       }
+    //       this.tooltip = new TooltipPGIS(
+    //           this.view,
+    //           tooltip,
+    //           infoWindow,
+    //           center
+    //       );
+    //     }
+    //   })
+    // })
     return {
       status:0,
       message:'ok',
@@ -581,6 +581,44 @@ export default class OverlayPGIS {
     }
   }
 
+  public async closeTooltips(params:IOverlayDelete):Promise<IResult>{
+    const tooltips = this.view.getOverlays();
+    return {
+      status:0,
+      message:'not complete'
+    }
+  }
+
+  public async closeAllTooltips(): Promise<IResult>{
+    await this.closeTooltip();
+    if(this.tooltips.length){
+      this.tooltips.forEach(tooltip => {
+        tooltip.remove();
+      })
+    }
+    if(this.tooltipTypes.size){
+      this.tooltipTypes.forEach(tooltips => {
+        tooltips.forEach(tooltip => {
+          tooltip.remove();
+        })
+      })
+      this.tooltipTypes.clear();
+    }
+    if(this.popupTypes.size){
+      this.popupTypes.forEach(popups => {
+        popups.forEach(popup => {
+          popup.remove();
+        })
+      })
+      this.popupTypes.clear();
+    }
+
+    return {
+      status:0,
+      message:'成功调用该方法',
+    }
+  }
+
   private async autoPopup(popup:Vue.Component,type?:string) :Promise<IResult>{
     if(!this.overlays.length){
       return {
@@ -590,10 +628,10 @@ export default class OverlayPGIS {
     }
 
     let popupCount = 0;
-    let popups:ToolTipBaiDu[] = [];
+    let popups:TooltipPGIS[] = [];
 
     if(type && (typeof type === 'string')){               //有type情况
-      let popupOfType:ToolTipBaiDu[] = this.popupTypes.get(type);   //首先检查该图层是否已经显示Popup
+      let popupOfType:TooltipPGIS[] | undefined = this.popupTypes.get(type);   //首先检查该图层是否已经显示Popup
       if(popupOfType){
         this.popupTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
         for(let popup of popupOfType){
@@ -616,13 +654,13 @@ export default class OverlayPGIS {
           content.valuePromise = await content.valuePromise;
         }
 
-        let _popup = new ToolTipBaiDu(
-            this.view,
-            popup,
-            content,
-            center
-        );
-        popups.push(_popup);
+        // let _popup = new TooltipPGIS(
+        //     this.view,
+        //     popup,
+        //     content,
+        //     center
+        // );
+        // popups.push(_popup);
         popupCount++;
       }
       this.popupTypes.set(type,popups);
@@ -643,13 +681,13 @@ export default class OverlayPGIS {
         if(content.hasOwnProperty('valuePromise')){
           content.valuePromise = await content.valuePromise;
         }
-        let _popup = new ToolTipBaiDu(
-            this.view,
-            popup,
-            content,
-            center
-        );
-        popups.push(_popup);
+        // let _popup = new TooltipPGIS(
+        //     this.view,
+        //     popup,
+        //     content,
+        //     center
+        // );
+        // popups.push(_popup);
         popupCount++;
       }
 
@@ -661,8 +699,9 @@ export default class OverlayPGIS {
     }
   }
 
-  private async autoTooltip(tooltip:Vue.Component,type?:string){
-    if(!this.overlays.length){
+  private async autoTooltip(tooltip:Vue.Component,overlays:any[]){
+    debugger;
+    if(!overlays.length){
       return {
         status:0,
         message:'there is no overlays,add first!'
@@ -670,10 +709,11 @@ export default class OverlayPGIS {
     }
 
     let tooltipCount = 0;
-    let tooltips:ToolTipBaiDu[] = [];
+    let tooltips:TooltipPGIS[] = [];
 
-    if(type && (typeof type === 'string')){               //有type情况
-      let tooltipOfType:ToolTipBaiDu[] = this.tooltipTypes.get(type);   //首先检查该图层是否已经显示Popup
+    const type = overlays[0].type
+    if(type && (typeof type === 'string')){
+      let tooltipOfType:TooltipPGIS[] | undefined = this.tooltipTypes.get(type);   //首先检查该图层是否已经显示Popup
       if(tooltipOfType){
         this.tooltipTypes.delete(type);   //如果存在改类型的弹窗，则遍历数组，删除所有改类弹窗
         for(let popup of tooltipOfType){
@@ -681,7 +721,7 @@ export default class OverlayPGIS {
         }
       }
 
-      for(const overlay of this.overlays){
+      for(const overlay of overlays){
         if(overlay.type !== type){
           continue;
         }
@@ -691,18 +731,27 @@ export default class OverlayPGIS {
           continue;
         }
 
-        let center =  overlay.getPosition();
+        const center = overlay.getGeometry().getCoordinates();
+        let popup_:any;
+        //等待数据准备完毕后再渲染弹窗
         if(content.hasOwnProperty('valuePromise')){
-          content.valuePromise = await content.valuePromise;
+          content.valuePromise.then(() => {
+            popup_ = new TooltipPGIS({
+              view: this.view,
+              component:tooltip,
+              props:content,
+              position:center,
+            });
+          })
+        }else {
+          popup_ = new TooltipPGIS({
+            view: this.view,
+            component:tooltip,
+            props:content,
+            position:center,
+          });
         }
-
-        let _popup = new ToolTipBaiDu(
-            this.view,
-            tooltip,
-            content,
-            center
-        );
-        tooltips.push(_popup);
+        tooltips.push(popup_);
         tooltipCount++;
       }
       this.popupTypes.set(type,tooltips);
@@ -713,23 +762,33 @@ export default class OverlayPGIS {
         result:`the layer of ${type} with ${tooltipCount}popups!`
       }
     }else {
-      for(const overlay of this.overlays){
+      for(const overlay of overlays){
         let content = overlay.attributes.popupWindow;
         if(!content){
           continue;
         }
 
         let center =  overlay.getPosition();
+        let popup_:any;
+        //等待数据准备完毕后再渲染弹窗
         if(content.hasOwnProperty('valuePromise')){
-          content.valuePromise = await content.valuePromise;
+          content.valuePromise.then(() => {
+            popup_ = new TooltipPGIS({
+              view: this.view,
+              component:tooltip,
+              props:content,
+              position:center,
+            });
+          })
+        }else {
+          popup_ = new TooltipPGIS({
+            view: this.view,
+            component:tooltip,
+            props:content,
+            position:center,
+          });
         }
-        let _tooltip = new ToolTipBaiDu(
-            this.view,
-            tooltip,
-            content,
-            center
-        );
-        tooltips.push(_tooltip);
+        this.tooltips.push(popup_);
         tooltipCount++;
       }
 
@@ -789,7 +848,7 @@ export default class OverlayPGIS {
     }else if(moveTooltip && tooltipComponent){
       await this.listenOverlayMouseOver('moveTooltip',tooltipComponent,overlays)
     }else if(autoTooltip && tooltipComponent){
-      await this.autoTooltip(tooltipComponent);
+      await this.autoTooltip(tooltipComponent,overlays);
     }
   }
 

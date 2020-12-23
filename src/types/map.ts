@@ -245,6 +245,8 @@ export interface IMapContainer {
   clearPOIResults: (params: IPOIDelete) => Promise<IResult>;
   searchBoundary: (params: IBoundary) => Promise<IResult>;
   searchRoadNetwork: (params: IRoadNetwork) => Promise<IResult>;
+  closeAllTooltips: () => Promise<IResult>;
+  closeTooltips: (params:IOverlayDelete) => Promise<IResult>;
 }
 
 export interface IPicChangeParameter {

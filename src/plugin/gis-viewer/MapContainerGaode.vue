@@ -31,6 +31,7 @@ import {
   IDefinitionParameter,
   ITrackParameter, IPOISearch, IPOIDelete, IBoundary, IRoadNetwork
 } from '@/types/map';
+import OverlayPGIS from "@/plugin/gis-viewer/widgets/Overlays/pgis-ls/OverlayPGIS";
 
 @Component({
   name: 'MapContainerGaode'
@@ -254,6 +255,7 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public async clearPOIResults(params: IPOIDelete): Promise<any> {}
   public async searchBoundary(params:IBoundary): Promise<any> {}
   public async searchRoadNetwork(params:IRoadNetwork): Promise<any> {}
+  public async closeAllTooltips():Promise<any> {}
 }
 </script>
 

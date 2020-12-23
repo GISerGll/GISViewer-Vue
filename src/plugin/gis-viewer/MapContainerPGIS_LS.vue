@@ -322,6 +322,10 @@
     }
 
     clearPOIResults(): any{}
+
+    public async closeAllTooltips(): Promise<IResult>{
+      return await this.mapApp.closeAllTooltips();
+    }
     
   }
   
