@@ -6,7 +6,7 @@ import {
   IResult,
   IPOIDelete,
   IRoadNetwork,
-    IBoundary
+  IBoundary, IMultiBoundary
 } from '@/types/map';
 
 export default class POISearchBD {
@@ -322,6 +322,35 @@ export default class POISearchBD {
       status:0,
       message:"成功调用该方法！",
       result:addResults ? JSON.stringify(overlays) : JSON.stringify(boundaryResults)
+    }
+  }
+
+  public async searchMultiBoundary(params:IMultiBoundary): Promise<IResult>{
+    const searchNames = params.searchNames;
+    const colors = [
+        'rgb(234,253,255)',
+      'rgb(238,221,237)',
+      'rgb(224,204,194)',
+      'rgb(232,233,254)',
+      'rgb(231,234,252)',
+    ]
+
+    const requests:any = []
+    searchNames.forEach((searchName:string) => {
+      console.log(searchName);
+      const request= bdWebAPIRequest.requestBoundary({
+        searchName:searchName,
+      });
+      requests.push(request);
+    })
+
+    Promise.all(requests).then((results) => {
+      console.log(results);
+    });
+
+    return {
+      status:0,
+      message:'not complete'
     }
   }
 }

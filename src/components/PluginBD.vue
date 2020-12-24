@@ -50,6 +50,7 @@
       <button @click="btn_POIQuery_roadPlan">路径规划</button>
       <button @click="btn_POIQuery_roadNetwork">路网查询</button>
       <button @click="btn_POIQuery_searchBoundary">行政区划查询</button>
+      <button @click="btn_POIQuery_searchMultiBoundary">多行政区划查询</button>
       <button @click="btn_POIQuery_Geocoding">点击获取信息</button>
     </div>
     <gis-viewer
@@ -417,19 +418,28 @@
 
       let map = this.$refs.gisViewer as any;
       let trackPts = [
-        [87.633314	,	43.887925],
-        [87.633242	,	43.867131],
-        [87.60694	,	43.87012],
-        [87.602538	,	43.881778]]
+        [116.404, 39.915],
+        [116.414, 39.885],
+        // [116.430, 39.645],
+        // [116.404, 39.528]
+      ]
 
       let trackPts_ = [
         {
           path:trackPts,
-          time: 100
+          time: 50
         }
       ]
       await map.startTrackPlayback({
-        trackPoints:trackPts_
+        trackPoints:trackPts_,
+        defaultLineSymbol:{
+          color:'blue',
+          width:5
+        },
+        defaultCarSymbol:{
+          url:require('@/assets/logo.png'),
+          size:[20,20]
+        }
       })
     }
     private async btn_startRealTrackPlayback(){
@@ -760,10 +770,25 @@
     }
     private async btn_POIQuery_searchBoundary(){
       let map = this.$refs.gisViewer as any;
-      console.log(map);
       await map.searchBoundary({
         searchName:"东城区",
         zoom:10
+      })
+    }
+    private async btn_POIQuery_searchMultiBoundary(){
+      let map = this.$refs.gisViewer as any;
+      map.searchMultiBoundary({
+        searchNames:[
+            "布拖县",
+            "普格县",
+            "宁南县",
+            "会东县",
+            "会理县",
+            "德昌县",
+            "盐源县",
+            "木里藏族自治县",
+            "西昌市"
+        ],
       })
     }
     private async btn_POIQuery_Geocoding(){
@@ -875,8 +900,8 @@
         return number;
       }
     }
-    private showGisDeviceInfo(id: string, type: string, attr:any) {
-      console.log(type, id,attr);
+    private showGisDeviceInfo(id: string, type: string, attr:any, geom:any) {
+      console.log(type, id,attr,geom);
       let map = this.$refs.gisViewer as any;
       map.changePicById({
         id:id,

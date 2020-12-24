@@ -25,7 +25,7 @@ import {
   ITrackParameter,
   IDrawOverlaysDelete,
   IPolylineRangingParameter,
-  IPicChangeParameter, IPOISearch, IPOIDelete, IBoundary, IRoadNetwork
+  IPicChangeParameter, IPOISearch, IPOIDelete, IBoundary, IRoadNetwork, IMultiBoundary
 } from '@/types/map';
 import {OverlayArcgis3D} from '@/plugin/gis-viewer/widgets/Overlays/arcgis/OverlayArcgis3D';
 import {RasterStretchRenderer} from 'esri/rasterRenderers';
@@ -670,4 +670,6 @@ export default class MapAppArcGIS3D implements IMapContainer {
   public async searchRoadNetwork(params:IRoadNetwork): Promise<any> {}
   public async clearPOIResults(params:IPOIDelete): Promise<any> {}
   public async closeAllTooltips():Promise<any> {}
+  public async closeTooltips():Promise<any> {}
+  public async searchMultiBoundary(params:IMultiBoundary):Promise<any> {}
 }

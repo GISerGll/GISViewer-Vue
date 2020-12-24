@@ -33,7 +33,7 @@
     IPOISearch,
     ISelectRouteHitTest,
     IDefinitionParameter,
-    ITrackParameter, IPOIDelete, IMonitorAreaParameter, IBoundary
+    ITrackParameter, IPOIDelete, IMonitorAreaParameter, IBoundary, IMultiBoundary
   } from '@/types/map';
   @Component({
     name: 'MapContainerPGIS_LS'
@@ -325,6 +325,10 @@
 
     public async closeAllTooltips(): Promise<IResult>{
       return await this.mapApp.closeAllTooltips();
+    }
+
+    public async searchMultiBoundary(params:IMultiBoundary): Promise<IResult>{
+      return await this.mapApp.searchMultiBoundary(params);
     }
     
   }

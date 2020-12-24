@@ -91,7 +91,11 @@ import {
   IGeocode,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter, IPOIDelete, IRoadNetwork, IBoundary
+  ITrackParameter,
+  IPOIDelete,
+  IRoadNetwork,
+  IBoundary,
+    IMultiBoundary
 } from '@/types/map';
 import bdWebAPIRequest from "@/plugin/gis-viewer/widgets/WebAPI/bd/bdWebAPIRequest";
 
@@ -438,6 +442,9 @@ export default class MapContainer extends Vue implements IMapContainer {
   }
   public async searchBoundary(params:IBoundary): Promise<IResult> {
     return await this.mapContainer.searchBoundary(params);
+  }
+  public async searchMultiBoundary(params:IMultiBoundary): Promise<IResult> {
+    return await this.mapContainer.searchMultiBoundary(params);
   }
   public async closeAllTooltips(): Promise<IResult> {
     return await this.mapContainer.closeAllTooltips();

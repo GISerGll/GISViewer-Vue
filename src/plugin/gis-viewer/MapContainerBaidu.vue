@@ -32,7 +32,7 @@ import {
   IPOISearch,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter, IPOIDelete, IMonitorAreaParameter, IBoundary
+  ITrackParameter, IPOIDelete, IMonitorAreaParameter, IBoundary, IMultiBoundary
 } from '@/types/map';
 @Component({
   name: 'MapAppBaidu'
@@ -246,6 +246,10 @@ export default class MapContainerBaidu extends Vue implements IMapContainer {
     return await this.mapApp.searchRoadNetwork(params);
   }
   public async closeAllTooltips():Promise<any> {}
+  public async closeTooltips():Promise<any> {}
+  public async searchMultiBoundary(params:IMultiBoundary):Promise<any> {
+    return await this.mapApp.searchMultiBoundary(params);
+  }
 }
 </script>
 

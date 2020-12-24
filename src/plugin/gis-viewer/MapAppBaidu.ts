@@ -24,7 +24,14 @@ import {
   ITrackParameter,
   IDrawOverlaysDelete,
   IPolylineRangingParameter,
-  ITrackPlaybackParameter, IPicChangeParameter, IPOISearch, IPOIDelete, IMonitorAreaParameter, IBoundary, IRoadNetwork,
+  ITrackPlaybackParameter,
+  IPicChangeParameter,
+  IPOISearch,
+  IPOIDelete,
+  IMonitorAreaParameter,
+  IBoundary,
+  IRoadNetwork,
+  IMultiBoundary,
 } from '@/types/map';
 import {OverlayBaidu} from '@/plugin/gis-viewer/widgets/Overlays/bd/OverlayBaidu';
 import {HeatMapBD} from './widgets/HeatMap/bd/HeatMapBD';
@@ -35,6 +42,7 @@ import GeometrySearchBD from "@/plugin/gis-viewer/widgets/GeometrySearch/bd/Geom
 import TrackPlaybackBD from "@/plugin/gis-viewer/widgets/TrackPlayback/bd/TrackPlaybackBD";
 import POISearchBD from "@/plugin/gis-viewer/widgets/POISearch/bd/POISearchBD";
 import ElectronicFence from "@/plugin/gis-viewer/widgets/ElectronicFence/bd/ElectronicFence";
+import OverlayPGIS from "@/plugin/gis-viewer/widgets/Overlays/pgis-ls/OverlayPGIS";
 
 
 declare let BMap: any;
@@ -436,5 +444,9 @@ export default class MapAppBaidu implements IMapContainer {
     return await poi.searchRoadNetwork(params);
   }
   public async closeAllTooltips():Promise<any> {}
-
+  public async closeTooltips():Promise<any> {}
+  public async searchMultiBoundary(params:IMultiBoundary):Promise<IResult> {
+    const multiBoundary = POISearchBD.getInstance(this.view);
+    return await multiBoundary.searchMultiBoundary(params);
+  }
 }

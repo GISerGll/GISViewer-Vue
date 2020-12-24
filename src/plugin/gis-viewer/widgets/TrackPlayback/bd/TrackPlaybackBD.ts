@@ -34,15 +34,16 @@ export default class TrackPlaybackBD {
     tempCache:{}
   };
   private allGraphics:any = []
-  private intervalTime: number = 500
+  private intervalTime: number = 500;
   private canGo: Boolean = true
+  private carSymbol:any
 
   private constructor(view: any) {
     this.view = view;
   }
 
   public static getInstance(view:any) {
-    let id = view.container.id;
+    let id = view.getContainer().id;
     if (!TrackPlaybackBD.intances) {
       TrackPlaybackBD.intances = new Map();
     }
@@ -64,12 +65,16 @@ export default class TrackPlaybackBD {
 
   public async startTrackPlayback(params:ITrackPlaybackBDParameter):Promise<IResult>{
     const allPathsObj = params.trackPoints;
+    const loop = params.loop || true;
+    const loopTimes = params.loopTimes || 100;
+    const isCenter = params.isCenter || true;
+
     //处理调用者输入的lineSymbol
     let defaultLineSymbol:any = params.defaultLineSymbol;
     if(!defaultLineSymbol){
       defaultLineSymbol = DrawOverlaysBD.defaultLineSymbol
     }else {
-      defaultLineSymbol = this.processDefaultLineSymbol(defaultLineSymbol);
+      defaultLineSymbol = await this.processDefaultLineSymbol(defaultLineSymbol);
     }
     //处理调用者输入的carSymbol
     let defaultCarSymbol:any = params.defaultCarSymbol;
@@ -87,11 +92,11 @@ export default class TrackPlaybackBD {
         icon:defaultIcon,
       }
     }else {
-      defaultCarSymbol = this.processDefaultCarSymbol(defaultCarSymbol);
+      defaultCarSymbol = await this.processDefaultCarSymbol(defaultCarSymbol);
     }
-    const moveType = params.moverType || "constant";
-    const moveTimes = params.moveTimes || 1000;
-
+    this.carSymbol = defaultCarSymbol;
+    // const moveType = params.moverType || "constant";
+    // const moveTimes = params.moveTimes || 1000;
     if(!allPathsObj.length){
       return {
         message:'请输入正确的坐标数组',
@@ -100,19 +105,26 @@ export default class TrackPlaybackBD {
     }
 
     const allPathObj_processed:any = [];
+    let allCoordinates:any = []
     allPathsObj.forEach((pathObj:any,index:number) => {
       let pathCoordinates = pathObj.path;
       let pathSymbol = pathObj.trackSymbol;
+      if(pathSymbol){
+        pathSymbol = this.processDefaultLineSymbol(pathSymbol);
+      }
       if(!pathCoordinates.length){
         console.error(`请检查第${index}段路径坐标格式是否正确！`)
         return;
       }
 
       //添加该段路径到地图
-      this.addTrackLine(pathCoordinates,pathSymbol || defaultLineSymbol)
+      this.addTrackLine(pathCoordinates,pathSymbol || defaultLineSymbol);
       let carCoordinates = this.calculateAPartRoad(pathCoordinates);
+      carCoordinates.forEach((carCoordinateObj:any) => {
+        allCoordinates.push(carCoordinateObj.coordinate);
+      })
       //添加该段小车到地图
-      this.addTrackCar(carCoordinates,defaultCarSymbol);
+      this.addTrackCar(carCoordinates);
 
       let pathObj_processed:any = {};
       //该短路的行驶时间，用于计算小车速度
@@ -127,13 +139,30 @@ export default class TrackPlaybackBD {
       this.movingMsgObj.sumOfRoads++;
     })
     this.movingMsgObj.tempCache = allPathObj_processed;
-
-    await this.movingIteration();
-
+    if(isCenter){
+      const pl = new BMap.Polyline(this.getPtGeometry(allCoordinates));
+      const plBounds = pl.getBounds();
+      const center = plBounds.getCenter();
+      await this.view.setCenter(center);
+    }
+    if(loop){
+      for (let i=0; i<loopTimes; i++){
+        await this.movingIteration();
+      }
+    }
     return {
       message:'not complete',
       status:0
     }
+  }
+  private getPtGeometry(points: number[][]): object[] {
+    let features: object[] = [];
+    for (let i = 0; i < points.length; i++) {
+      let pt: number[] = points[i];
+      let point = new BMap.Point(pt[0], pt[1]);
+      features.push(point);
+    }
+    return features;
   }
 
   private calculateAPartRoad(params:number[][]):number[][]{
@@ -165,7 +194,7 @@ export default class TrackPlaybackBD {
 
   private calculateMovingPoints(trackPoints:number[][],orderAndNum:any) {
     let movingPointsCoordinates = [];
-    debugger;
+
     for(let j=0;j<orderAndNum.length;j++){
       let num = orderAndNum[j];
 
@@ -268,7 +297,7 @@ export default class TrackPlaybackBD {
     return pathLength;
   }
 
-  private async processDefaultLineSymbol(defaultSymbol:any):Promise<any>{
+  private processDefaultLineSymbol(defaultSymbol:any):Promise<any>{
     let symbolOption:any = null;
 
     symbolOption = DrawOverlaysBD.defaultLineSymbol;
@@ -285,11 +314,8 @@ export default class TrackPlaybackBD {
     return symbolOption;
   }
 
-  private async processDefaultCarSymbol(defaultSymbol:any):Promise<any>{
-    const symbolOption = DrawOverlaysBD.defaultPicMarkerSymbol;
-    // if(defaultSymbol && defaultSymbol.hasOwnProperty('url')){
-    //   symbolOption.icon.imageUrl = defaultSymbol.url;
-    // }
+  private processDefaultCarSymbol(defaultSymbol:any):Promise<any>{
+    const symbolOption:any = {};
     if(defaultSymbol && defaultSymbol.hasOwnProperty('size') &&
         defaultSymbol.size instanceof Array){
       let size = new BMap.Size(
@@ -302,6 +328,7 @@ export default class TrackPlaybackBD {
 
       symbolOption.icon = icon;
     }
+    return symbolOption;
   }
 
   private addTrackLine(path:number[][],symbol:any) {
@@ -309,20 +336,22 @@ export default class TrackPlaybackBD {
     this.view.addOverlay(lineGraphic);
   }
 
-  private addTrackCar(path:any,symbol:any) {
+  private addTrackCar(path:any) {
     path.forEach((coordinateObj:any,coordinateIndex:number)=>{
       let coordinate = coordinateObj.coordinate;
       let angel = coordinateObj.angle
-      let carGraphic:any = new BMap.Marker(new BMap.Point(coordinate[0],coordinate[1]),symbol);
+      let carGraphic:any = new BMap.Marker(new BMap.Point(coordinate[0],coordinate[1]),this.carSymbol);
       carGraphic.id = "trackPlaybackCar_carOrder: " + coordinateIndex;
       carGraphic.type = "trackPlayback";
       carGraphic.setRotation(angel);
-      carGraphic.hide();
-      this.view.addOverlay(carGraphic);
+      // carGraphic.hide();
+      // this.view.addOverlay(carGraphic);
 
       this.allGraphics.push(carGraphic);
     })
-
+    // this.allGraphics.forEach((graphic:any) => {
+    //   this.view.addOverlay(graphic);
+    // })
   }
 
   private getGeometry(points: number[][]): object[] {
@@ -340,7 +369,6 @@ export default class TrackPlaybackBD {
       this.movingMsgObj.currentId = 0;
       this.movingMsgObj.currentRoad = 0;
     }
-
     let movingStatus:string = "normal";
 
     let start = 0;
@@ -353,7 +381,6 @@ export default class TrackPlaybackBD {
       this.movingMsgObj.currentSpeed = speed;
 
       end += this.movingMsgObj.tempCache[i].coordinates.length-1;
-
       await this.showAPartRoad(start,end).then((value)=>{
         start = end;
         //value = "pause",处理暂停情况
@@ -364,7 +391,7 @@ export default class TrackPlaybackBD {
         else {
           if(i === this.movingMsgObj.tempCache.length -1){
             //隐藏最后一辆小车
-            this.allGraphics[this.allGraphics.length-1].visible = false;
+            this.view.removeOverlay(this.allGraphics[this.allGraphics.length-1]);
             i=0;
             start = end = 0;
           }
@@ -376,7 +403,6 @@ export default class TrackPlaybackBD {
   }
   //展示从当前id到终点的一段路
   private async showAPartRoad(start:number,end:number) {
-    debugger;
     for(let i=start;i<=end;i++){
       if(this.canGo){
         this.movingMsgObj.currentId = i;
@@ -391,7 +417,6 @@ export default class TrackPlaybackBD {
   }
   //展示一段路中的某一点
   private async showOneMovingCar(startId:number) {
-    debugger;
     let graphicLast:any;
     let graphicCur:any = this.allGraphics[startId];
 
@@ -399,8 +424,8 @@ export default class TrackPlaybackBD {
       graphicLast = this.allGraphics[startId-1];
       let stage = graphicLast.type;
       await this.sleep(this.intervalTime);
-      graphicLast.hide();
+      this.view.removeOverlay(graphicLast);
     }
-    graphicCur.show();
+    this.view.addOverlay(graphicCur);
   }
 }

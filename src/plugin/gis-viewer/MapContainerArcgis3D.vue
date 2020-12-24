@@ -30,7 +30,7 @@ import {
   IPolylineRangingParameter,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter, IPOISearch, IPOIDelete, IBoundary, IRoadNetwork
+  ITrackParameter, IPOISearch, IPOIDelete, IBoundary, IRoadNetwork, IMultiBoundary
 } from '@/types/map';
 import POISearchBD from "@/plugin/gis-viewer/widgets/POISearch/bd/POISearchBD";
 
@@ -247,6 +247,8 @@ export default class MapContainerArcgis3D extends Vue implements IMapContainer {
   public async searchRoadNetwork(params:IRoadNetwork): Promise<any> {}
   public async clearPOIResults(params:IPOIDelete): Promise<any> {}
   public async closeAllTooltips():Promise<any> {}
+  public async closeTooltips():Promise<any> {}
+  public async searchMultiBoundary(params:IMultiBoundary):Promise<any> {}
 }
 </script>
 

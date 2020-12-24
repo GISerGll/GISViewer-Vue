@@ -30,7 +30,7 @@ import {
   IPOIDelete,
   IMonitorAreaParameter,
   IBoundary,
-  IRoadNetwork,
+  IRoadNetwork, IMultiBoundary,
 } from '@/types/map';
 import {Utils} from '@/plugin/gis-viewer/Utils';
 import OverlayPGIS from "@/plugin/gis-viewer/widgets/Overlays/pgis-ls/OverlayPGIS";
@@ -399,4 +399,11 @@ export default class MapAppPGIS_LS implements IMapContainer{
     const tooltips = OverlayPGIS.getInstance(this.view,this.fmap);
     return await tooltips.closeAllTooltips();
   }
+
+  public async closeTooltips():Promise<IResult> {
+    const tooltips = OverlayPGIS.getInstance(this.view,this.fmap);
+    return await tooltips.closeTooltips();
+  }
+
+  public async searchMultiBoundary(params:IMultiBoundary):Promise<any> {}
 }

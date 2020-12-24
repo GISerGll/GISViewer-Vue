@@ -28,7 +28,7 @@ import {
   IDefinitionParameter,
   ITrackParameter,
   IPolylineRangingParameter,
-  IPicChangeParameter, IPOISearch, IPOIDelete, IBoundary, IRoadNetwork
+  IPicChangeParameter, IPOISearch, IPOIDelete, IBoundary, IRoadNetwork, IMultiBoundary
 } from '@/types/map';
 
 import {Draw2D} from "@/plugin/gis-viewer/widgets/draw2D";
@@ -64,6 +64,7 @@ import ImageOverlays from './widgets/HeatMap/arcgis/ImageOverlays';
 import {LayerDefinition} from './widgets/LayerDefinition/arcgis/LayerDefinition';
 import GeometrySearchBD from "@/plugin/gis-viewer/widgets/GeometrySearch/bd/GeometrySearchBD";
 import POISearchBD from "@/plugin/gis-viewer/widgets/POISearch/bd/POISearchBD";
+import OverlayPGIS from "@/plugin/gis-viewer/widgets/Overlays/pgis-ls/OverlayPGIS";
 
 export default class MapAppArcGIS2D {
   public view!: __esri.MapView;
@@ -1004,4 +1005,6 @@ export default class MapAppArcGIS2D {
   public async searchRoadNetwork(params:IRoadNetwork): Promise<any> {}
   public async clearPOIResults(params:IPOIDelete): Promise<any> {}
   public async closeAllTooltips():Promise<any> {}
+  public async closeTooltips():Promise<any> {}
+  public async searchMultiBoundary(params:IMultiBoundary):Promise<any> {}
 }

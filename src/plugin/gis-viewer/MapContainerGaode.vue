@@ -29,7 +29,7 @@ import {
   IPolylineRangingParameter,
   ISelectRouteHitTest,
   IDefinitionParameter,
-  ITrackParameter, IPOISearch, IPOIDelete, IBoundary, IRoadNetwork
+  ITrackParameter, IPOISearch, IPOIDelete, IBoundary, IRoadNetwork, IMultiBoundary
 } from '@/types/map';
 import OverlayPGIS from "@/plugin/gis-viewer/widgets/Overlays/pgis-ls/OverlayPGIS";
 
@@ -256,6 +256,8 @@ export default class MapContainerGd extends Vue implements IMapContainer {
   public async searchBoundary(params:IBoundary): Promise<any> {}
   public async searchRoadNetwork(params:IRoadNetwork): Promise<any> {}
   public async closeAllTooltips():Promise<any> {}
+  public async closeTooltips():Promise<any> {}
+  public async searchMultiBoundary(params:IMultiBoundary):Promise<any> {}
 }
 </script>
 

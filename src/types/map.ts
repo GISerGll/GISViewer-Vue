@@ -247,6 +247,7 @@ export interface IMapContainer {
   searchRoadNetwork: (params: IRoadNetwork) => Promise<IResult>;
   closeAllTooltips: () => Promise<IResult>;
   closeTooltips: (params:IOverlayDelete) => Promise<IResult>;
+  searchMultiBoundary: (params: IMultiBoundary) => Promise<IResult>;
 }
 
 export interface IPicChangeParameter {
@@ -368,7 +369,7 @@ export interface ITrackPlaybackBDParameter {
   moverType?:string                     //"constant" || "bySecond"
   defaultLineSymbol?:IPolylineSymbol
   defaultCarSymbol?:IPointSymbol
-  moveTimes?:number
+  loopTimes?:number
   autoStart?:Boolean
   loop?:Boolean
   repeatCount?:number
@@ -549,6 +550,9 @@ export interface IBoundary {
     width:number
   },
   defaultZoom?:number //默认缩放等级
+}
+export interface IMultiBoundary {
+  searchNames:string[],
 }
 export interface IGeocode {
   location:number[],
