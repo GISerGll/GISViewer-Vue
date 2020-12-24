@@ -246,7 +246,7 @@ export interface IMapContainer {
   searchBoundary: (params: IBoundary) => Promise<IResult>;
   searchRoadNetwork: (params: IRoadNetwork) => Promise<IResult>;
   closeAllTooltips: () => Promise<IResult>;
-  closeTooltips: (params:IOverlayDelete) => Promise<IResult>;
+  // closeTooltips: (params:IOverlayDelete) => Promise<IResult>;
   searchMultiBoundary: (params: IMultiBoundary) => Promise<IResult>;
 }
 
@@ -549,10 +549,12 @@ export interface IBoundary {
     color:string,
     width:number
   },
+  centerResult?:boolean,
   defaultZoom?:number //默认缩放等级
 }
 export interface IMultiBoundary {
   searchNames:string[],
+  defaultZoom?:number,
 }
 export interface IGeocode {
   location:number[],

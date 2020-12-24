@@ -378,6 +378,7 @@
       })
 
     }
+
     private async btn_drawCircles(){
       let map = this.$refs.gisViewer as any;
       const result = await map.startDrawOverlays({
@@ -387,6 +388,7 @@
         showPopup:true
       })
     }
+
     private async btn_drawRects(){
       let map = this.$refs.gisViewer as any;
       const result = await map.startDrawOverlays({
@@ -396,10 +398,12 @@
         showPopup:true
       })
     }
+
     private async btn_stopDrawOverlays(){
       let map = this.$refs.gisViewer as any;
       const results = await map.stopDrawOverlays();
     }
+
     private async btn_getDrawOverlays(){
       let map = this.$refs.gisViewer as any;
       const results = await map.getDrawOverlays();
@@ -414,14 +418,12 @@
 
       console.log(JSON.parse(results.result));
     }
-    private async btn_startTrackPlayback(){
 
+    private async btn_startTrackPlayback(){
       let map = this.$refs.gisViewer as any;
       let trackPts = [
         [116.404, 39.915],
         [116.414, 39.885],
-        // [116.430, 39.645],
-        // [116.404, 39.528]
       ]
 
       let trackPts_ = [
@@ -442,6 +444,7 @@
         }
       })
     }
+
     private async btn_startRealTrackPlayback(){
       let map = this.$refs.gisViewer as any;
       let trackPts = [
@@ -478,14 +481,17 @@
         routeUrl:"http://128.64.151.245:6080/arcgis/rest/services/WuLuMuQi/wlmq_road_analyst/NAServer/Route"
       })
     }
+
     private async btn_pausePlayback(){
       let map = this.$refs.gisViewer as any;
       await map.pausePlayback();
     }
+
     private async btn_goOnPlayback(){
       let map = this.$refs.gisViewer as any;
       await map.goOnPlayback();
     }
+
     private async btn_showMonitorArea(){
       let map = this.$refs.gisViewer as any;
       const result1 = await map.showMonitorArea({
@@ -516,6 +522,7 @@
       })
       // console.log(result);
     }
+
     private async btn_showCircleOutline(){
       let map = this.$refs.gisViewer as any;
       await map.showCircleOutline({
@@ -523,6 +530,7 @@
         radius:1000
       })
     }
+
     private async btn_createPlaceFence(){
       let map = this.$refs.gisViewer as any;
       let fenceParamsObj:any = {};
@@ -531,6 +539,7 @@
       fenceParamsObj.centerResults = true;
       await map.createPlaceFence(fenceParamsObj);
     }
+
     private async btn_createLineFence(){
       let map = this.$refs.gisViewer as any;
       let fenceParamsObj:any = {};
@@ -539,6 +548,7 @@
       fenceParamsObj.centerResults = true;
       await map.createLineFence(fenceParamsObj);
     }
+
     private async btn_createElectFenceByEndPtsConnection(){
       let map = this.$refs.gisViewer as any;
       let fenceParamsObj:any = {};
@@ -771,14 +781,23 @@
     private async btn_POIQuery_searchBoundary(){
       let map = this.$refs.gisViewer as any;
       await map.searchBoundary({
-        searchName:"东城区",
-        zoom:10
+        searchName:"凉山彝族自治州",
+        centerResult:false,
+        color:'rgba(37,122,251,0.1)'
       })
     }
     private async btn_POIQuery_searchMultiBoundary(){
       let map = this.$refs.gisViewer as any;
       map.searchMultiBoundary({
         searchNames:[
+            "雷波县",
+            "美姑县",
+            "甘洛县",
+            "越西县",
+            "冕宁县",
+            "喜德县",
+            "昭觉县",
+            "金阳县",
             "布拖县",
             "普格县",
             "宁南县",
@@ -800,7 +819,6 @@
       })
     }
     private async mapLoaded() {
-      console.log(222);
       let map = this.$refs.gisViewer as any;
       const result = await map.addOverlays({
         type: 'police',
@@ -859,7 +877,7 @@
         ],
         // showPopup: false,
         // autoPopup: false,
-        autoTooltip: true,
+        autoTooltip: false,
         // popupComponent:Parent,
         tooltipComponent:SimpleTooltip,
         // defaultInfoTemplate: {

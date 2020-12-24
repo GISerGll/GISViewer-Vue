@@ -146,10 +146,10 @@ export default class bdWebAPIRequest {
 
     $.ajax(requestObj).then((value:any) => {
       console.log(requestObj);
-      console.log(value);
+
     }).fail((err:any) => {
       console.log(requestObj);
-      console.log(err);
+
     })
 
     return {
@@ -188,11 +188,9 @@ export default class bdWebAPIRequest {
     }
 
     $.ajax(requestObj).then((value:any) => {
-      console.log(requestObj);
-      console.log(value);
+
     }).fail((err:any) => {
-      console.log(requestObj);
-      console.log(err);
+
     })
 
     return {
@@ -229,7 +227,6 @@ export default class bdWebAPIRequest {
     )
         .then(function (response) {
           resultDate = response.data;
-          console.log(resultDate);
         })
         .catch(function (error) {
           console.log(error);
@@ -254,7 +251,6 @@ export default class bdWebAPIRequest {
     )
         .then(function (response) {
           resultDate = response.data;
-          console.log(resultDate);
         })
         .catch(function (error) {
           console.log(error);

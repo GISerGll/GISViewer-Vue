@@ -9,6 +9,7 @@ import {
   IBoundary, IMultiBoundary
 } from '@/types/map';
 
+declare let BMap:any
 export default class POISearchBD {
   private view!: any;
   private static intances: Map<string, any>;
@@ -229,7 +230,6 @@ export default class POISearchBD {
             color: 'blue',
             width: 5
           }
-          console.log(overlayObj);
           overlays.push(overlayObj);
         })
       })
@@ -253,12 +253,13 @@ export default class POISearchBD {
   public async searchBoundary(params:IBoundary): Promise<IResult>{
     const searchName = params.searchName;
     const adcode = params.adcode || "";
-    const addResults = params.addResults || true;
+    const addResults = params.addResults !== false;
     const areaColor = params.color || 'rgba(37,122,251,0.5)';
     const boundaryColor = params.outline?.color || 'blue';
     const boundaryWidth = params.outline?.width || 5;
     const areaId = params.id;
     const areaType = params.type;
+    const centerResult = params.centerResult !== false;
     const defaultZoom = params.defaultZoom || 12;
 
     const requestResults = await bdWebAPIRequest.requestBoundary({
@@ -315,6 +316,7 @@ export default class POISearchBD {
       await overlaysBD.addOverlays({
         type:"boundary",
         overlays:overlays,
+        centerResult:centerResult,
         defaultZoom:defaultZoom
       })
     }
@@ -327,30 +329,121 @@ export default class POISearchBD {
 
   public async searchMultiBoundary(params:IMultiBoundary): Promise<IResult>{
     const searchNames = params.searchNames;
+    const defaultZoom = params.defaultZoom || 12;
     const colors = [
-        'rgb(234,253,255)',
-      'rgb(238,221,237)',
-      'rgb(224,204,194)',
-      'rgb(232,233,254)',
-      'rgb(231,234,252)',
+      'rgb(207,252,228)',
+      'rgb(239,252,187)',
+      'rgb(191,179,252)',
+      'rgb(252,216,187)',
+      'rgb(182,211,252)',
+      'rgb(182,252,186)',
+      'rgb(182,226,252)',
+      'rgb(252,179,210)',
+      'rgb(244,182,252)',
+      'rgb(207,252,228)',
+      'rgb(239,252,187)',
+      'rgb(191,179,252)',
+      'rgb(252,216,187)',
+      'rgb(182,211,252)',
+      'rgb(182,252,186)',
+      'rgb(182,226,252)',
+      'rgb(252,179,210)',
+      'rgb(244,182,252)',
     ]
 
     const requests:any = []
+    const overlays:any = []
     searchNames.forEach((searchName:string) => {
-      console.log(searchName);
       const request= bdWebAPIRequest.requestBoundary({
         searchName:searchName,
       });
       requests.push(request);
     })
 
-    Promise.all(requests).then((results) => {
-      console.log(results);
-    });
+    await Promise.all(requests).then((results) => {
+      results.forEach((resultObj:any,index) => {
+        const boundaryStr = resultObj.result.results[0].boundary;
+        const boundaryName = resultObj.result.results[0].district;
+        const attr = resultObj.result.results[0];
+        const boundaryArray:any[] = boundaryStr.split(";");
+        boundaryArray.forEach((coordinateStr:any,index:number) => {
+          const coordinateArray:any[] = coordinateStr.split(",");
+          coordinateArray.forEach((xOrY:any,index) => {
+            coordinateArray[index] = parseFloat(xOrY);
+          })
+          boundaryArray[index] = coordinateArray;
+        })
 
+        const overlayObj:any = {};
+        overlayObj.geometry = {rings:boundaryArray};
+        overlayObj.id = boundaryName ? boundaryName : "multiBoundary" + Math.random().toFixed(5).toString();
+        overlayObj.type = "multiBoundary";
+        overlayObj.fields = attr;
+        overlayObj.fields.id = overlayObj.id;
+        overlayObj.fields.type = overlayObj.type;
+        delete overlayObj.fields.boundary;
+        overlayObj.symbol = {
+          type: 'polygon',
+          color: colors[index],
+          outline: {
+            color: colors[index],
+            width: 1
+          }
+        }
+        overlays.push(overlayObj);
+
+        const polygon = new BMap.Polyline(this.getPtGeometry(boundaryArray));
+        const plBounds = polygon.getBounds();
+        const center = plBounds.getCenter();
+        const opts = {
+          position : center,    // 指定文本标注所在的地理位置
+          offset   : new BMap.Size(30, -30)    //设置文本偏移量
+        }
+        const label = new BMap.Label(boundaryName, opts);  // 创建文本标注对象
+        label.setStyle({
+          border:"none",
+          color : "black",
+          fontSize : "12px",
+          height : "20px",
+          lineHeight : "20px",
+          fontFamily:"黑体",
+          background: 'rgba(240,240,240, 0.1)',
+          marginLeft: `${-12 * boundaryName.length}px`,
+          marginTop: "12px",
+        });
+
+        this.view.addOverlay(label);
+      })
+    });
+    const overlaysBD = OverlayBaidu.getInstance(this.view);
+    await overlaysBD.deleteOverlays({
+      types:["multiBoundary"],
+    })
+
+
+    await overlaysBD.addOverlays({
+      type:"multiBoundary",
+      overlays:overlays,
+      defaultZoom:defaultZoom
+    })
+
+    const centerCoordinate = [102.458255,27.70151];
+    const centerPt = new BMap.Point(centerCoordinate[0],centerCoordinate[1]);
+
+    await this.view.centerAndZoom(centerPt, 8);
     return {
       status:0,
       message:'not complete'
     }
+  }
+
+  private getPtGeometry(points: number[][]): object[] {
+    let features: object[] = [];
+    for (let i = 0; i < points.length; i++) {
+      let pt: number[] = points[i];
+      let point = new BMap.Point(pt[0], pt[1]);
+      features.push(point);
+    }
+    return features;
   }
 }

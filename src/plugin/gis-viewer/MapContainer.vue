@@ -449,6 +449,9 @@ export default class MapContainer extends Vue implements IMapContainer {
   public async closeAllTooltips(): Promise<IResult> {
     return await this.mapContainer.closeAllTooltips();
   }
+  // public async closeTooltips(params:IOverlayDelete): Promise<IResult> {
+  //   return await this.mapContainer.closeTooltips(params);
+  // }
   // public async startLayerSearch(
   //   params: IGeometrySearchParameter
   // ): Promise<IResult> {

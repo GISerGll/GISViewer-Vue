@@ -197,7 +197,7 @@ export class OverlayBaidu {
     const defaultSymbol = params.defaultSymbol;
     const defaultType = params.type;
     const defaultButtons = params.defaultButtons;
-    const centerResult = params.centerResult || true;
+    const centerResult = params.centerResult !== false;
     const defaultZoom = params.defaultZoom || 14;
       //默认弹窗样式
       const defaultInfoTemplate = params.defaultInfoTemplate;
