@@ -13,8 +13,8 @@
       <button @click="btn_addOverlays_line">添加线</button>
       <button @click="btn_addOverlays_polygon">添加面</button>
       <button @click="btn_closeAllTooltips">关闭弹窗</button>
-<!--      <button @click="btn_hideOverlays">隐藏</button>-->
-<!--      <button @click="btn_showOverlays">显示</button>-->
+      <button @click="btn_hideOverlays">隐藏</button>
+      <button @click="btn_showOverlays">显示</button>
 <!--      <button @click="btn_deleteOverlays">删除</button>-->
 <!--      <button @click="btn_backgroudGeometrySearch">搜索覆盖物</button>-->
 <!--      <button @click="btn_closeToolTip">关闭VUE弹窗</button><br>-->
@@ -302,7 +302,8 @@
     private async btn_showOverlays(){
       let map = this.$refs.gisViewer as any;
       const results = await map.showOverlays({
-        types:['alarmPoints','police']
+        types:['police'],
+        ids:['test001']
       });
       console.log(results)
     }

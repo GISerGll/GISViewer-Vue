@@ -28,13 +28,12 @@ export default class OverlayPGIS {
   //控制有autoTooltip,autoPopup多个弹窗
   private popupTypes: Map<string, TooltipPGIS[]> = new Map<string, TooltipPGIS[]>();
   private tooltipTypes:Map<string, TooltipPGIS[]> = new Map<string, TooltipPGIS[]>();
-  private tooltips:TooltipPGIS[] = []
-
-
-  private layerGroups: Map<string, any> = new Map<     //所有覆盖物的图层组
-      string,
-      any
-      >();
+  private tooltips:TooltipPGIS[] = [];
+  //features 与 feature.style集合，用于设置隐藏/显示覆盖物
+  private featuresAndStyle:Map<any,any> = new Map<any,any>();
+  //features 与 feature弹窗几何，用于隐藏/显示覆盖物时对弹窗进行相应操作
+  private featuresAndTooltips:Map<any,any> = new Map<any,any>();
+  private layerGroups: Map<string, any> = new Map<string,any>();  //<type,layer>
   private overlayLayers: any[] = [];                          //一次添加覆盖物的图层组
   public static hlFeatures:boolean;
 
@@ -69,18 +68,18 @@ export default class OverlayPGIS {
     const vectorLayer = new ol.layer.Vector({
       source:new ol.source.Vector({}),
       style:new ol.style.Style({
-        fill: new ol.style.Fill({
-          color: 'rgba(37,122,251,0.5)',
-        }),
-        stroke: new ol.style.Stroke({
-          color: 'rgb(126,251,37)'
-        }),
-        image: new ol.style.Circle({
-          radius: 7,
-          fill: new ol.style.Fill({
-            color: '#c00000'
-          })
-        })
+        // fill: new ol.style.Fill({
+        //   color: 'rgba(37,122,251,0.5)',
+        // }),
+        // stroke: new ol.style.Stroke({
+        //   color: 'rgb(126,251,37)'
+        // }),
+        // image: new ol.style.Circle({
+        //   radius: 7,
+        //   fill: new ol.style.Fill({
+        //     color: '#c00000'
+        //   })
+        // })
       })
     });
     vectorLayer.title = "addOverlays_layer";
@@ -177,6 +176,130 @@ export default class OverlayPGIS {
       message: 'ok',
       result: `成功添加${params.overlays.length}中的${addCount}个覆盖物`
     };
+  }
+
+  public async findFeature(params:IFindParameter): Promise<IResult> {
+
+    return {
+      status:0,
+      message:'not complete'
+    }
+  }
+
+  public async deleteOverlays(params:IOverlayDelete): Promise<IResult> {
+
+    return {
+      status:0,
+      message:'not complete'
+    }
+  }
+
+  public async showOverlays(params:IOverlayDelete): Promise<IResult> {
+    const types = params.types || [];
+    const ids = params.ids || [];
+    if(!types.length && !ids.length){
+      return {
+        status:0,
+        message:'请输入id或type值'
+      }
+    }
+
+    let showCount = 0;
+
+    for(let feature of this.featuresAndStyle.keys()){
+      if (
+          //只判断type
+          (types.length > 0 &&
+              ids.length === 0 &&
+              types.indexOf(feature.type) >= 0) ||
+          //只判断id
+          (types.length === 0 &&
+              ids.length > 0 &&
+              ids.indexOf(feature.id) >= 0) ||
+          //type和id都要判断
+          (types.length > 0 &&
+              ids.length > 0 &&
+              types.indexOf(feature.type) >= 0 &&
+              ids.indexOf(feature.id) >= 0)
+      ) {
+        const style = this.featuresAndStyle.get(feature);
+        feature.setStyle(style);
+
+        this.featuresAndStyle.delete(feature);
+        showCount++;
+      }
+    }
+    return {
+      status:0,
+      message:'成功调用该方法！',
+      result:showCount ? `成功显示${showCount}个覆盖物,一共隐藏${this.featuresAndStyle.size}个覆盖物`
+          : "未显示任何覆盖物"
+    }
+  }
+
+  public async hideOverlays(params:IOverlayDelete): Promise<IResult> {
+    const types = params.types || [];
+    const ids = params.ids || [];
+
+    if(!types.length && !ids.length){
+      return {
+        status:0,
+        message:'请输入id或type值'
+      }
+    }
+
+    let hideNum = 0;
+    if(types.length){
+      for(let type of types){
+        const layerOfType = this.layerGroups.get(type);
+        if(layerOfType){
+          const featuresOfType = layerOfType.getSource().getFeatures();
+
+          if(ids.length){
+            featuresOfType.forEach((featureOfType:any) => {
+              if(ids.indexOf(featureOfType.id) > -1){
+                const style = featureOfType.getStyle();
+                this.featuresAndStyle.set(featureOfType,style);
+                featureOfType.setStyle(null);
+
+                hideNum++;
+              }
+            })
+          }else {
+            for(let featureOfType of featuresOfType){
+              const style = featureOfType.getStyle();
+              this.featuresAndStyle.set(featureOfType,style);
+              featureOfType.setStyle(null);
+
+              hideNum++;
+            }
+          }
+        }
+      }
+    }
+
+    if(ids.length && !types.length){
+      this.overlayLayers.forEach((overlayLayer:any) => {
+        const features = overlayLayer.getFeatures();
+        features.forEach((feature:any) => {
+          if(ids.indexOf(feature.id) >-1){
+            const style = feature.getStyle();
+            this.featuresAndStyle.set(feature,style)
+            feature.setStyle(null);
+
+            hideNum++
+          }
+        })
+      })
+    }
+
+
+    return {
+      status:0,
+      message:'成功调用该方法！',
+      result:hideNum ? `成功隐藏${hideNum}个覆盖物,一共隐藏${this.featuresAndStyle.size}个覆盖物`
+          : "未隐藏覆盖物"
+    }
   }
 
   private getStyle(params:any): any {
@@ -582,7 +705,46 @@ export default class OverlayPGIS {
   }
 
   public async closeTooltips(params:IOverlayDelete):Promise<IResult>{
-    const tooltips = this.view.getOverlays();
+    const types = params.types || [];
+    const ids = params.ids || [];
+
+    if(!types.length && !ids.length){
+      return {
+        status:0,
+        message:'请输入type或id值！'
+      }
+    }
+    if(types.length && ids.length){
+      for(let type of types){
+        const tooltips = this.tooltipTypes.get(type);
+        if(!tooltips || !tooltips.length){
+          break;
+        }
+
+        if(ids.length){
+          tooltips.forEach((tooltip:TooltipPGIS,index) => {
+            if(ids.indexOf(tooltip.id) > -1){
+              tooltip.remove();
+              // tooltips.splice(index,1);
+            }
+          })
+        }else {
+          for (let tooltip of tooltips){
+            tooltip.remove();
+          }
+          this.tooltipTypes.delete(type);
+        }
+      }
+    }else if(ids.length && !types.length){
+      this.tooltipTypes.forEach((tooltips:TooltipPGIS[]) => {
+        tooltips.forEach((tooltip:TooltipPGIS) => {
+          if(ids.indexOf(tooltip.id) > -1){
+
+          }
+        })
+      })
+    }
+
     return {
       status:0,
       message:'not complete'
@@ -700,7 +862,6 @@ export default class OverlayPGIS {
   }
 
   private async autoTooltip(tooltip:Vue.Component,overlays:any[]){
-    debugger;
     if(!overlays.length){
       return {
         status:0,
@@ -850,24 +1011,6 @@ export default class OverlayPGIS {
     }else if(autoTooltip && tooltipComponent){
       await this.autoTooltip(tooltipComponent,overlays);
     }
-  }
-
-  private async styleFunction(feature:any,isSelect:boolean) {
-    const geometry = feature.getGeometry();
-    const geometryType = geometry.getType();
-    if(geometryType === "Point"){
-      const event = geometry.getExtent();
-      console.log(event);
-    }
-    return  new ol.style.Style({
-      fill: new ol.style.Fill({ //矢量图层填充颜色，以及透明度
-        color:'rgba(201,253,1,0.8)'
-      }),
-      stroke: new ol.style.Stroke({ //边界样式
-        color: '#319FD3',
-        width: 1
-      }),
-    });
   }
 
   public async highlightFeatures():Promise<any> {

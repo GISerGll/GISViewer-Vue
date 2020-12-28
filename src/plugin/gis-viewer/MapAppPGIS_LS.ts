@@ -252,8 +252,9 @@ export default class MapAppPGIS_LS implements IMapContainer{
   hideMigrateChart(): void {
   }
 
-  hideOverlays(param: IDrawOverlaysDelete): Promise<any> {
-    return Promise.resolve(undefined);
+  public async hideOverlays(param: IOverlayDelete): Promise<any> {
+    const overlays = OverlayPGIS.getInstance(this.view,this.fmap)
+    return await overlays.hideOverlays(param);
   }
 
   hideRoad(): void {
@@ -351,8 +352,9 @@ export default class MapAppPGIS_LS implements IMapContainer{
     return Promise.resolve(undefined);
   }
 
-  showOverlays(param: IDrawOverlaysDelete): Promise<any> {
-    return Promise.resolve(undefined);
+  public async showOverlays(param: IOverlayDelete): Promise<any> {
+    const overlays = OverlayPGIS.getInstance(this.view,this.fmap)
+    return await overlays.showOverlays(param);
   }
 
   showRoad(param: { ids: string[] }): void {

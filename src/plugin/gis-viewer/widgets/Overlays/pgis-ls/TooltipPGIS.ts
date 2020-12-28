@@ -43,4 +43,7 @@ export default class TooltipPGIS {
     this.view.removeOverlay(this.overlay); // 删除元素
     this.vm.$destroy(); // 销毁组件
   }
+  public hide() {
+    this.overlay.getElement().style.display = "none";
+  }
 }

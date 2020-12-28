@@ -420,7 +420,6 @@ export default class POISearchBD {
       types:["multiBoundary"],
     })
 
-
     await overlaysBD.addOverlays({
       type:"multiBoundary",
       overlays:overlays,

@@ -301,7 +301,8 @@
     private async btn_showOverlays(){
       let map = this.$refs.gisViewer as any;
       const results = await map.showOverlays({
-        types:['alarmPoints','police']
+        types:['police'],
+        ids:['test005']
       });
       console.log(results)
     }
@@ -783,6 +784,7 @@
       await map.searchBoundary({
         searchName:"凉山彝族自治州",
         centerResult:false,
+        defaultZoom:10,
         color:'rgba(37,122,251,0.1)'
       })
     }

@@ -182,8 +182,8 @@
     hideMigrateChart(): void {
     }
 
-    hideOverlays(param: IDrawOverlaysDelete): Promise<any> {
-      return Promise.resolve(undefined);
+    public async hideOverlays(params: IDrawOverlaysDelete): Promise<any> {
+      return await this.mapApp.hideOverlays(params);
     }
 
     hideRoad(): void {
@@ -281,8 +281,8 @@
       return Promise.resolve(undefined);
     }
 
-    showOverlays(param: IDrawOverlaysDelete): Promise<any> {
-      return Promise.resolve(undefined);
+    public async showOverlays(params: IDrawOverlaysDelete): Promise<any> {
+      return await this.mapApp.showOverlays(params);
     }
 
     showRoad(param: { ids: string[] }): void {
